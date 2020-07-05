@@ -11,6 +11,11 @@ NULL
 #       All users of any code in this package agree to the terms and conditions described in the 
 #file Copyright_RHtests__RClimDex_SoftwarePackages.pdf, which is also included in this package.
 #*****************************
+# last updated at 2019-03-01
+# in QMadjGaussian.wRef(), change osmean estimation from the way QMadjGaussian to just take the
+# mean value of adjusted segments, since there has extra adjustments for the difference b/w
+# QMadj and mean-adj
+
 # last updated at 2018-03-01
 # in QMadjGaussian.wRef(), added check sample size during EBa calculation, and reduce Mq once
 #   sample size too small detected (the same consequence as EBb estimation)

@@ -1,9 +1,10 @@
 #' StartGUI
 #' 
 #' @export
-#' @import tcltk
+#' @import
 StartGUI<-function(){
-  GUI<-function(){
+  GUI<-function()
+  {
     if(!exists("MissingStr")) MissingStr<-"-99.9"
     if(!exists("PlevStr")) PlevStr<-"0.95"
     if(!exists("AdjStr")) AdjStr<-"10000"
