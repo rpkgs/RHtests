@@ -6485,7 +6485,8 @@ Read.wRef<-function(ibase,iref,MissingValue){
   assign("Nt",Nt,envir=.GlobalEnv) # Cycle length
 }
 
-readPTtable<-function(Nx,pkth){
+readPTtable<-function(Nx,pkth) 
+{
 # read in PTmax table, assign PTmax table as global variable;
 # phi -- vector for cor catalog -- as global variable
   itmp<-matrix(c(
@@ -9897,4 +9898,4 @@ tkbind(topFrame,"<Destroy>",function()noAgree())
 tkfocus(textFrame)
 }
 
-#StartGUI()
+StartGUI()
