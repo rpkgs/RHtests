@@ -23,13 +23,13 @@ FindUD<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,p.lev=0.95,
         return(-1)
     }
     N<-length(Y0); Nadj<-Ny4a*Nt
-    readPFtable(N,pkth)
-    itmp<-readLines(InCs)
-    Pk0<-Pk.PMFT(N)
-    oout<-rmCycle(itable)
-    Y1<-oout$Base
-    EB<-oout$EB
-    assign("EB",EB,envir=.GlobalEnv)
+    readPFtable(N, pkth)
+    itmp <- readLines(InCs)
+    Pk0  <- Pk.PMFT(N)
+    oout <- rmCycle(itable)
+    Y1   <- oout$Base
+    EB   <- oout$EB
+    assign("EB", EB, envir=.GlobalEnv)
     if(length(EB)!=length(Icy)) {
         ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
                          "\n",get("ErrorMSG",env=.GlobalEnv),"\n")
@@ -39,11 +39,10 @@ FindUD<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,p.lev=0.95,
 
     ofileIout<-paste(output,"_pCs.txt",sep="")
     ofileMout<-paste(output,"_mCs.txt",sep="")
-    file.create(ofileIout)
-
     ofileAout<-paste(output,"_UD.dat",sep="")
     ofilePdf<-paste(output,"_UD.pdf",sep="")
     ofileSout<-paste(output,"_UDstat.txt",sep="")
+    file.create(ofileIout)
     file.create(ofileAout)
     file.create(ofilePdf)
     file.create(ofileSout)

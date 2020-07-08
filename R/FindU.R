@@ -1,49 +1,73 @@
-# NT=1, 12, and 365 for annual, monthly, and daily series, respectively
-
 #' Penalized maximal F (PMF) test
-#' 
+#'
 #' PMF allows the time series being tested to have a linear trend throughout
-#' the whole period of the data record (i.e., no shift in the trend component; 
-#' see Wang 2003), with the annual cycle, linear trend, and lag-1 autocorrelation 
-#' of the base series being estimated in tandem through iterative procedures, 
-#' while accounting for all the identified mean-shifts (Wang 2008a). No reference 
-#' series will be used in any of these functions; the base series is tested in 
+#' the whole period of the data record (i.e., no shift in the trend component;
+#' see Wang 2003), with the annual cycle, linear trend, and lag-1 autocorrelation
+#' of the base series being estimated in tandem through iterative procedures,
+#' while accounting for all the identified mean-shifts (Wang 2008a). No reference
+#' series will be used in any of these functions; the base series is tested in
 #' this case.
-#' 
+#'
 #' @param InSeries file path of the input data
 #' @param output prefix of the outputs
 #' @param MissingValueCode string, missing value code
 #' @param GUI boolean
-#' @param p.lev p.lev is the nominal level of confidence; (1 - p.lev) is the 
-#' nominal level of significance, choose one of the following 6 p.lev values: 
+#' @param p.lev p.lev is the nominal level of confidence; (1 - p.lev) is the
+#' nominal level of significance, choose one of the following 6 p.lev values:
 #' 0.75, 0.80, 0.90, 0.95, 0.99, 0.9999
-#' @param Iadj If Iadj = 0, the data series is adjusted to the longest segment; 
-#' otherwise the data series is adjusted to the chosen segment Iadj (if the 
-#' given integer Iadj > Ns+1, we re-set Iadj=Ns+1, which corresponds to 
-#' adjusting the series to the last segment). Set Iadj = 10000 if you want 
+#' @param Iadj If Iadj = 0, the data series is adjusted to the longest segment;
+#' otherwise the data series is adjusted to the chosen segment Iadj (if the
+#' given integer Iadj > Ns+1, we re-set Iadj=Ns+1, which corresponds to
+#' adjusting the series to the last segment). Set Iadj = 10000 if you want
 #' to ensure that the series is adjusted to the last segment
-#' @param Mq Mq (=0, 1, 2, ..., 20) is the number of points (categories) on which 
-#' the empirical cumulative distribution function are estimated. 
-#' If Mq=0, the actual Mq is determined by the length of the shortest segment 
-#' Mq=1 corresponds to mean adjustments (one adjustment for all data in 
+#' @param Mq Mq (=0, 1, 2, ..., 20) is the number of points (categories) on which
+#' the empirical cumulative distribution function are estimated.
+#' If Mq=0, the actual Mq is determined by the length of the shortest segment
+#' Mq=1 corresponds to mean adjustments (one adjustment for all data in
 #' the same segment).
-#' @param Ny4a 
-#' 
-#' @return 
+#' @param Ny4a
+#'
+#' @return
 #' Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
-#' 
+#'
 #' - Example1_1Cs.txt
-#' 
-#'   Ns >= 0 is the number of changepoints identified; 
+#'
+#'   Ns >= 0 is the number of changepoints identified;
 #'   changepoint positions are Ip(1), Ip(2),...,Ip(Ns)
-#' 
-#' @export 
-FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode, 
-	GUI=FALSE, p.lev=0.95, 
+#'
+#' * OutFile_U.dat
+#'
+#'   - index
+#'   - date
+#'   - original base series
+#'   - estimated linear trend line of the base series
+#'   - the mean-adjusted base series
+#' #'
+#'   - the 6 th and 7 th columns are similar to the 4 th and 5 th columns but for
+#'     shift-sizes estimated from the de-seasonalized base series
+#'
+#'   - the 8 th and 9 th columns are respectively the de-seasonalized base series
+#'     (i.e., the base series with its the mean annual cycle subtracted) and its
+#'     multi-phase regression model fit;
+#'
+#'   - the 10 th column: the estimated mean annual cycle together with the linear trend
+#'     and mean-shifts;
+#'
+#'   - the 11 th column: the QM-adjusted base series (the QM-adjustments here
+#'     are estimated using the reference series);
+#'
+#'   - the 12 th column: the multi-phase regression model fit to the de-seasonalized base
+#'     series without accounting for any shifts (i.e. ignore all shifts identified).
+#'
+#' @examples
+#' infile = system.file("extdata/Example1.dat", package = "RHtests")
+#' FindU(infile)
+#' @export
+FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-999.99",
+	GUI=FALSE, p.lev=0.95,
 	Iadj=10000, Mq=10, Ny4a=0)
 {
-	
-    ErrorMSG<-NA
+	ErrorMSG<-NA
     assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
     Nmin <- 10
     if(Ny4a>0&Ny4a<=5) Ny4a<-5
@@ -56,7 +80,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     plev<-p.lev
     pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
     assign("Nmin",Nmin,envir=.GlobalEnv)
-	
+
     # if success, a data.table will be returned
     data <- Read(InSeries, MissingValueCode) # data not used
     if(is.null(data)){
@@ -81,15 +105,15 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
     cat(paste("Input data filename:", InSeries, "N=",N, "\n"),file=ofileSout,append=T)
     readPFtable(N,pkth)
-    Pk0<-Pk.PMFT(N)
-    oout<-rmCycle(itable)
-    Y1<-oout$Base
-    EB<-oout$EB
+    Pk0  <- Pk.PMFT(N)
+    oout <- rmCycle(itable)
+    Y1   <- oout$Base
+    EB   <- oout$EB
     assign("EB",EB,envir=.GlobalEnv)
     if(length(EB)!=length(Icy)) {
         ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
                          "\n",get("ErrorMSG",env=.GlobalEnv),"\n")
-        if(GUI==FALSE) print(ErrorMSG)
+        if(!GUI) print(ErrorMSG)
         return(-1)
     }
 
@@ -99,10 +123,10 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     meanhat0 <- otmp$meanhat
     Ehat0    <- mean(meanhat0)
     cat(file=ofileSout,paste(" Ignore changepoints -> trend0 =",
-                             round(beta0,6),"(",round(otmp$betaL,6),",",round(otmp$betaU,6),")",
-                             "(p=",round(otmp$p.tr,4),"); cor=",
-                             round(otmp$cor,4),"(", round(otmp$corl,4),",",
-                             round(otmp$corh,4),")\n"),append=T)
+        round(beta0,6),"(",round(otmp$betaL,6),",",round(otmp$betaU,6),")",
+        "(p=",round(otmp$p.tr,4),"); cor=",
+        round(otmp$cor,4),"(", round(otmp$corl,4),",",
+        round(otmp$corh,4),")\n"),append=T)
 
     oout<-PMFT(Y1,Ti,Pk0)
     I0<-0
@@ -158,7 +182,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
         corL2 <- 0
     }
 
-    Ips<-c(I3,N)
+    Ips <- c(I3,N)
     if(I3>0){
         otmp   <- LSmultiple(Y1,Ti,Ips)
         resi   <- otmp$resi
@@ -186,29 +210,29 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     cor.mx  <- c(corL1,corL2,corL3)[tmp$ix[1]]
     PFx95L  <- getPFx95(cor.mx,N)
     if(PFx.mx<PFx95L){
-        Ns<-0
-        Ips<-N
+        Ns  <- 0
+        Ips <- N
         cat(paste(Ns,"changepoints in Series", InSeries,
                   paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
                         sprintf("%10.0f",19000101),")",sep=""),"\n"),file=ofileIout)
         cat("PMF finds no Type-1 changepoints in the series!\n")
         #   return(0)
     } else {
-        Ns<-1
-        Ips<-c(Imx,N)
+        Ns  <- 1
+        Ips <- c(Imx,N)
 
         # if(Debug) cat(file=flog,c("First Ips:",Ips,"\n"))
-        tt<-TRUE
-        Niter<-0
+        tt    <- TRUE
+        Niter <- 0
         while(tt){  # condition on is there any more Bps to insert in Ips?
-            Niter<-Niter+1
-            tt<-FALSE
-            Ips0<-NULL
+            Niter <- Niter+1
+            tt    <- FALSE
+            Ips0  <- NULL
             for(i in 1:(Ns+1)){ # search for new break points
-                I0<- if(i==1) 0 else Ips[i-1]
-                I2<-Ips[i]
-                otmp<-PMFxKxI0I2(Y1,Ti,I0,I2)
-                if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
+                I0   <- if(i==1) 0 else Ips[i-1]
+                I2   <- Ips[i]
+                otmp <- PMFxKxI0I2(Y1,Ti,I0,I2)
+                if(otmp$prob>0) Ips0 <- sort(c(Ips0,otmp$Ic))
             }
             #   if(Debug) {
             #     cat(file=flog,paste("Niter",Niter,"new Ips:",length(Ips0),"\n"),append=T)
@@ -219,28 +243,28 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
             # of the Ips0 series and find the most significant changepoint Iseg.mx
             tt1<-TRUE
             while(tt1){
-                PFx.mx<-(-9999)
-                Iseg.mx<-0
-                PFx95L.mx<-0
+                PFx.mx    <- (-9999)
+                Iseg.mx   <- 0
+                PFx95L.mx <- 0
                 if(length(Ips0)==0) tt1<-FALSE
                 else{
                     for(i in 1:length(Ips0)){
-                        Ips1<-sort(c(Ips,Ips0[i]))
-                        ith<-match(Ips0[i],Ips1)
-                        otmp<-PMFxIseg(Y1,Ti,Ips1,ith)
+                        Ips1 <- sort(c(Ips,Ips0[i]))
+                        ith  <- match(Ips0[i],Ips1)
+                        otmp <- PMFxIseg(Y1,Ti,Ips1,ith)
                         if(otmp$PFx<otmp$PFx95L) Ips0[i]<-0
                         else
                             if(otmp$PFx>PFx.mx){
-                                PFx.mx<-otmp$PFx
-                                Iseg.mx<-Ips0[i]
-                                PFx95L.mx<-otmp$PFx95L
+                                PFx.mx    <- otmp$PFx
+                                Iseg.mx   <- Ips0[i]
+                                PFx95L.mx <- otmp$PFx95L
                             }
                     }
                     if(PFx.mx>=PFx95L.mx){
-                        Ips<-sort(c(Ips,Iseg.mx))
-                        Ns<-Ns+1
-                        Ips0<-Ips0[Ips0!=Iseg.mx]
-                        tt<-TRUE
+                        Ips  <- sort(c(Ips,Iseg.mx))
+                        Ns   <- Ns+1
+                        Ips0 <- Ips0[Ips0!=Iseg.mx]
+                        tt   <- TRUE
                     }
                     else tt1<-FALSE
                     Ips0<-Ips0[Ips0!=0]
@@ -253,21 +277,21 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
 
         tt<-TRUE
         while(tt){
-            tt<-FALSE
-            Iseg.mn<-0
-            PFx.mn<-99999
-            PFx95L.mn<-99999
+            tt        <- FALSE
+            Iseg.mn   <- 0
+            PFx.mn    <- 99999
+            PFx95L.mn <- 99999
             for(i in 1:Ns){
                 otmp<-PMFxIseg(Y1,Ti,Ips,i)
                 if(otmp$PFx<PFx.mn){
-                    Iseg.mn<-i
-                    PFx.mn<-otmp$PFx
-                    PFx95L.mn<-otmp$PFx95L
+                    Iseg.mn   <- i
+                    PFx.mn    <- otmp$PFx
+                    PFx95L.mn <- otmp$PFx95L
                 }
             }
             if(Iseg.mn>0&PFx.mn<PFx95L.mn){
-                Ips<-Ips[-Iseg.mn]
-                Ns<-Ns-1
+                Ips <- Ips[-Iseg.mn]
+                Ns  <- Ns-1
                 if(Ns>0) tt<-TRUE
             }
         }
@@ -285,12 +309,13 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     else Iseg.adj<-Iadj
 
     oout            <- LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj)
+
     Y1              <- oout$Y0
     cor             <- oout$cor
     corl            <- oout$corl
     corh            <- oout$corh
     df              <- (N-2-Nt-Ns)
-    pcor            <- pt(abs(cor)*sqrt(df/(1-cor^2)),df)
+    pcor            <- pt(abs(cor)*sqrt(df/(1-cor^2)), df)
     W               <- oout$W
     WL              <- oout$WL
     WU              <- oout$WU
@@ -303,9 +328,9 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     EEB             <- mean(EB1,na.rm=T)
 
     if(Ns>0){
-        Rb<-Y1-oout$trend*Ti+EBfull
-        QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
-        B<-QMout$PA
+        Rb    <- Y1-oout$trend*Ti+EBfull
+        QMout <- QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
+        B     <- QMout$PA
         cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
             file=ofileSout,append=T)
         cat(paste("\n Adjust to segment", Iseg.adj,": from",
@@ -365,130 +390,43 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     Ehat<-mean(oout$meanhat)
     meanhat0<-meanhat0-Ehat0+Ehat
 
-    pdf(file=ofilePdf,onefile=T,paper='letter')
-    op <- par(no.readonly = TRUE) # the whole list of settable par's.
-    par(mfrow=c(2,1))
-    par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
-    uyrs<-unique(floor(ori.itable[,1]/10))*10
-    labels<-NULL
-    ats<-NULL
-    for(i in 1:length(uyrs)){
-        if(!is.na(match(uyrs[i],ori.itable[,1]))){
-            labels<-c(labels,uyrs[i])
-            ats<-c(ats,match(uyrs[i],ori.itable[,1]))
-        }
-    }
+    nrow = dim(ori.itable)[1]
+    varnames = c("id", "date", "base",
+                 "base_trend+meanShift", "base_mean_adj",
+                 "base_anomaly",             # 6, base - mean annual cycle
+                 "pred_multi_phase_regress", # 7
+                 "annualC+meanShifts",       # 8
+                 #  "deseason_base_trend", "deseason_base_adj_mean",
+                 # "base_minus_annualC", "fit_of_base_minus_annualC",
+                 "QM_adjusted",              # 9
+                 "fit_of_deseason_base")     # 10
 
-    pdata<-rep(NA,dim(ori.itable)[1])
-    pdata[ooflg]<-oout$Y0
-    plot(1:dim(ori.itable)[1],pdata,type="l",xlab="",ylab="",
-         ylim=c(min(oout$Y0,oout$meanhat),max(oout$Y0,oout$meanhat)),
-         xaxt="n",col="black",lwd=0.5,
-         main="Base anomaly series and regression fit")
-    axis(side=1,at=ats,labels=labels)
-    pdata[ooflg]<-oout$meanhat
-    lines(1:dim(ori.itable)[1],pdata,col="red")
+    odata            <- matrix(NA, nrow,10) %>% set_colnames(varnames)
+    # odata[ooflg,1] <- Ti
+    odata[,1]        <- c(1:nrow)
+    odata[,2]        <- ori.itable$year*10000 + ori.itable$month*100 + ori.itable$day
+    # odata[ooflg,3] <- round(oout$Y0+EBfull,4)
+    odata[,3]        <- ori.itable$data
+    odata[ooflg,4]   <- round(oout$meanhat+EEB,4)
+    odata[ooflg,5]   <- round(adj,4)
+    odata[ooflg,6]   <- round(oout$Y0,4)
+    odata[ooflg,7]   <- round(oout$meanhat,4)
+    odata[ooflg,8]   <- round(oout$meanhat+EBfull,4)
 
-    pdata[ooflg]<-oout$Y0+EBfull
-    plot(1:dim(ori.itable)[1],pdata,type="l",xlab="",ylab="",
-         ylim=c(min(oout$Y0+EBfull,oout$meanhat+EEB),
-                max(oout$Y0+EBfull,oout$meanhat+EEB)),
-         xaxt="n",col="black",lwd=0.5,
-         main="Base series and regression fit")
-    axis(side=1,at=ats,labels=labels)
-    pdata[ooflg]<-oout$meanhat+EEB
-    lines(1:dim(ori.itable)[1],pdata,col="red")
+    if(Ns>0) if(QMout$Mq>1) odata[ooflg,9] <- round(B,4)
+    odata[ooflg,10]  <- round(meanhat0,4)
 
-    pdata[ooflg]<-adj
-    plot(1:dim(ori.itable)[1],pdata,type="l",xlab="",ylab="",
-         ylim=c(min(c(adj,B)),max(c(adj,B))),
-         xaxt="n",col="black",lwd=0.5,
-         main="Mean-adjusted base series")
-    axis(side=1,at=ats,labels=labels)
-
-    if(Mq>1){
-        pdata[ooflg]<-B
-        plot(1:dim(ori.itable)[1],pdata,type="l",xlab="",ylab="",
-             ylim=c(min(c(adj,B)),max(c(adj,B))),
-             xaxt="n",col="black",lwd=0.5,
-             main="QM-adjusted base series")
-        axis(side=1,at=ats,labels=labels)
-    }
-
-    # test plot
-    if(Ns>0&Mq>1){
-        par(mar=c(4,5,3,2)+.1,cex=.8,mfrow=c(2,2),mgp=c(1.2,.5,0))
-        col=0
-        np<-0
-        osp<-QMout$osp
-        osmean<-QMout$osmean
-        for(i in 1:(Ns+1)){
-            Fd<-.5/QMout$Mq
-            I1<-if(i==1) 1 else Ips[i-1]+1
-            I2<-Ips[i]
-            ymax<-max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
-            if(i!=Iseg.adj){
-                np<-np+1
-                if(col==0) {
-                    col<-2
-                    plot(osp[I1:I2,2],osp[I1:I2,3],xlim=c(0,1),ylim=c(ymin,ymax),
-                         type="l",lwd=1,col=col,xlab="Cumulative Frequency",
-                         ylab="QM Adjustment")
-                    title(cex.main=0.9,main=paste("distribution of QM adjustments with Mq=",QMout$Mq),line=.5)
-                    icol<-2*np
-                    for(j in 1:QMout$Mq){
-                        lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-                              c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-                        if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-                                                  c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=0.5)
-                    }
-                }
-                else{
-                    col<-col+1
-                    lines(osp[I1:I2,2],osp[I1:I2,3],lwd=1,col=col)
-                    icol<-2*np
-                    for(j in 1:QMout$Mq){
-                        lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-                              c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-                        if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-                                                  c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=0.5)
-                    }
-                }
-                text(.15,ymax-np*(ymax-ymin)/(Ns*3),paste("Seg.",i))
-                lines(c(.25,.30),rep(ymax-np*(ymax-ymin)/(Ns*3),2),lwd=2,col=col)
-            }
-            else np<-np+1
-        }
-    }
-
-    par(op)
-    dev.off()
-
-    odata<-matrix(NA,dim(ori.itable)[1],10)
-    # odata[ooflg,1]<-Ti
-    odata[,1]<-c(1:dim(ori.itable)[1])
-    odata[,2]<-ori.itable[,1]*10000+ori.itable[,2]*100+ori.itable[,3]
-    # odata[ooflg,3]<-round(oout$Y0+EBfull,4)
-    odata[,3]<-ori.itable[,4]
-    odata[ooflg,4]<-round(oout$meanhat+EEB,4)
-    odata[ooflg,5]<-round(adj,4)
-    odata[ooflg,6]<-round(oout$Y0,4)
-    odata[ooflg,7]<-round(oout$meanhat,4)
-    odata[ooflg,8]<-round(oout$meanhat+EBfull,4)
-    if(Ns>0) if(QMout$Mq>1) odata[ooflg,9]<-round(B,4)
-    odata[ooflg,10]<-round(meanhat0,4)
-
-    Imd1<-ori.itable[,2]*100+ori.itable[,3]
-    if(sum(is.na(ori.itable[,4])==F&Imd1==229)>0){
+    Imd1 <- ori.itable$month*100 + ori.itable$day
+    if(sum(!is.na(ori.itable[,4]) & Imd1==229)>0){
         if(Ns>0){
-            tdata<-ori.itable[is.na(ori.itable[,4])==F,]
-            IY1<-tdata[,1]*10000+tdata[,2]*100+tdata[,3]
+            tdata <- ori.itable[!is.na(ori.itable$data),]
+            IY1   <- tdata[,1]*10000+tdata[,2]*100+tdata[,3]
             Ips.ymd<-IY0[Ips]
             Ips.1<-rep(NA,Ns+1)
             for(i in 1:Ns) Ips.1[i]<-c(1:length(IY1))[IY1==Ips.ymd[i]]
             Ips.1[Ns+1]<-length(IY1)
             #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
-            Imd2<-tdata[,2]*100+tdata[,3]
+            Imd2 <- tdata[,2]*100+tdata[,3]
             Ids.leap<-c(1:length(Imd2))[Imd2==229]
             Nl<-length(Ids.leap)
             Rb<-Y1-oout$trend*Ti+EBfull
@@ -504,32 +442,42 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
                 B1.leap<-B1[Ids.leap]
                 odata[is.na(odata[,3])==F&Imd1==229,9]<-round(B1.leap,4)
             }
-        }
-        else
-            odata[Imd1==229,9]<-odata[Imd1==229,3]
-        Ids.leapo<-c(1:dim(ori.itable)[1])[is.na(ori.itable[,4])==F&Imd1==229]
+        } else
+            odata[Imd1==229,9] <- odata[Imd1==229, 3]
+
+        Ids.leapo <- which(!is.na(ori.itable[,4]) & Imd1==229)
         for(jth in 1:length(Ids.leapo)){
-            kth<-Ids.leapo[jth]
+            kth <- Ids.leapo[jth]
             if(Ns>0){
                 k1th<-if(odata[kth-1,2]%in%IY0[Ips]) (kth+1) else (kth-1)
+            } else k1th<-kth-1
+
+            for(pth in c(4,7,8,10)) odata[kth,pth] <- odata[k1th,pth]
+            for(pth in c(5,6)) {
+                delta1<-odata[k1th,3]-odata[k1th,pth]
+                odata[kth,pth] <- odata[kth,3] - delta1
             }
-            else k1th<-kth-1
-            for(pth in c(4,7,8,10)) odata[kth,pth]<-odata[k1th,pth]
-            for(pth in c(5,6)){delta1<-odata[k1th,3]-odata[k1th,pth]; odata[kth,pth]<-odata[kth,3]-delta1}
         }
     }
 
-    write.table(file=ofileAout,odata,na=MissingValueCode,
+    odata = as.data.table(odata)
+    # plot(odata$base, type = "l")
+    # lines(odata$base_trend, col = "red")
+    # lines(odata$base_adj_mean, col = "blue")
+    # plot(odata$deseason_base_adj_mean)
+    # lines(odata$deseason_base_trend, col = "blue")
+    write.table(file=ofileAout, odata, na=MissingValueCode,
                 col.names=F,row.names=F)
 
-    otmp<-LSmultiple(Y1,Ti,Ips)
-    resi<-otmp$resi
-    otmpW<-LSmultiple(W,Ti,Ips)
-    resiW<-otmpW$resi
-    otmpWL<-LSmultiple(WL,Ti,Ips)
-    resiWL<-otmpWL$resi
-    otmpWU<-LSmultiple(WU,Ti,Ips)
-    resiWU<-otmpWU$resi
+    otmp   <- LSmultiple(Y1,Ti,Ips)
+    resi   <- otmp$resi
+    otmpW  <- LSmultiple(W,Ti,Ips)
+    resiW  <- otmpW$resi
+    otmpWL <- LSmultiple(WL,Ti,Ips)
+    resiWL <- otmpWL$resi
+    otmpWU <- LSmultiple(WU,Ti,Ips)
+    resiWU <- otmpWU$resi
+
     if(Ns==0) {
         cat(paste(Ns,"changepoints in Series", InSeries,
                   paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
@@ -540,13 +488,13 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
         cat(paste(Ns,"changepoints in Series", InSeries,"\n"),
             file=ofileIout)
         for(i in 1:Ns){
-            I1<- if(i==1) 1 else Ips[i-1]+1
-            Ic<-Ips[i]
-            I3<-Ips[i+1]
-            Nseg<-I3-I1+1
-            PFx95<-getPFx95(cor,Nseg)
-            PFx95l<-getPFx95(corl,Nseg)
-            PFx95h<-getPFx95(corh,Nseg)
+            I1   <- if(i==1) 1 else Ips[i-1]+1
+            Ic   <- Ips[i]
+            I3   <- Ips[i+1]
+            Nseg <- I3-I1+1
+            PFx95  <- getPFx95(cor,Nseg)
+            PFx95l <- getPFx95(corl,Nseg)
+            PFx95h <- getPFx95(corh,Nseg)
             SSEf.Iseg<-sum(resi[I1:I3]^2)
             Ips1<-Ips[-i]
             otmp1<-LSmultiple(Y1,Ti,Ips1)
@@ -566,17 +514,17 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
                 PFx<-0
             }
 
-            SSEf.Iseg<-sum(resiWL[I1:I3]^2)
-            otmp1<-LSmultiple(WL,Ti,Ips1)
-            SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
-            FxL<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
+            SSEf.Iseg <- sum(resiWL[I1:I3]^2)
+            otmp1     <- LSmultiple(WL,Ti,Ips1)
+            SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
+            FxL       <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
             if(FxL>0) probL<-pf(Fx,1,Nseg-3)
             else probL<-0
 
-            SSEf.Iseg<-sum(resiWU[I1:I3]^2)
-            otmp1<-LSmultiple(WU,Ti,Ips1)
-            SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
-            FxU<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
+            SSEf.Iseg <- sum(resiWU[I1:I3]^2)
+            otmp1     <- LSmultiple(WU,Ti,Ips1)
+            SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
+            FxU       <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
             if(FxU>0) probU<-pf(Fx,1,Nseg-3)
             else probU<-0
 
@@ -594,8 +542,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
                       sprintf("%10.4f",PFx)," (",
                       sprintf("%10.4f",PFx95l),"-",
                       sprintf("%10.4f",PFx95h),")\n",sep=""),
-                file=ofileIout,
-                append=TRUE)
+                file=ofileIout, append=TRUE)
             cat(paste("PMF : c=", sprintf("%4.0f",Ic),
                       "; (Time ", sprintf("%10.0f",IY0[Ic]),
                       "); Type= 1; p=",sprintf("%10.4f",prob),"(",
@@ -610,10 +557,115 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
 			# "Ic", "IY0", "prob", "probL", "probU", "PFx", "PFx95", "PFx95l", "PFx95h", "Nseg"
         }
     }
+
+    plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
+        Ips, Iseg.adj)
+
     if(GUI)
         return(0)
-    else{
+    else {
         file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
         cat("FindU finished successfully...\n")
+        odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+        return(odata)
     }
+}
+
+# global variales:
+# - `ori.itable`
+#
+plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
+    Ips, Iseg.adj)
+{
+    pdf(file=ofilePdf, onefile=TRUE, paper='letter')
+    op <- par(no.readonly = TRUE) # the whole list of settable par's.
+    par(mfrow=c(2,1))
+    par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
+    on.exit({ par(op); dev.off() })
+
+    uyrs   <- unique(floor(ori.itable$year/10))*10 # decades
+    ats    <- match(uyrs, ori.itable$year) %>% rm_empty()
+    labels <- ori.itable$year[ats]
+
+    I_valid <- which(ooflg)
+    plot2(I_valid, oout$Y0, type="l",xlab="",ylab="",
+         ylim= range2(oout$Y0, oout$meanhat),
+         xaxt="n",col="black",lwd=0.5,
+         main="Base anomaly series and regression fit", 
+         at=ats,labels=labels)
+    lines(I_valid, oout$meanhat, col = "red")
+
+    plot2(I_valid, oout$Y0+EBfull, type="l",xlab="",ylab="",
+         ylim=range2(oout$Y0+EBfull,oout$meanhat+EEB),
+         xaxt="n",col="black",lwd=0.5,
+         main="Base series and regression fit", 
+         at=ats,labels=labels)
+    lines(I_valid, oout$meanhat+EEB, col="red")
+
+    plot2(I_valid, adj, type="l",xlab="",ylab="",
+         ylim=c(min(c(adj,B)),max(c(adj,B))),
+         xaxt="n",col="black",lwd=0.5,
+         main="Mean-adjusted base series", 
+         at=ats, labels=labels)
+
+    if(Mq>1){
+        plot2(I_valid, B, type="l",xlab="",ylab="",
+             ylim=c(min(c(adj,B)),max(c(adj,B))),
+             xaxt="n",col="black",lwd=0.5,
+             main="QM-adjusted base series", 
+             at=ats,labels=labels)
+    }
+
+    # test plot
+    if(Ns>0 & Mq>1){
+        par(mar=c(4,5,3,2)+.1, cex=.8, mfrow=c(2,2), mgp=c(1.2,.5,0))
+        col = 0
+        np     <- 0
+        osp    <- QMout$osp
+        osmean <- QMout$osmean
+        for(i in 1:(Ns+1)){
+            Fd   <- .5/QMout$Mq
+            I1   <- if(i==1) 1 else Ips[i-1]+1
+            I2   <- Ips[i]
+            ymax <- max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
+            if(i!=Iseg.adj){
+                np <- np+1
+                if(col==0) {
+                    col <- 2
+                    plot(osp[I1:I2,2], osp[I1:I2,3], xlim=c(0,1), ylim=c(ymin,ymax),
+                         type="l",lwd=1,col=col,xlab="Cumulative Frequency",
+                         ylab="QM Adjustment")
+                    title(cex.main=0.9,main=paste("distribution of QM adjustments with Mq=",QMout$Mq),line=.5)
+                    icol <- 2*np
+                    for(j in 1:QMout$Mq){
+                        lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
+                              c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
+                        if(j>=1 & j<QMout$Mq) 
+                            lines(rep(osmean[(j+1),icol]+Fd,2), 
+                                c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=0.5)
+                    }
+                } else {
+                    col<-col+1
+                    lines(osp[I1:I2,2],osp[I1:I2,3],lwd=1,col=col)
+                    icol<-2*np
+                    for(j in 1:QMout$Mq){
+                        lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
+                              c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
+                        if(j>=1 & j<QMout$Mq)
+                            lines(rep(osmean[(j+1),icol]+Fd,2),
+                                c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=0.5)
+                    }
+                }
+                text(.15,ymax-np*(ymax-ymin)/(Ns*3),paste("Seg.",i))
+                lines(c(.25,.30),rep(ymax-np*(ymax-ymin)/(Ns*3),2),lwd=2,col=col)
+            }
+            else np<-np+1
+        }
+    }
+
+}
+
+plot2 <- function(at, labels, ...) {
+    plot(..., xaxt = "n")
+    axis(side = 1, at = at, labels = labels)
 }

@@ -11,10 +11,11 @@ QMadjDLY<-function(P,Ips,Mq,Iseg.adj){
   if(Mq<=0) Mq<-min(floor(Nseg.mn/20),100) else Mq<-min(floor(Nseg.mn/20),Mq)
   if(Mq>100) Mq<-100
   if(Mq<=0) Mq<-1
-  Fd<-.5/Mq
-  Fcat<-matrix(NA,(Ns+1),(Mq+2))
-  F<-matrix(NA,(Ns+1),N)
-  EP<-matrix(NA,(Ns+1),(Mq+2))
+  Fd   <- .5/Mq
+  Fcat <- matrix(NA,(Ns+1),(Mq+2))
+  F    <- matrix(NA,(Ns+1),N)
+  EP   <- matrix(NA,(Ns+1),(Mq+2))
+
   for(i in 1:(Ns+1)) Fcat[i,]<-seq(0,by=1/Mq,length=(Mq+2))
   for(i in 1:(Ns+1)){
     I1<-if(i==1) 1 else Ips[i-1]+1
@@ -39,9 +40,9 @@ QMadjDLY<-function(P,Ips,Mq,Iseg.adj){
     osmean<-cbind(osmean,Fcat[Iseg,]-Fd,EP[Iseg.adj,]-EP[Iseg,])
   # output osmean is a 2*(Ns+1)+1 by Mq+2 matrix
 
-  PA<-P
-  W<-rep(NA,N)
-  osp<-NULL
+  PA  <- P
+  W   <- rep(NA,N)
+  osp <- NULL
   for(i in 1:(Ns+1)){
     I1<-if(i==1) 1 else Ips[i-1]+1
     I2<-Ips[i]
@@ -55,16 +56,16 @@ QMadjDLY<-function(P,Ips,Mq,Iseg.adj){
       PA[I1:I2]<-P[I1:I2]+W[I1:I2]
     }
 
-    Rs<-F[i,1:Nseg]
-    ors<-sort(Rs,index=T)$ix
-    osp<-rbind(osp,cbind(I1:I2,Rs[ors],W[I1:I2][ors]))
+    Rs  <- F[i,1:Nseg]
+    ors <- sort(Rs,index=T)$ix
+    osp <- rbind(osp,cbind(I1:I2,Rs[ors],W[I1:I2][ors]))
   }
   oout<-list()
-  oout$PA<-PA
-  oout$W<-W
-  oout$Mq<-Mq
-  oout$Nseg.mn<-Nseg.mn
-  oout$osmean<-osmean
-  oout$osp<-osp
+  oout$PA      <- PA
+  oout$W       <- W
+  oout$Mq      <- Mq
+  oout$Nseg.mn <- Nseg.mn
+  oout$osmean  <- osmean
+  oout$osp     <- osp
   return(oout)
 }

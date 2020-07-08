@@ -7,7 +7,7 @@
 FindU(
   InSeries,
   output = "./OUTPUT/example01",
-  MissingValueCode,
+  MissingValueCode = "-999.99",
   GUI = FALSE,
   p.lev = 0.95,
   Iadj = 10000,
@@ -50,6 +50,28 @@ Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
 Ns >= 0 is the number of changepoints identified;
 changepoint positions are Ip(1), Ip(2),...,Ip(Ns)
 }
+\itemize{
+\item OutFile_U.dat
+\itemize{
+\item index
+\item date
+\item original base series
+\item estimated linear trend line of the base series
+\item the mean-adjusted base series
+#'
+\item the 6 th and 7 th columns are similar to the 4 th and 5 th columns but for
+shift-sizes estimated from the de-seasonalized base series
+\item the 8 th and 9 th columns are respectively the de-seasonalized base series
+(i.e., the base series with its the mean annual cycle subtracted) and its
+multi-phase regression model fit;
+\item the 10 th column: the estimated mean annual cycle together with the linear trend
+and mean-shifts;
+\item the 11 th column: the QM-adjusted base series (the QM-adjustments here
+are estimated using the reference series);
+\item the 12 th column: the multi-phase regression model fit to the de-seasonalized base
+series without accounting for any shifts (i.e. ignore all shifts identified).
+}
+}
 }
 \description{
 PMF allows the time series being tested to have a linear trend throughout
@@ -59,4 +81,8 @@ of the base series being estimated in tandem through iterative procedures,
 while accounting for all the identified mean-shifts (Wang 2008a). No reference
 series will be used in any of these functions; the base series is tested in
 this case.
+}
+\examples{
+infile = system.file("extdata/Example1.dat", package = "RHtests")
+FindU(infile)
 }

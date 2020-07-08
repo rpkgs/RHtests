@@ -90,22 +90,23 @@ OnFindU<-function(){
         tkinsert(txt,"end","P_lev setting error, reset P_lev...")
         return()
       }
-      itmp<-FindU(InSeries=ifname,output=ofname,
-            MissingValueCode=MissingStr,p.lev=as.numeric(PlevStr),
-	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),
-	    GUI=TRUE)
-      if(itmp<0){
+
+      itmp <- FindU(InSeries=ifname, output=ofname,
+        MissingValueCode=MissingStr, p.lev=as.numeric(PlevStr),
+        Iadj=as.numeric(AdjStr), Mq=as.numeric(Mq0Str), Ny4a=as.numeric(Ny4aStr),
+        GUI=TRUE)
+      if (itmp<0) {
         tkinsert(txt,"end",ErrorMSG)
         return()
-      }
-      else{
+      } else {
         UIpsName1<-paste(ofname,"_1Cs.txt",sep="")
         UIpsName<-paste(ofname,"_mCs.txt",sep="")
         file.copy(from=UIpsName1,to=UIpsName,overwrite=TRUE)
         assign("iDIpsName",UIpsName,envir=.GlobalEnv)
-	oact<-str40("ofbody",ofbody)
-	ocurdir<-str40("curdir",curdir)
-	ooutdir<-str40("outdir",outdir)
+        oact<-str40("ofbody",ofbody)
+        ocurdir<-str40("curdir",curdir)
+        ooutdir<-str40("outdir",outdir)
+
         if(exists("ofref")) rm("ofref",envir=.GlobalEnv)
         b20<-"                    "
         oref<-paste(b20,"                  NA",sep="")
@@ -120,7 +121,6 @@ OnFindU<-function(){
       tkfocus(main)
       return()
     }
-
   }
   Ok2.but<-tkbutton(tt,text="   OK   ",command=OnOk2)
   tkgrid(Ok2.but,column=3,row=3)

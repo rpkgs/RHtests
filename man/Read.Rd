@@ -21,6 +21,8 @@ columns will be returned:
 \item \code{Ti}: index or original Y
 \item \code{Y0}: original Y after eliminating NA values
 }
+
+\code{NT}=1, 12, and 365 for annual, monthly, and daily series, respectively.
 }
 \description{
 Remove NA values and flag y\link{t} as 0 when it has not corresponding y\link{t+1} values.
