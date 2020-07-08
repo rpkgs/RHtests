@@ -12,13 +12,18 @@ Read(InSeries, MissingValueCode = "-999.99")
 \item{MissingValueCode}{string, missing value code}
 }
 \value{
+If failed, NULL will be returned. If success, a data.table with the following
+columns will be returned:
 \itemize{
-\item \code{lon}: name
-\item \code{lat}: name
+\item \code{IY0}: numeric, \code{year*1000 + month*100 + day}, e.g. '19980100'
+\item \code{IY0flg}: 0 or 1, is y\link{t} has y\link{t+1} for autocorrelation?
+\item \code{Imd}: numeric, \code{month*100 + day}, e.g. '100'
+\item \code{Ti}: index or original Y
+\item \code{Y0}: original Y after eliminating NA values
 }
 }
 \description{
-read input of RHtestsV4
+Remove NA values and flag y\link{t} as 0 when it has not corresponding y\link{t+1} values.
 }
 \examples{
 infile = system.file("extdata/Example1.dat", package = "RHtests")

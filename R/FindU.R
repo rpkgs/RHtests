@@ -57,8 +57,9 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode,
     pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
     assign("Nmin",Nmin,envir=.GlobalEnv)
 	
-    itmp <- Read(InSeries, MissingValueCode)
-    if(itmp==(-1)){
+    # if success, a data.table will be returned
+    data <- Read(InSeries, MissingValueCode) # data not used
+    if(is.null(data)){
         ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
                          get("ErrorMSG",env=.GlobalEnv),"\n")
         if(!GUI) cat(ErrorMSG)
