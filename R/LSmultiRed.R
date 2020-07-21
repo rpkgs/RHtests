@@ -14,7 +14,7 @@ LSmultipleRed <- function(Y0,Ti,Ips){
   W2   <- c(W1[1],(resi[2:N]-cor*resi[1:(N-1)])/(1-cor))
   W    <- c(1,IY0flg[1:(N-1)])*W2+(!c(1,IY0flg[1:(N-1)]))*W1
 
-  otmp    <- LSmatrix(W,Ti,NA)
+  otmp    <- LSmatrix(W, Ti - mean(Ti), NA)
   beta    <- otmp$sig[2]
   St0     <- sum((Ti-mean(Ti))^2)
   df      <- (N-2-Ns-Nt)
@@ -207,11 +207,12 @@ LSmultiple<-function(Y,T,Ips, ...){
 #'
 #' - `SSE`   : sum of square error
 #' @export
-LSmatrix<-function(Y,T,Ic, ...){
+LSmatrix<-function(Y, T_anorm, Ic, ...){
   Nx <- length(Y)
   X  <- as.matrix(Y)
   # D  <- rep(1, Nx)
-  D  <- cbind(1, T-mean(T))
+  # T_anorm = T - mean(T)
+  D  <- cbind(1, T_anorm)
   if(!is.na(Ic)) {
     D <- cbind(D, c(rep(0,Ic), rep(1,Nx-Ic)))
   }

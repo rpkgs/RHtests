@@ -51,15 +51,17 @@ PMFT<-function(Y,T,Pk0){
   PFx   <- (-99999.)
   Fx    <- (-99999.)
   KPx   <- 0
-  oout1 <- LSmatrix(Y,T,NA)
+  T_anorm = T - mean(T)
+  oout1 <- LSmatrix(Y, T_anorm, NA)
+
   for(i in Nmin:(N-Nmin)){
-    oout2 <- LSmatrix(Y, T, i, only.SSE = TRUE)
+    oout2 <- LSmatrix(Y, T_anorm, i, only.SSE = TRUE)
     Fc    <- (oout1$SSE-oout2$SSE)*(N-3)/oout2$SSE
     PFc   <- Fc*Pk0[i]
     if(PFc > PFx){
       PFx <- PFc
-      KPx <- i
       Fx  <- Fc
+      KPx <- i
     }
   }
 
@@ -75,14 +77,16 @@ PMFxKc<-function(Y,T,I0,I2,Ic){
   Ic1<-Ic-I0
   oout<-list()
   if(Ic>I0){
-    Y0    <- Y[(I0+1):I2]
-    T0    <- T[(I0+1):I2]
-    oout1 <- LSmatrix(Y0,T0,NA)
-    oout2 <- LSmatrix(Y0,T0,Ic1)
-    Fc    <- (oout1$SSE-oout2$SSE)*(Nseg-3)/oout2$SSE
-    prob  <- pf(Fc,1,(Nseg-3))
-    Pk0   <- Pk.PMFT(Nseg)
-    PFc   <- Fc*Pk0[Ic1]
+    Y0      <- Y[(I0+1):I2]
+    T0      <- T[(I0+1):I2]
+
+    T_anorm <- T0 - mean(T0)
+    oout1   <- LSmatrix(Y0, T_anorm, NA)
+    oout2   <- LSmatrix(Y0, T_anorm, Ic1)
+    Fc      <- (oout1$SSE-oout2$SSE)*(Nseg-3)/oout2$SSE
+    prob    <- pf(Fc,1,(Nseg-3))
+    Pk0     <- Pk.PMFT(Nseg)
+    PFc     <- Fc*Pk0[Ic1]
     oout$Fc   <- Fc
     oout$PFc  <- PFc
     oout$prob <- prob
