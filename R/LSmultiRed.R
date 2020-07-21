@@ -168,7 +168,7 @@ rmCycle<-function(idata){
   return(oout)
 }
 
-#' LSmultiple
+#' Multiple Linear Regression (same slope, different interception)
 #'
 #' @param Ips what?
 #'
@@ -176,12 +176,12 @@ rmCycle<-function(idata){
 #' - `sig`   : coefficients
 #' - `fitted`: fitted value
 #' - `resi`  : residual of fitted value
-LSmultiple<-function(Y,T,Ips){
+LSmultiple<-function(Y,T,Ips, ...){
   Nx <- length(Y)
   Ns <- length(Ips)-1
-  X  <- t(t(Y))
-  D  <- rep(1,Nx)
-  D  <- cbind(D,T-mean(T))
+  X  <- as.matrix(Y)
+  # D  <- rep(1,Nx)
+  D  <- cbind(1, T-mean(T))
   if(Ns>=1){
     for(i in 1:Ns){
       tmp<-rep(0,Nx)
@@ -189,21 +189,10 @@ LSmultiple<-function(Y,T,Ips){
       D<-cbind(D,tmp)
     }
   }
-
-  sig    <- solve(t(D)%*%D)%*%t(D)%*%X
-  fitted <- D%*%sig
-  resi   <- X-fitted
-  SSE    <- sum(resi^2)
-
-  oout<-list()
-  oout$SSE    <- SSE
-  oout$fitted <- as.vector(fitted)
-  oout$resi   <- as.vector(resi)
-  oout$sig    <- as.vector(sig)
-  return(oout)
+  lm_solve(D, X, ...)  
 }
 
-#' Piecewise Linear regression
+#' Piecewise Linear regression (same slope, different interception)
 #'
 #' @param Y The response vector
 #' @param T The predictor vector
@@ -218,21 +207,38 @@ LSmultiple<-function(Y,T,Ips){
 #'
 #' - `SSE`   : sum of square error
 #' @export
-LSmatrix<-function(Y,T,Ic){
+LSmatrix<-function(Y,T,Ic, ...){
   Nx <- length(Y)
-  D  <- rep(1, Nx)
-  X  <- t(t(Y))
-  D  <- cbind(D, T-mean(T))
-  if(!is.na(Ic)) D <- cbind(D, c(rep(0,Ic), rep(1,Nx-Ic)))
-  sig    <- solve(t(D) %*% D) %*% t(D) %*% X
-  fitted <- D %*% sig
-  resi   <- X-fitted
-  SSE    <- sum(resi^2)
+  X  <- as.matrix(Y)
+  # D  <- rep(1, Nx)
+  D  <- cbind(1, T-mean(T))
+  if(!is.na(Ic)) {
+    D <- cbind(D, c(rep(0,Ic), rep(1,Nx-Ic)))
+  }
+  lm_solve(D, X, ...)  
+}
 
-  oout<-list()
-  oout$sig    <- as.vector(sig)
-  oout$fitted <- as.vector(fitted)
-  oout$resi   <- as.vector(resi)
-  oout$SSE    <- SSE
-  return(oout)
+lm_solve <- function(D, X, only.SSE = FALSE, ...) {
+  # microbenchmark::microbenchmark(
+  #   sig  = solve(t(D) %*% D) %*% t(D) %*% X,
+  #   sig3  = as.matrix(.lm.fit(D, X)$coefficients),
+  #   sig2 = chol2inv(chol(t(D) %*% D)) %*% t(D) %*% X,
+  #   times = 100
+  # )
+
+  l   <- .lm.fit(D, X)
+  sig <- as.matrix(l$coefficients)
+  fitted <- D %*% sig
+  # resi   <- X-fitted
+  SSE    <- sum(l$residuals^2)
+  if (!only.SSE) {
+    list(
+      sig = l$coefficients,
+      fitted = as.vector(fitted),
+      resi = l$residuals,
+      SSE = SSE
+    )
+  } else {
+    list(SSE = SSE)
+  }
 }

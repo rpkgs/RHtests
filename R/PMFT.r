@@ -1,18 +1,18 @@
 
 Pk.PMFT<-function(N){
-# if(floor(N)!=N) stop("input data error in Pk")
+  # if(floor(N)!=N) stop("input data error in Pk")
   Nlt40<- if(N<40) TRUE else FALSE
   Nle500<- if(N<=500) TRUE else FALSE
   
   K<-seq(1,(N-1))
   Kmin<- if(floor((N-1)/2)==(N-1)/2) c(1:floor((N-1)/2),floor((N-1)/2):1)
          else c(1:(floor((N-1)/2)+1),floor((N-1)/2):1)
-  W<- floor(if(Nle500) 11*N/50 else 21*N/100)
-  A<-abs(1-2*K/N)
-  B<-log(N)
-  C<-log(B)
-  D<-log(log(N+150))
-  Q<-c(abs(1-50*K[1:floor(N/2)]/(N*11)),
+  W <- floor(if(Nle500) 11*N/50 else 21*N/100)
+  A <- abs(1-2*K/N)
+  B <- log(N)
+  C <- log(B)
+  D <- log(log(N+150))
+  Q <- c(abs(1-50*K[1:floor(N/2)]/(N*11)),
        abs(1-(50*K[(floor(N/2)+1):(N-1)]-28*N)/(N*11)))
   tmp1<-11/B^3
   tmp2<-abs(2*C^4/(900-9*Kmin))
@@ -46,27 +46,27 @@ Pk.PMFT<-function(N){
   return(P)
 }
 
-
 PMFT<-function(Y,T,Pk0){
-  N<-length(Y)
-  PFx<-(-99999.)
-  Fx<-(-99999.)
-  KPx<-0
-  oout1<-LSmatrix(Y,T,NA)
+  N     <- length(Y)
+  PFx   <- (-99999.)
+  Fx    <- (-99999.)
+  KPx   <- 0
+  oout1 <- LSmatrix(Y,T,NA)
   for(i in Nmin:(N-Nmin)){
-    oout2<-LSmatrix(Y,T,i)
-    Fc<-(oout1$SSE-oout2$SSE)*(N-3)/oout2$SSE
-    PFc<-Fc*Pk0[i]
-    if(PFc>PFx){
-      PFx<-PFc
-      KPx<-i
-      Fx<-Fc
+    oout2 <- LSmatrix(Y, T, i, only.SSE = TRUE)
+    Fc    <- (oout1$SSE-oout2$SSE)*(N-3)/oout2$SSE
+    PFc   <- Fc*Pk0[i]
+    if(PFc > PFx){
+      PFx <- PFc
+      KPx <- i
+      Fx  <- Fc
     }
   }
+
   oout<-list()
-  oout$PFx<-PFx
-  oout$KPx<-KPx
-  oout$Fx<-Fx
+  oout$PFx <- PFx
+  oout$KPx <- KPx
+  oout$Fx  <- Fx
   return(oout)
 }
 
@@ -75,42 +75,42 @@ PMFxKc<-function(Y,T,I0,I2,Ic){
   Ic1<-Ic-I0
   oout<-list()
   if(Ic>I0){
-    Y0<-Y[(I0+1):I2]
-    T0<-T[(I0+1):I2]
-    oout1<-LSmatrix(Y0,T0,NA)
-    oout2<-LSmatrix(Y0,T0,Ic1)
-    Fc<-(oout1$SSE-oout2$SSE)*(Nseg-3)/oout2$SSE
-    prob<-pf(Fc,1,(Nseg-3))
-    Pk0<-Pk.PMFT(Nseg)
-    PFc<-Fc*Pk0[Ic1]
-    oout$Fc<-Fc
-    oout$PFc<-PFc
-    oout$prob<-prob
+    Y0    <- Y[(I0+1):I2]
+    T0    <- T[(I0+1):I2]
+    oout1 <- LSmatrix(Y0,T0,NA)
+    oout2 <- LSmatrix(Y0,T0,Ic1)
+    Fc    <- (oout1$SSE-oout2$SSE)*(Nseg-3)/oout2$SSE
+    prob  <- pf(Fc,1,(Nseg-3))
+    Pk0   <- Pk.PMFT(Nseg)
+    PFc   <- Fc*Pk0[Ic1]
+    oout$Fc   <- Fc
+    oout$PFc  <- PFc
+    oout$prob <- prob
   }
   else{
-    oout$Fc<-0
-    oout$PFc<-0
-    oout$prob<-0
+    oout$Fc   <- 0
+    oout$PFc  <- 0
+    oout$prob <- 0
   }
   return(oout)
 }
 
 PMFxKxI0I2<-function(Y,T,I0,I2){
-  Nmin2<-Nmin*2
-  prob<-(-1)
-  Ic<-I0
-  Nseg<-(I2-I0)
+  Nmin2 <- Nmin*2
+  prob  <- (-1)
+  Ic    <- I0
+  Nseg  <- (I2-I0)
   if(Nseg>=Nmin2){
-    Y0<-Y[(I0+1):I2]
-    T0<-T[(I0+1):I2]
-    Pk0<-Pk.PMFT(Nseg)
-    oout<-PMFT(Y0,T0,Pk0)
-    Ic<-I0+oout$KPx
-    prob<-pf(oout$Fx,1,(Nseg-3))
+    Y0   <- Y[(I0+1):I2]
+    T0   <- T[(I0+1):I2]
+    Pk0  <- Pk.PMFT(Nseg)
+    oout <- PMFT(Y0, T0, Pk0)
+    Ic   <- I0+oout$KPx
+    prob <- pf(oout$Fx,1,(Nseg-3))
   }
   oout<-list()
-  oout$Ic<-Ic
-  oout$prob<-prob
+  oout$Ic   <- Ic
+  oout$prob <- prob
   return(oout)
 }
 
@@ -184,22 +184,25 @@ autocorlh<-function(Y,IY){
 }
 
 getPFx95<-function(cor,N){
+  n = length(phi)
 # if(cor<phi[1]|cor>phi[length(phi)]) stop("input series autocorrelation outbound!")
   if(cor<=phi[1])
     PTx95<-PFmax[N,1]
-  else if(cor>=phi[length(phi)])
-    PTx95<-PFmax[N,length(phi)]
+  else if(cor>=phi[n])
+    PTx95<-PFmax[N, n]
   else{
-    for(i in 1:(length(phi)-1))
-      if(cor>phi[i]&cor<phi[i+1]) {
-        Kr1<-i
-        Kr2<-i+1
-        cor1<-phi[i]
-        cor2<-phi[i+1]
-      }
-    tmp1<-PFmax[N,Kr1]
-    tmp2<-PFmax[N,Kr2]
-    PTx95<-tmp1+(tmp2-tmp1)*(cor-cor1)/(cor2-cor1)
+    Kr1 <- which(cor > phi[-n] & cor < phi[-1])
+    Kr2 <- Kr1 + 1
+    # for(i in 1:(length(phi)-1))
+    #   if(cor>phi[i]&cor<phi[i+1]) {
+    #     Kr1<-i
+    #     Kr2<-i+1
+    #   }
+    cor1 <- phi[Kr1]
+    cor2 <- phi[Kr2]
+    tmp1 <- PFmax[N,Kr1]
+    tmp2 <- PFmax[N,Kr2]
+    PTx95 <- tmp1+(tmp2-tmp1)*(cor-cor1)/(cor2-cor1)
   }
   return(PTx95)
 }

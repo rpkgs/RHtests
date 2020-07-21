@@ -62,10 +62,12 @@
 #' @examples
 #' infile = system.file("extdata/Example1.dat", package = "RHtests")
 #' FindU(infile)
+#' 
+#' @import foreach
 #' @export
 FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, p.lev=0.95,
-	Iadj=10000, Mq=10, Ny4a=0)
+	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
 {
 	ErrorMSG<-NA
     assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
@@ -487,6 +489,9 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     } else{
         cat(paste(Ns,"changepoints in Series", InSeries,"\n"),
             file=ofileIout)
+
+        # d_TP = foreach(i = 1:Ns) %do% {
+        d_TP <- list()
         for(i in 1:Ns){
             I1   <- if(i==1) 1 else Ips[i-1]+1
             Ic   <- Ips[i]
@@ -543,6 +548,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
                       sprintf("%10.4f",PFx95l),"-",
                       sprintf("%10.4f",PFx95h),")\n",sep=""),
                 file=ofileIout, append=TRUE)
+            
             cat(paste("PMF : c=", sprintf("%4.0f",Ic),
                       "; (Time ", sprintf("%10.0f",IY0[Ic]),
                       "); Type= 1; p=",sprintf("%10.4f",prob),"(",
@@ -555,11 +561,14 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
                       "); Nseg=", sprintf("%4.0f",Nseg),"\n",sep=""),
                 file=ofileSout, append=T)
 			# "Ic", "IY0", "prob", "probL", "probU", "PFx", "PFx95", "PFx95l", "PFx95h", "Nseg"
+            d_TP[[i]] <- data.table(kind = 1, Idc = gsub(" ", "", Idc), date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
         }
+        d_TP %<>% do.call(rbind, .)
     }
 
-    plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-        Ips, Iseg.adj)
+    if (is_plot)
+        plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
+            Ips, Iseg.adj)
 
     if(GUI)
         return(0)
@@ -567,7 +576,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
         file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
         cat("FindU finished successfully...\n")
         odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
-        return(odata)
+        list(fit = odata, turningPoint = d_TP)
     }
 }
 

@@ -85,4 +85,5 @@ this case.
 \examples{
 infile = system.file("extdata/Example1.dat", package = "RHtests")
 FindU(infile)
+
 }

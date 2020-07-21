@@ -24,46 +24,53 @@ Read<-function(InSeries, MissingValueCode = "-999.99"){
         ErrorMSG<<-paste("Input datafile",InSeries,"does not exist!\n")
         return(data)
     }
-    sep = ifelse(is.csv(InSeries), ",", "")
+    sep = ifelse(is.csv(InSeries), ",", " ")
 
-    itable <- tryCatch({
-		read.table(InSeries, sep = sep, header = FALSE, na.strings = MissingValueCode,
-		    colClasses = rep("real", 4)) %>%
-			set_colnames(c("year","month","day","data"))
-    }, error = function(e) {
-		ErrorMSG <<- e$message
-    })
+    # itable <- tryCatch({
 
-    if(ncol(itable)!=4){
-        ErrorMSG <<- paste(InSeries,"has",ncol(itable),"columns. The number of columns should be 4\n")
-        return(data)
-    }
+	# itable <- read.table(InSeries, sep = sep, header = FALSE, na.strings = MissingValueCode,
+	# 	    colClasses = rep("real", 4))
+    itable <- fread(InSeries, sep = sep, na.strings = MissingValueCode)
+    itable %<>% set_colnames(c("year","month","day","data"))
+    # }, error = function(e) {
+	# 	ErrorMSG <<- e$message
+    # })
+    # if(ncol(itable)!=4){
+    #     ErrorMSG <<- paste(InSeries,"has",ncol(itable),"columns. The number of columns should be 4\n")
+    #     return(data)
+    # }
 
     # keep input base data as ori.itable
     ori.itable <- itable
-    isnot_0229 <- (itable$month*100 + itable$day) != 229
-    ooflg      <- !is.na(ori.itable$data) & isnot_0229
+    isnot_0229 <- itable$day != 29
+    ooflg      <- itable[, which(day != 29 & !is.na(data))]
 
+    # browser()
     # get rid of Feb 29th data
     Nall <- n <- nrow(itable)
-    itable   <- itable[isnot_0229, ]
+    itable   <- itable[day != 29, ]
     iyrbegin <- itable$year[1]
     imdbegin <- itable$month[1]*100 + itable$day[1]
     iyrend   <- itable$year[n]
     imdend   <- itable$month[n]*100 + itable$day[n]
+
     # check input data (both base and ref), no jump with begin and end
-    Icy  <- sort(unique(ori.itable[ooflg, 2]*100+ori.itable[ooflg,3]))
-    Ind2 <- iyrbegin*10000+Icy[Icy>=imdbegin] # first year
-    if(iyrend>(iyrbegin+1)) for(i in (iyrbegin+1):(iyrend-1))
-        Ind2<-c(Ind2,i*10000+Icy)
+    Icy  <- ori.itable[, sort(unique(month*100+day))]
+    # Icy  <- sort(unique(ori.itable[ooflg, 2]*100+ori.itable[ooflg,3]))
+    Ind2 <- iyrbegin*10000 + Icy[Icy>=imdbegin] # first year
+    if (iyrend > (iyrbegin + 1)) {
+        for (i in (iyrbegin + 1):(iyrend - 1)) {
+            Ind2 <- c(Ind2, i * 10000 + Icy)
+        }
+    }
     Ind2 <- c(Ind2,iyrend*10000+Icy[Icy<=imdend])
     Nt   <- length(Icy)
 
-    ind  <- ori.itable[ooflg,1]*10000+ori.itable[ooflg,2]*100+ori.itable[ooflg,3]
+    ind  <- ori.itable[ooflg, year*10000+month*100+day]
     if(sum(!(ind%in%Ind2))>0|all.equal(ind,sort(ind))!=T){
         ErrorMSG <<- paste("Input data series not continuous\n")
         return(-1)
-    }
+    } 
     # for(i in 1:length(Ind2))
     #   if(Ind2[i]!=ind[i]) {
     #     ErrorMSG<<-paste("Input data series not continuous at:",Ind2[i],ind[i],"\n")
@@ -71,8 +78,8 @@ Read<-function(InSeries, MissingValueCode = "-999.99"){
     #   }
     # IY0<-ind[is.na(itable[,4])==F]
     IY0    <- ind
-    IY0flg <- rep(0,length(IY0))
-    Y0     <- itable[is.na(itable[,4])==F,4]
+    IY0flg <- rep(0, length(IY0))
+    Y0     <- itable[!is.na(data), data]
     Iyr    <- floor(IY0/10000)
     Imd    <- IY0-Iyr*10000
     Ti     <- IY0
@@ -81,6 +88,7 @@ Read<-function(InSeries, MissingValueCode = "-999.99"){
         Ti[i]<-(Iyr[i]-iyrbegin)*Nt+ith
     }
     assign("IY0",IY0,env=.GlobalEnv)
+
     for(i in 1:(length(IY0)-1)){
         if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
     }
@@ -89,10 +97,10 @@ Read<-function(InSeries, MissingValueCode = "-999.99"){
         return(-1)
     }
 
-    itable<-itable[is.na(itable[,4])==F,]
-    assign("ori.itable",ori.itable,envir=.GlobalEnv)
-    assign("ooflg",ooflg,envir=.GlobalEnv)
-    assign("itable",itable,envir=.GlobalEnv)
+    itable <- itable[!is.na(data),]
+    assign("ori.itable", as.data.frame(ori.itable), envir=.GlobalEnv)
+    assign("ooflg", ooflg, envir=.GlobalEnv)
+    assign("itable", as.data.frame(itable), envir=.GlobalEnv)
     assign("Ti",Ti,envir=.GlobalEnv) # Time index for LS fitting
     assign("Y0",Y0,envir=.GlobalEnv) # Data series for Base
     assign("IY0",IY0,envir=.GlobalEnv) # Cycle index for Base
