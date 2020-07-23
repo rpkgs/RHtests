@@ -4,3 +4,4 @@
 ^V4_files$
 ^LICENSE\.md$
 ^codecov\.yml$
+^OUTPUT$

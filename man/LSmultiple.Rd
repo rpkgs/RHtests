@@ -2,9 +2,9 @@
 % Please edit documentation in R/LSmultiRed.R
 \name{LSmultiple}
 \alias{LSmultiple}
-\title{LSmultiple}
+\title{Multiple Linear Regression (same slope, different interception)}
 \usage{
-LSmultiple(Y, T, Ips)
+LSmultiple(Y, T, Ips, ...)
 }
 \arguments{
 \item{Ips}{what?}
@@ -17,5 +17,5 @@ LSmultiple(Y, T, Ips)
 }
 }
 \description{
-LSmultiple
+Multiple Linear Regression (same slope, different interception)
 }

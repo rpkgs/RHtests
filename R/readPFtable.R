@@ -1,7 +1,8 @@
-readPFtable<-function(Nx,pkth=4,ifile="PFmax31red_Nmin10_CVs"){
+readPFtable<-function(Nx, pkth=4, ...){
+  # ,ifile="PFmax31red_Nmin10_CVs"
   # read in PTmax table, assign PTmax table as global variable;
   # phi -- vector for cor catalog -- as global variable
-  # itmp<-matrix(scan(ifile,skip=2,quiet=T),ncol=6,byrow=T)
+  # itmp <- matrix(scan(ifile,skip=2,quiet=T),ncol=6,byrow=T)
   # itmp <- read.table("PFtable.csv", header = FALSE) %>% as.matrix()
   itmp <- PFtable
   # itmp<-itmp[,c(1,2,2,2,3,4,5,6)] # temp, will remove later
@@ -11,6 +12,7 @@ readPFtable<-function(Nx,pkth=4,ifile="PFmax31red_Nmin10_CVs"){
   nlevs <- unique(itmp[,1])
   PTmax <- matrix(0,max(Nmax,Nx),45)
   phi   <- c(-0.975,itmp[1:44,ncol])
+
   for(i in 0:(length(nlevs)-1)){
     for(j in 1:44){
       if(i==0){
@@ -24,7 +26,7 @@ readPFtable<-function(Nx,pkth=4,ifile="PFmax31red_Nmin10_CVs"){
         ind1   <- nlevs[i]
         ind2   <- nlevs[i+1]
       }
-      PTmax[ind1:ind2,(j+1)] <- seq(PTmax1,PTmax2,length=(ind2-ind1+1))
+      PTmax[ind1:ind2,(j+1)] <- seq(PTmax1, PTmax2, length=(ind2-ind1+1))
     }
     PTmax[ind1:ind2,1] <- PTmax[ind1:ind2,2]-(phi[2]-phi[1])*
       (PTmax[ind1:ind2,3]-PTmax[ind1:ind2,2])/(phi[3]-phi[2])
@@ -39,4 +41,5 @@ readPFtable<-function(Nx,pkth=4,ifile="PFmax31red_Nmin10_CVs"){
   # PTmax<-PTmax[-1,]
   assign("phi", phi, envir=.GlobalEnv)
   assign("PFmax", PTmax, envir=.GlobalEnv)
+  listk(phi, PFmax = PTmax)
 }

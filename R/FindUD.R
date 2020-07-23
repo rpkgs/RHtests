@@ -1,8 +1,10 @@
 FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     GUI=FALSE, p.lev=0.95, Iadj=10000,Mq=10,Ny4a=0, is_plot = FALSE)
 {
-    Debug<-TRUE
-    ErrorMSG<-NA
+    if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
+
+    Debug    <- TRUE
+    ErrorMSG <- NA
     assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
     flog <- paste(output,".log",sep="")
     Nmin <- 10
@@ -17,13 +19,13 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
     assign("Nmin",Nmin,envir=.GlobalEnv)
 
-    if (is.character(InSeries)) {
-        data <- Read(InSeries, MissingValueCode)    
-    }
-    
     N <- length(Y0); Nadj <- Ny4a*Nt
     readPFtable(N, pkth)
-    itmp <- readLines(InCs)
+
+    # change InCs
+    TP = if (is.character(InCs)) fread(InCs) else InCs
+    Ns = nrow(TP) # number of changing points
+
     Pk0  <- Pk.PMFT(N)
     oout <- rmCycle(itable)
     Y1   <- oout$Base
@@ -60,7 +62,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     corDL    <- oout$corl
     corDU    <- oout$corh
 
-    if(length(itmp) < 2) { # no input changepoints
+    if(Ns == 0) { # no input changepoints no input changepoints
         oout  <- PMFT(Y1, Ti, Pk0)
         I0    <- 0
         I2    <- oout$KPx
@@ -135,7 +137,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
         PFx.mx  <- tmp$x[1]
         prob.mx <- c(prob1,prob2,prob3)[tmp$ix[1]]
         Imx     <- c(I1,I2,I3)[tmp$ix[1]]
-        if(prob.mx<plev){
+        if(prob.mx < plev){
             #     cat("PMF finds the series to be homogeneous!\n",file=ofileIout)
             cat(paste(0,"changepoints in Series", InSeries,"\n"),file=ofileIout)
             cat("PMF finds the series to be homogeneous!\n")
@@ -149,21 +151,23 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
             Ids <- c(0,1)
         }
     } else {
-        Ns  <- length(itmp) - 1 # number of changing points
-        Ips <- c(rep(0, Ns), N) # 
+        Ips <- c(rep(0, Ns), N) #
         Ids <- rep(0, Ns)
 
         for(i in 1:Ns){ # using YYYYMMDD as index, searching for the largest
             # date less or equal to given YYYYMMDD
-            ymdtmp <- as.numeric(substr(itmp[i+1],7,16))
-            it     <- match(ymdtmp,IY0)
+            # ymdtmp <- as.numeric(substr(itmp[i+1],7,16))
+            ymdtmp <- TP$date[i] #%>% format("%Y%m%d") %>% as.numeric()
+            it     <- match(ymdtmp, IY0)
             if (!is.na(it)) {
                 Ips[i] <- it
             } else {
                 Ips[i] <- max(c(1:N)[IY0 <= ymdtmp])
             }
-            Ids[i] <- as.numeric(substr(itmp[i+1],1,1))
+            # Ids[i] <- as.numeric(substr(itmp[i+1],1,1))
         }
+        Ids = TP$kind
+
         if(sum(is.na(Ips))>0 | !identical(Ips,sort(Ips))){
             ErrorMSG<<-paste("FindUD: Ips read in from ",InCs,"error:")
             for(i in 1:Ns)
@@ -285,6 +289,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     itmp1<-cbind(EB1,Icy)
     itmp2<-cbind(1:N,Imd)
     colnames(itmp2)<-c("idx","Icy")
+
     itmp<-merge(itmp1,itmp2,by="Icy")
     EBfull<-itmp[order(itmp[,"idx"]),"EB1"]
     EEB<-mean(EB1,na.rm=T)
@@ -352,10 +357,10 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     meanhat0<-meanhat0-Ehat0+Ehat
 
     if (is_plot)
-        plot_FindUD(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj, 
+        plot_FindUD(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
             Ips, Iseg.adj, otmp)
 
-    odata<-matrix(NA,dim(ori.itable)[1],10)
+    odata <- matrix(NA,dim(ori.itable)[1],10) %>% set_colnames(fitdata_varnames_noref)
     # odata[ooflg,1]<-Ti
     odata[,1]        <- c(1:dim(ori.itable)[1])
     odata[,2]        <- ori.itable[,1]*10000+ori.itable[,2]*100+ori.itable[,3]
@@ -412,19 +417,12 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
         }
     }
 
-    write.table(file=ofileAout,odata,na=MissingValueCode,
-                col.names=F,row.names=F)
+    write.table(file=ofileAout,odata,na=MissingValueCode, col.names=TRUE, row.names=F)
     RW  <- LSmultiple(W , Ti, Ips)$resi
     RWL <- LSmultiple(WL, Ti, Ips)$resi
     RWU <- LSmultiple(WU, Ti, Ips)$resi
-    if(Ns==0) {
-        #   cat("PMF finds the series to be homogeneous!\n",file=ofileIout)
-        cat(paste(Ns,"changepoints in Series", InSeries,"\n"),file=ofileIout)
-        cat("PMF finds the series to be homogeneous!\n")
-        #   return()
-    } else {
-        cat(paste(Ns,"changepoints in Series", InSeries,"\n"), file=ofileIout)
 
+    if (Ns > 0) {
         # d_TP = foreach(i = 1:Ns) %do% {
         d_TP = list()
         for(i in 1:Ns){
@@ -439,7 +437,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
             PFx95h    <- getPFx95(corh,Nseg)
             SSEf.Iseg <- sum(Rf[I1:I3]^2)
             Ips0      <- Ips[-i]
-            
+
             otmp      <- LSmultiple(Y1,Ti,Ips0)
             SSE0.Iseg <- sum(otmp$resi[I1:I3]^2)
             Fx        <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
@@ -477,7 +475,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
             ## type_TP的判断标准
             # browser()
             Idc = guess_sign_level(Id, plev, probL, probU, PFx, PFx95l, PFx95h)
-            
+
             cat(paste(sprintf("%1.0f",as.numeric(Id))," ",
                       sprintf("%-4.4s",Idc),
                       sprintf("%10.0f",IY0[Ic])," (",
@@ -501,9 +499,15 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
                       "-", sprintf("%10.4f",PFx95h),
                       "); Nseg=", sprintf("%4.0f",Nseg),"\n",sep=""),
                 file=ofileSout, append=T)
-            d_TP[[i]] <- data.table(kind = Id, Idc = gsub(" ", "", Idc), date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
+            d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
         }
+
+        if (Ns == 0) cat("PMF finds the series to be homogeneous!\n")
+        cat(paste("# ", Ns, "changepoints in Series", InSeries, "\n"), file = ofileIout)
+        
         d_TP %<>% do.call(rbind, .)
+        d_TP[, 4:9] %<>% lapply(round, digits = 4)
+        fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
     }
     if(GUI)
         return(0)
@@ -512,7 +516,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
         cat("FindUD finished successfully...\n")
         list(turningPoint = d_TP) # fit = odata,
     }
-    
+
 }
 
 guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
@@ -529,10 +533,10 @@ guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
     Idc
 }
 
-# plot_FindUD(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj, Ips, Iseg.adj) 
+# plot_FindUD(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj, Ips, Iseg.adj)
 plot_FindUD <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-    Ips, Iseg.adj, 
-    otmp, ...) 
+    Ips, Iseg.adj,
+    otmp, ...)
 {
     pdf(file=ofilePdf, onefile=TRUE, paper='letter')
     op <- par(no.readonly = TRUE) # the whole list of settable par's.

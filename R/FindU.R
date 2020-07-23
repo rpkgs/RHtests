@@ -62,18 +62,19 @@
 #' @examples
 #' infile = system.file("extdata/Example1.dat", package = "RHtests")
 #' FindU(infile)
-#' 
 #' @import foreach
 #' @export
 FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, p.lev=0.95,
 	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
 {
+    if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
+
 	ErrorMSG<-NA
     assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
     Nmin <- 10
     if(Ny4a>0&Ny4a<=5) Ny4a<-5
-    if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
+    if(!p.lev %in% c(0.75,0.8,0.9,0.95,0.99,0.9999)){
         ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
                          get("ErrorMSG",env=.GlobalEnv),"\n")
         if(!GUI) cat(ErrorMSG)
@@ -82,15 +83,12 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     plev<-p.lev
     pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
     assign("Nmin",Nmin,envir=.GlobalEnv)
-
-    # if success, a data.table will be returned
-    data <- Read(InSeries, MissingValueCode) # data not used
-    if(is.null(data)){
-        ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
-                         get("ErrorMSG",env=.GlobalEnv),"\n")
-        if(!GUI) cat(ErrorMSG)
-        return(-1)
-    }
+    # if(is.null(data)){
+    #     ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
+    #                      get("ErrorMSG",env=.GlobalEnv),"\n")
+    #     if(!GUI) cat(ErrorMSG)
+    #     return(-1)
+    # }
 
     ofileAout <- paste(output,"_U.dat",sep="")
     ofilePdf  <- paste(output,"_U.pdf",sep="")
@@ -103,10 +101,10 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     file.create(ofileSout)
     file.create(ofileIout)
 
-    N<-length(Y0); Nadj<-Ny4a*Nt
+    N <- length(Y0); Nadj <- Ny4a*Nt
     cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
     cat(paste("Input data filename:", InSeries, "N=",N, "\n"),file=ofileSout,append=T)
-    readPFtable(N,pkth)
+    readPFtable(N, pkth)
     Pk0  <- Pk.PMFT(N)
     oout <- rmCycle(itable)
     Y1   <- oout$Base
@@ -363,12 +361,12 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     # itmp1<-cbind(EB1,Icy)
     # itmp2<-cbind(1:N,Imd)
     # colnames(itmp2)<-c("idx","Icy")
-    # itmp<-merge(itmp1,itmp2,by="Icy")
-    # EBfull<-itmp[order(itmp[,"idx"]),"EB1"]
-    # EEB<-mean(EB1,na.rm=T)
-    adj<-oout$Y0+EBfull
-    # B<-B+EBfull+oout$trend*Ti
-    B<-B+oout$trend*Ti
+    # itmp   <- merge(itmp1,itmp2,by="Icy")
+    # EBfull <- itmp[order(itmp[,"idx"]),"EB1"]
+    # EEB    <- mean(EB1,na.rm=T)
+    adj      <- oout$Y0+EBfull
+    # B      <- B+EBfull+oout$trend*Ti
+    B        <- B+oout$trend*Ti
     cat("Common trend TPR fit to the de-seasonalized Base series:\n",
         file=ofileSout,append=T)
     cat(paste("#steps= ",Ns,"; trend=",round(oout$trend,6),"(",
@@ -393,17 +391,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     meanhat0<-meanhat0-Ehat0+Ehat
 
     nrow = dim(ori.itable)[1]
-    varnames = c("id", "date", "base",
-                 "base_trend+meanShift", "base_mean_adj",
-                 "base_anomaly",             # 6, base - mean annual cycle
-                 "pred_multi_phase_regress", # 7
-                 "annualC+meanShifts",       # 8
-                 #  "deseason_base_trend", "deseason_base_adj_mean",
-                 # "base_minus_annualC", "fit_of_base_minus_annualC",
-                 "QM_adjusted",              # 9
-                 "fit_of_deseason_base")     # 10
-
-    odata            <- matrix(NA, nrow,10) %>% set_colnames(varnames)
+    odata            <- matrix(NA, nrow,10) %>% set_colnames(fitdata_varnames_noref)
     # odata[ooflg,1] <- Ti
     odata[,1]        <- c(1:nrow)
     odata[,2]        <- ori.itable$year*10000 + ori.itable$month*100 + ori.itable$day
@@ -421,27 +409,27 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     Imd1 <- ori.itable$month*100 + ori.itable$day
     if(sum(!is.na(ori.itable[,4]) & Imd1==229)>0){
         if(Ns>0){
-            tdata <- ori.itable[!is.na(ori.itable$data),]
-            IY1   <- tdata[,1]*10000+tdata[,2]*100+tdata[,3]
-            Ips.ymd<-IY0[Ips]
-            Ips.1<-rep(NA,Ns+1)
+            tdata   <- ori.itable[!is.na(ori.itable$data),]
+            IY1     <- tdata[,1]*10000+tdata[,2]*100+tdata[,3]
+            Ips.ymd <- IY0[Ips]
+            Ips.1   <- rep(NA,Ns+1)
             for(i in 1:Ns) Ips.1[i]<-c(1:length(IY1))[IY1==Ips.ymd[i]]
             Ips.1[Ns+1]<-length(IY1)
             #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
-            Imd2 <- tdata[,2]*100+tdata[,3]
-            Ids.leap<-c(1:length(Imd2))[Imd2==229]
-            Nl<-length(Ids.leap)
-            Rb<-Y1-oout$trend*Ti+EBfull
-            Rb1<-tdata[,4]; Rb1[-Ids.leap]<-Rb
-            Ti1<-rep(NA,length(IY1)); Ti1[-Ids.leap]<-Ti
+            Imd2     <- tdata[,2]*100+tdata[,3]
+            Ids.leap <- c(1:length(Imd2))[Imd2==229]
+            Nl       <- length(Ids.leap)
+            Rb       <- Y1-oout$trend*Ti+EBfull
+            Rb1      <- tdata[,4]; Rb1[-Ids.leap]<-Rb
+            Ti1      <- rep(NA,length(IY1)); Ti1[-Ids.leap]<-Ti
             for(i in 1:length(Ids.leap)) {
-                Rb1[Ids.leap[i]]<-tdata[Ids.leap[i],4]+Rb1[Ids.leap[i]-1]-tdata[Ids.leap[i]-1,4]
-                Ti1[Ids.leap[i]]<-Ti1[Ids.leap[i]-1]
+                Rb1[Ids.leap[i]] <- tdata[Ids.leap[i],4]+Rb1[Ids.leap[i]-1]-tdata[Ids.leap[i]-1,4]
+                Ti1[Ids.leap[i]] <- Ti1[Ids.leap[i]-1]
             }
             if(QMout$Mq>1){
-                B1<-QMadjGaussian(Rb1,Ips.1,Mq,Iseg.adj,Nadj)$PA
-                B1<-B1+oout$trend*Ti1
-                B1.leap<-B1[Ids.leap]
+                B1      <- QMadjGaussian(Rb1,Ips.1,Mq,Iseg.adj,Nadj)$PA
+                B1      <- B1+oout$trend*Ti1
+                B1.leap <- B1[Ids.leap]
                 odata[is.na(odata[,3])==F&Imd1==229,9]<-round(B1.leap,4)
             }
         } else
@@ -463,13 +451,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     }
 
     odata = as.data.table(odata)
-    # plot(odata$base, type = "l")
-    # lines(odata$base_trend, col = "red")
-    # lines(odata$base_adj_mean, col = "blue")
-    # plot(odata$deseason_base_adj_mean)
-    # lines(odata$deseason_base_trend, col = "blue")
-    write.table(file=ofileAout, odata, na=MissingValueCode,
-                col.names=F,row.names=F)
+    write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
 
     otmp   <- LSmultiple(Y1,Ti,Ips)
     resi   <- otmp$resi
@@ -480,16 +462,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     otmpWU <- LSmultiple(WU,Ti,Ips)
     resiWU <- otmpWU$resi
 
-    if(Ns==0) {
-        cat(paste(Ns,"changepoints in Series", InSeries,
-                  paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
-                        sprintf("%10.0f",19000101),")",sep=""),"\n"),file=ofileIout)
-        cat("PMF finds no Type-1 changepoints in the series!\n")
-        #   return(0)
-    } else{
-        cat(paste(Ns,"changepoints in Series", InSeries,"\n"),
-            file=ofileIout)
-
+    if (Ns > 0) {
         # d_TP = foreach(i = 1:Ns) %do% {
         d_TP <- list()
         for(i in 1:Ns){
@@ -538,17 +511,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
             else if(PFx>=PFx95l&PFx<PFx95h) Idc<-"?   "
             else if(PFx>=PFx95h) Idc<-"Yes "
             #     }
-            cat(paste(sprintf("%1.0f",1)," ",
-                      sprintf("%-4.4s",Idc),
-                      sprintf("%10.0f", IY0[Ic])," (",
-                      sprintf("%6.4f",probL),"-",
-                      sprintf("%6.4f",probU),")",
-                      sprintf("%6.3f",plev),
-                      sprintf("%10.4f",PFx)," (",
-                      sprintf("%10.4f",PFx95l),"-",
-                      sprintf("%10.4f",PFx95h),")\n",sep=""),
-                file=ofileIout, append=TRUE)
-            
+
             cat(paste("PMF : c=", sprintf("%4.0f",Ic),
                       "; (Time ", sprintf("%10.0f",IY0[Ic]),
                       "); Type= 1; p=",sprintf("%10.4f",prob),"(",
@@ -561,9 +524,22 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
                       "); Nseg=", sprintf("%4.0f",Nseg),"\n",sep=""),
                 file=ofileSout, append=T)
 			# "Ic", "IY0", "prob", "probL", "probU", "PFx", "PFx95", "PFx95l", "PFx95h", "Nseg"
-            d_TP[[i]] <- data.table(kind = 1, Idc = gsub(" ", "", Idc), date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
+            d_TP[[i]] <- data.table(kind = 1, Idc, date = IY0[Ic],
+                probL, probU, plev, PFx, PFx95l, PFx95h)
         }
+        ## save turningPoints --------------------------------------------------
+        if (Ns==0) {
+            cat("PMF finds no Type-1 changepoints in the series!\n")
+            cat(paste("# ", Ns,"changepoints in Series", InSeries,
+                    paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
+                            sprintf("%10.0f",19000101),")",sep=""),"\n"), file=ofileIout)
+        } else {
+            cat(paste("# ", Ns,"changepoints in Series", InSeries,"\n"), file=ofileIout)
+        }
+
         d_TP %<>% do.call(rbind, .)
+        d_TP[, 4:9] %<>% lapply(round, digits = 4)
+        fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
     }
 
     if (is_plot)
@@ -600,28 +576,28 @@ plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
     plot2(I_valid, oout$Y0, type="l",xlab="",ylab="",
          ylim= range2(oout$Y0, oout$meanhat),
          xaxt="n",col="black",lwd=0.5,
-         main="Base anomaly series and regression fit", 
+         main="Base anomaly series and regression fit",
          at=ats,labels=labels)
     lines(I_valid, oout$meanhat, col = "red")
 
     plot2(I_valid, oout$Y0+EBfull, type="l",xlab="",ylab="",
          ylim=range2(oout$Y0+EBfull,oout$meanhat+EEB),
          xaxt="n",col="black",lwd=0.5,
-         main="Base series and regression fit", 
+         main="Base series and regression fit",
          at=ats,labels=labels)
     lines(I_valid, oout$meanhat+EEB, col="red")
 
     plot2(I_valid, adj, type="l",xlab="",ylab="",
          ylim=c(min(c(adj,B)),max(c(adj,B))),
          xaxt="n",col="black",lwd=0.5,
-         main="Mean-adjusted base series", 
+         main="Mean-adjusted base series",
          at=ats, labels=labels)
 
     if(Mq>1){
         plot2(I_valid, B, type="l",xlab="",ylab="",
              ylim=c(min(c(adj,B)),max(c(adj,B))),
              xaxt="n",col="black",lwd=0.5,
-             main="QM-adjusted base series", 
+             main="QM-adjusted base series",
              at=ats,labels=labels)
     }
 
@@ -649,8 +625,8 @@ plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
                     for(j in 1:QMout$Mq){
                         lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
                               c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-                        if(j>=1 & j<QMout$Mq) 
-                            lines(rep(osmean[(j+1),icol]+Fd,2), 
+                        if(j>=1 & j<QMout$Mq)
+                            lines(rep(osmean[(j+1),icol]+Fd,2),
                                 c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=0.5)
                     }
                 } else {

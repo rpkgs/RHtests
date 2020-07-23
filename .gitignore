@@ -1,4 +1,9 @@
 .Rproj.user
 .Rhistory
 V4_files/output
-OUTPUT/
+OUTPUT/*.pdf
+OUTPUT/*.txt
+OUTPUT/example*/
+
+*.pdf
+*.html

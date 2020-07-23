@@ -227,10 +227,10 @@ lm_solve <- function(D, X, only.SSE = FALSE, ...) {
   #   times = 100
   # )
 
-  l   <- .lm.fit(D, X)
-  sig <- as.matrix(l$coefficients)
-  fitted <- D %*% sig
-  # resi   <- X-fitted
+  l      <- .lm.fit(D, X)
+  # sig  <- as.matrix(l$coefficients)
+  fitted <- D %*% l$coefficients
+  # resi <- X-fitted
   SSE    <- sum(l$residuals^2)
   if (!only.SSE) {
     list(

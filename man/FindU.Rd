@@ -12,7 +12,8 @@ FindU(
   p.lev = 0.95,
   Iadj = 10000,
   Mq = 10,
-  Ny4a = 0
+  Ny4a = 0,
+  is_plot = FALSE
 )
 }
 \arguments{
@@ -85,5 +86,4 @@ this case.
 \examples{
 infile = system.file("extdata/Example1.dat", package = "RHtests")
 FindU(infile)
-
 }
