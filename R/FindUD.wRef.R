@@ -5,19 +5,19 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   assign("Nmin",Nmin,envir=.GlobalEnv)
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
   if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-      ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
-                 get("ErrorMSG",env=.GlobalEnv),"\n")
-      if(!GUI) cat(ErrorMSG)
-      return(-1)
+    ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
+                     get("ErrorMSG",env=.GlobalEnv),"\n")
+    if(!GUI) cat(ErrorMSG)
+    return(-1)
   }
   plev<-p.lev
   pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
 
   Read.wRef(Bseries,Rseries,MissingValueCode)
   N<-length(Y0); Nadj<-Nt*Ny4a
-# readin PTmax table
+  # readin PTmax table
   readPTtable(N,pkth)
-# readin Ips
+  # readin Ips
   itmp<-readLines(InCs)
   Pk0<-Pk.PMT(N)
   ofileIout<-paste(output,"_pCs.txt",sep="")
@@ -51,7 +51,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     Ips<-c(rep(0,Ns),N)
     Ids<-rep(0,Ns)
     for(i in 1:Ns){ # using YYYYMMDD as index, searching for the largest
-                    # date less or equal to given YYYYMMDD
+      # date less or equal to given YYYYMMDD
       ymdtmp<-as.numeric(substr(itmp[i+1],7,16))
       it<-match(ymdtmp,IY0)
       if(!is.na(it)) Ips[i]<-it
@@ -60,7 +60,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     }
     if(sum(is.na(Ips))>0|!identical(Ips,sort(Ips))){
       ErrorMSG<<-paste("FindUD.wRef: Ips read in from ",InCs,"error!\n",
-                 get("ErrorMSG",env=.GlobalEnv),"\n")
+                       get("ErrorMSG",env=.GlobalEnv),"\n")
       if(!GUI) cat(ErrorMSG)
       return(-1)
     }
@@ -82,7 +82,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       otmp<-PTKI0I2(Y0,I0,I2)
       if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
     }
-# finished find new possible changepoints, sorted in Ips0      
+    # finished find new possible changepoints, sorted in Ips0
     tt1<-TRUE
     while(tt1){ # check Ips0 and insert new break points
       if(length(Ips0)==0) tt1<-FALSE
@@ -147,16 +147,16 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     prob3<-PTKIc(WU,Pk0,I02)$prob
     probU<-max(c(prob1,prob2,prob3))
     if(probU<plev){
-#     cat("PMT finds the series to be homogeneous!\n",file=ofileIout)
+      #     cat("PMT finds the series to be homogeneous!\n",file=ofileIout)
       cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,"\n"),
           file=ofileIout)
       if(!GUI) {
         cat("PMT finds the series to be homogeneous!\n")
-	return()
+        return()
       }
       else {
         ErrorMSG<<-paste("PMT finds the series",Bseries,"to be homogeneous!\n",
-	           get("ErrorMSG",env=.GlobalEnv),"\n",sep="")
+                         get("ErrorMSG",env=.GlobalEnv),"\n",sep="")
         return(-1)
       }
     }
@@ -185,50 +185,50 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       if(length(Ips0)==0) tt1<-FALSE
       else{
         probU.mx<-(-1)
-	probL.mx<-(-1)
-	PTx.mx<-(-9999)
-	PTx95L.mx<-.001
+        probL.mx<-(-1)
+        PTx.mx<-(-9999)
+        PTx95L.mx<-.001
         for(i in 1:length(Ips0)){ # search Ips1 series, find max prob
           Ips1<-sort(c(Ips,Ips0[i]))
-	  Ic<-Ips0[i]
-	  id<-match(Ic,Ips1)
-	  if(id==length(Ips1)) {
-	    print(Ips1)
-	    print(id)
-	    stop("error in FindSteps")
-	  }
-	  I0<-if(id==1) 0 else Ips1[id-1]
-	  I2<-Ips1[id+1]
+          Ic<-Ips0[i]
+          id<-match(Ic,Ips1)
+          if(id==length(Ips1)) {
+            print(Ips1)
+            print(id)
+            stop("error in FindSteps")
+          }
+          I0<-if(id==1) 0 else Ips1[id-1]
+          I2<-Ips1[id+1]
           Ns1<-Ns+1
-	  Nseg<-I2-I0
-	  Pk1<-Pk.PMT(Nseg)
-	  PTx95L<-getPTx95(corL,I2-I0)
-	  PTx<-PTKIc(Y0[(I0+1):I2],Pk1,Ic-I0)$PTk
+          Nseg<-I2-I0
+          Pk1<-Pk.PMT(Nseg)
+          PTx95L<-getPTx95(corL,I2-I0)
+          PTx<-PTKIc(Y0[(I0+1):I2],Pk1,Ic-I0)$PTk
           prob1<-PTKIc(W[(I0+1):I2],Pk1,Ic-I0)$prob
           prob2<-PTKIc(WL[(I0+1):I2],Pk1,Ic-I0)$prob
           prob3<-PTKIc(WU[(I0+1):I2],Pk1,Ic-I0)$prob
-	  probU<-max(c(prob1,prob2,prob3))
-	  probL<-min(c(prob1,prob2,prob3))
-	  if(probU<plev) Ips0[i]<-0
-	  else{
-	    if(PTx/PTx95L > PTx.mx/PTx95L.mx){
-	      PTx.mx<-PTx
-	      PTx95L.mx<-PTx95L
-	      probL.mx<-probL
-	      probU.mx<-probL
-	      Imx<-Ic
-	      inc<-i
-	    }
-	  }
-	}
-	if(probU.mx>=plev){
-	  Ips<-sort(c(Ips,Imx)) # insert new point into Ips
-	  Ns<-Ns+1
-	  Ips0<-Ips0[-inc] # exclude co-responding point in Ips0
-	  tt<-TRUE # continue search
-	}
-	else 
-	  tt1<-FALSE # finish inserting new points into Ips
+          probU<-max(c(prob1,prob2,prob3))
+          probL<-min(c(prob1,prob2,prob3))
+          if(probU<plev) Ips0[i]<-0
+          else{
+            if(PTx/PTx95L > PTx.mx/PTx95L.mx){
+              PTx.mx<-PTx
+              PTx95L.mx<-PTx95L
+              probL.mx<-probL
+              probU.mx<-probL
+              Imx<-Ic
+              inc<-i
+            }
+          }
+        }
+        if(probU.mx>=plev){
+          Ips<-sort(c(Ips,Imx)) # insert new point into Ips
+          Ns<-Ns+1
+          Ips0<-Ips0[-inc] # exclude co-responding point in Ips0
+          tt<-TRUE # continue search
+        }
+        else
+          tt1<-FALSE # finish inserting new points into Ips
         Ips0<-Ips0[Ips0!=0]
       }
     }
@@ -243,85 +243,85 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   tt<-TRUE
   tt0<-TRUE
   while(tt0){
-  while(tt){ # delete changepoints which are not significant
-    tt<-FALSE
-    probL.mn<-9999
-    Iseg.mn<-0
-    for(i in 1:Ns){  # check all changepoints
-      if(Ids[i]==0){ # check those un-documented 
-        I0<- if(i==1) 0 else Ips[i-1]
-        I3<-Ips[i+1]
-        Ic<-Ips[i]
-        Nseg<-I3-I0
-        Pk0<-Pk.PMT(Nseg)
-        PTx<-PTKIc(Y0[(I0+1):I3],Pk0,Ic-I0)$PTk
-        prob1<-PTKIc(W[(I0+1):I3],Pk0,Ic-I0)$prob
-        prob2<-PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)$prob
-        prob3<-PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)$prob
-        probU<-otmp$prob
-        probL<-min(prob1,prob2,prob3)
-        if(probL<probL.mn){
-	  probL.mn<-probL
-	  Iseg.mn<-i
-	}
-      } # end if documented
-    } # end of do-loop from 1 ~ (Ns+1)
-    if(Iseg.mn>0 & probL.mn<plev){
-      Ips<-Ips[-Iseg.mn]
-      Ids<-Ids[-Iseg.mn]
-      Ns<-Ns-1
-      if(Ns>0) tt<-TRUE
-    }
-  } # end of do-while
-  otmp<-Rphi(Y0,Ips,Ns)
-  W<-otmp$W
-  WL<-otmp$WL
-  WU<-otmp$WU
-  cor<-otmp$cor
-  corl<-otmp$corl
-  corh<-otmp$corh
-  df<-(N-2-Ns)
-  p.cor<-pt(abs(cor)*sqrt(df/(1-cor^2)),df)
-  if(Ns.initial>Ns) Ns.initial<-Ns
-  else tt0<-FALSE
+    while(tt){ # delete changepoints which are not significant
+      tt<-FALSE
+      probL.mn<-9999
+      Iseg.mn<-0
+      for(i in 1:Ns){  # check all changepoints
+        if(Ids[i]==0){ # check those un-documented
+          I0<- if(i==1) 0 else Ips[i-1]
+          I3<-Ips[i+1]
+          Ic<-Ips[i]
+          Nseg<-I3-I0
+          Pk0<-Pk.PMT(Nseg)
+          PTx<-PTKIc(Y0[(I0+1):I3],Pk0,Ic-I0)$PTk
+          prob1<-PTKIc(W[(I0+1):I3],Pk0,Ic-I0)$prob
+          prob2<-PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)$prob
+          prob3<-PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)$prob
+          probU<-otmp$prob
+          probL<-min(prob1,prob2,prob3)
+          if(probL<probL.mn){
+            probL.mn<-probL
+            Iseg.mn<-i
+          }
+        } # end if documented
+      } # end of do-loop from 1 ~ (Ns+1)
+      if(Iseg.mn>0 & probL.mn<plev){
+        Ips<-Ips[-Iseg.mn]
+        Ids<-Ids[-Iseg.mn]
+        Ns<-Ns-1
+        if(Ns>0) tt<-TRUE
+      }
+    } # end of do-while
+    otmp<-Rphi(Y0,Ips,Ns)
+    W<-otmp$W
+    WL<-otmp$WL
+    WU<-otmp$WU
+    cor<-otmp$cor
+    corl<-otmp$corl
+    corh<-otmp$corh
+    df<-(N-2-Ns)
+    p.cor<-pt(abs(cor)*sqrt(df/(1-cor^2)),df)
+    if(Ns.initial>Ns) Ns.initial<-Ns
+    else tt0<-FALSE
   }
 
-# all changepoints in the list are significant, final estimates of step size
+  # all changepoints in the list are significant, final estimates of step size
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])
     Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
   }
   else Iseg.longest<-0
 
-  if(Iadj>(Ns+1)|Iseg.longest==0) Iseg.adj<-Ns+1 
+  if(Iadj>(Ns+1)|Iseg.longest==0) Iseg.adj<-Ns+1
   else if(Iadj==0)Iseg.adj<-Iseg.longest
   else Iseg.adj<-Iadj
 
   ofileMout<-paste(output,"_mCs.txt",sep="")
   ofileSout<-paste(output,"_UDstat.txt",sep="")
-# ofileRout<-paste(output,"_Base_Ref.fitUD",sep="")
+  # ofileRout<-paste(output,"_Base_Ref.fitUD",sep="")
   file.create(ofileSout)
-# file.create(ofileRout)
+  # file.create(ofileRout)
   cat(paste("Input Base Series:",Bseries,"\n"),file=ofileSout)
   cat(paste("Input Ref Series:",Rseries,"\n"),file=ofileSout,append=T)
   if(Ns==0) {
     cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,"\n"),
         file=ofileIout)
-#   cat("PMT finds the series to be homogeneous!\n",
-#       file=ofileIout)
+    #   cat("PMT finds the series to be homogeneous!\n",
+    #       file=ofileIout)
     if(!GUI) {
       cat("PMT finds the series to be homogeneous!\n")
       return()
     }
     else {
       ErrorMSG<<-paste("PMT finds the series",Bseries,"to be homogeneous!\n",
-                 get("ErrorMSG",env=.GlobalEnv),"\n",sep="")
+                       get("ErrorMSG",env=.GlobalEnv),"\n",sep="")
       return(-1)
     }
   }
   else{
     cat(paste("The adj-diff. autocor is:",round(cor,4),"(",round(corl,4),
-        ",",round(corh,4),"p=",round(p.cor,4),")\n"), file=ofileSout,append=T)
+              ",",round(corh,4),"p=",round(p.cor,4),")\n"), file=ofileSout,append=T)
     cat(paste(Ns,"changepoints in Series", Bseries,"\n"),
         file=ofileIout)
   }
@@ -364,26 +364,26 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
               sprintf("%10.0f",IY0[Ic])," (",
               sprintf("%10.4f",probL),"-",
               sprintf("%10.4f",probU),")",
-	      sprintf("%6.3f",plev),
+              sprintf("%6.3f",plev),
               sprintf("%10.4f",PTx0)," (",
               sprintf("%10.4f",PTx95L),"-",
               sprintf("%10.4f",PTx95U),")\n",sep=""),
-	      file=ofileIout, append=TRUE)
+        file=ofileIout, append=TRUE)
     cat(paste("PMT : c=", sprintf("%4.0f",Ic),
-              "; (Time ", sprintf("%10.0f",IY0[Ic]), 
-	      "); Type=",sprintf("%4.0f",as.numeric(Id)),
-	      "; p=",sprintf("%10.4f",prob), 
-	      "(", sprintf("%10.4f",probL),
-	      "-", sprintf("%10.4f",probU),
-	      "); PTmax=", sprintf("%10.4f",PTx0),
-              "; CV95=", sprintf("%10.4f",PTx95), 
-	      "(",sprintf("%10.4f",PTx95L),
-	      "-",sprintf("%10.4f",PTx95U),
-	      "); Nseg=",sprintf("%4.0f",Nseg),"\n",sep=""),
-	      file=ofileSout,append=TRUE)
+              "; (Time ", sprintf("%10.0f",IY0[Ic]),
+              "); Type=",sprintf("%4.0f",as.numeric(Id)),
+              "; p=",sprintf("%10.4f",prob),
+              "(", sprintf("%10.4f",probL),
+              "-", sprintf("%10.4f",probU),
+              "); PTmax=", sprintf("%10.4f",PTx0),
+              "; CV95=", sprintf("%10.4f",PTx95),
+              "(",sprintf("%10.4f",PTx95L),
+              "-",sprintf("%10.4f",PTx95U),
+              "); Nseg=",sprintf("%4.0f",Nseg),"\n",sep=""),
+        file=ofileSout,append=TRUE)
   }
 
-# estimate delta and final output
+  # estimate delta and final output
   otmp<-Rphi(Y0,Ips,Ns)
   cor<-otmp$cor
   muDif<-rep(0,Ns+1)
@@ -400,10 +400,10 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   }
   Wo[1]<-Ro[1]
   Wo[2:N]<-Ro[2:N]-cor*Ro[1:(N-1)]*IY0flg[1:(N-1)]
-# write.table(cbind(IY0,round(oY0,4),round(omuDif,4),round(Wo,4)),
-#             file=ofileRout,col.names=F,row.names=F)
+  # write.table(cbind(IY0,round(oY0,4),round(omuDif,4),round(Wo,4)),
+  #             file=ofileRout,col.names=F,row.names=F)
 
-# transfer Ips(Base-Ref) to Ips(Base)
+  # transfer Ips(Base-Ref) to Ips(Base)
   Ips0<-Ips
   IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
   IYM<-bdata[,2]*100+bdata[,3]
@@ -441,7 +441,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   Aadj<-dtmp$Base  # de-seasonalize Badj
   Ipd<-c(N)
   dtmp<-LSmultipleRed(Aadj,Ti,Ipd)
-# muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
+  # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD<-dtmp$mu[1]
   betaD<-dtmp$trend
   betaDL<-dtmp$betaL
@@ -450,7 +450,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   corDL<-dtmp$corl
   corDU<-dtmp$corh
   p.trD<-dtmp$p.tr
-  
+
   dtmp<-rmCycle(bdata) # de-seasonalized Base series
   tbase<-dtmp$Base
   Ipd<-length(tbase)
@@ -463,20 +463,20 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   Ehat0<-mean(meanhat0)
 
   cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
-      "(",round(dtmp$betaL,6),",",round(dtmp$betaU,6),
-      ") (p=",round(dtmp$p.tr,4),
-      "); cor=",round(cor,3),"(", round(corL,3),",",
-      round(corU,3),")\n\n"),file=ofileSout,append=TRUE)
+            "(",round(dtmp$betaL,6),",",round(dtmp$betaU,6),
+            ") (p=",round(dtmp$p.tr,4),
+            "); cor=",round(cor,3),"(", round(corL,3),",",
+            round(corU,3),")\n\n"),file=ofileSout,append=TRUE)
   cat("Step-sizes estimated from difference series:\n",
       file=ofileSout,append=TRUE)
   cat(round(muDif[2:(Ns+1)]-muDif[1:Ns],4),
       file=ofileSout,append=TRUE,fill=80)
   cat(paste("\n after such adjustments, the base series trend=",
             round(betaD,6),"(",round(betaDL,6),",",round(betaDU,6),
-	    ") (p=",round(p.trD,4),"); cor=",
-	    round(corD,3),"(",round(corDL,3),
-	    ",",round(corDU,3),")\n\n"),file=ofileSout,append=TRUE)
-  
+            ") (p=",round(p.trD,4),"); cor=",
+            round(corD,3),"(",round(corDL,3),
+            ",",round(corDU,3),")\n\n"),file=ofileSout,append=TRUE)
+
   otmp<-rmCycle(bdata)
   EB<-rep(0,length(IY1))
   for(i in 1:length(IY1))
@@ -500,7 +500,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       Delta<- sig[i+1]-sig[Iseg.adj+1]
       Base[I0:I2]<-Base[I0:I2]+EB00[I0:I2]-Delta
     }
-# re-estimate seasonal cycle using adjusted series:
+    # re-estimate seasonal cycle using adjusted series:
     EB1<-rep(0,length(inds))
     for(i in 1:length(inds))
       EB1[i]<-mean(Base[IYM==inds[i]],na.rm=T)
@@ -523,17 +523,17 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   Ro[2:N]<-Ro[2:N]-corout[1]*Ro[1:(N-1)]
 
   if(Ns>0){
-#   Rb<-Base-otmp$trend*Ti+EB
-#   QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
+    #   Rb<-Base-otmp$trend*Ti+EB
+    #   QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
     QMout<-QMadjGaussian.wRef(bdata[,4],bdata[,4]-bdata[,5],Ips,Mq,Iseg.adj,Nadj,Nt,Ny4a)
     B<-QMout$PA
     cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
         file=ofileSout,append=T)
     cat(paste("\n Adjust to segment", Iseg.adj,": from",
-        if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-        "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
-#   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-#       append=T)
+              if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
+              "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
+    #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
+    #       append=T)
     if(QMout$Mq>1){
       oline<-paste('#Fcat: frequency category boundaries\n',
                    '#DP: Difference in the category means\n#',sep='')
@@ -547,14 +547,14 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
         if(i!=Iseg.adj)
-        cat(paste("Seg. ",i,": mean of QM-adjustments =",round(QMout$AdjM[i],4),
-            "\n",sep=""),file=ofileSout,append=T)
+          cat(paste("Seg. ",i,": mean of QM-adjustments =",round(QMout$AdjM[i],4),
+                    "\n",sep=""),file=ofileSout,append=T)
       }
     }
   }
   else B<-Base
-# else B<-Base-otmp$trend*Ti+EB
-# B<-B+otmp$trend*Ti
+  # else B<-Base-otmp$trend*Ti+EB
+  # B<-B+otmp$trend*Ti
 
   ofileAout<-paste(output,"_UD.dat",sep="")
   ofilePdf<-paste(output,"_UD.pdf",sep="")
@@ -680,30 +680,30 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       ymax<-max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
       if(i!=Iseg.adj){
         np<-np+1
-        if(col==0) { 
+        if(col==0) {
           col<-2
-	  plot(osp[I1:I2,2],osp[I1:I2,3],xlim=c(0,1),ylim=c(ymin,ymax),
-	       type="l",lwd=1,col=col,xlab="Cumulative Frequency",
-	       ylab="QM Adjustment")
+          plot(osp[I1:I2,2],osp[I1:I2,3],xlim=c(0,1),ylim=c(ymin,ymax),
+               type="l",lwd=1,col=col,xlab="Cumulative Frequency",
+               ylab="QM Adjustment")
           title(cex.main=.9,main=paste("distribution of QM adjustments with Mq=",QMout$Mq),line=.5)
-	  icol<-2*np
-	  for(j in 1:QMout$Mq){
-	    lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-	          c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-	    if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-	          c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
-	  }
+          icol<-2*np
+          for(j in 1:QMout$Mq){
+            lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
+                  c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
+            if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
+                                      c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
+          }
         }
         else{
           col<-col+1
-	  lines(osp[I1:I2,2],osp[I1:I2,3],lwd=1,col=col)
-	  icol<-2*np
-	  for(j in 1:QMout$Mq){
-	    lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-	          c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-	    if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-	          c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
-	  }
+          lines(osp[I1:I2,2],osp[I1:I2,3],lwd=1,col=col)
+          icol<-2*np
+          for(j in 1:QMout$Mq){
+            lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
+                  c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
+            if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
+                                      c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
+          }
         }
         text(.15,ymax-np*(ymax-ymin)/(Ns*3),paste("Seg.",i))
         lines(c(.25,.30),rep(ymax-np*(ymax-ymin)/(Ns*3),2),lwd=2,col=col)
@@ -717,9 +717,9 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
       file=ofileSout,append=TRUE)
   cat(paste("#steps= ",Ns,"; trend=",round(sig[2],6),"(p=",
-      round(p.tro,4),"); cor=",
-      round(corout[1],4),"(",round(corout[2],4),",",round(corout[3],4),
-      ")  p=", round(corout[4],4), "\n"),
+            round(p.tro,4),"); cor=",
+            round(corout[1],4),"(",round(corout[2],4),",",round(corout[3],4),
+            ")  p=", round(corout[4],4), "\n"),
       file=ofileSout,append=TRUE)
   oout<-NULL
   for(i in 1:Ns){
@@ -731,7 +731,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   odata<-matrix(NA,dim(ori.bdata)[1],12)
   odata[owflg,1]<-Ti
   odata[,2]<-ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
-# odata[owflg,3]<-round(Base+EB,4)
+  # odata[owflg,3]<-round(Base+EB,4)
   odata[,3]<-ori.bdata[,4]
   odata[owflg,4]<-round(meanhatD,4)
   odata[owflg,5]<-round(adjB,4)
@@ -740,7 +740,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   odata[owflg,8]<-round(Base,4)
   odata[owflg,9]<-round(otmp$meanhat,4)
   odata[owflg,10]<-round(otmp$meanhat+EB,4)
-# odata[owflg,11]<-round(Ro,4)
+  # odata[owflg,11]<-round(Ro,4)
   if(Ns>0) if(Mq>1) odata[owflg,11]<-round(B,4)
   odata[owflg,12]<-round(meanhat0,4)
 
@@ -753,7 +753,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       Ips.1<-rep(NA,Ns+1)
       for(i in 1:Ns) Ips.1[i]<-c(1:length(IY1))[IY1==Ips.ymd[i]]
       Ips.1[Ns+1]<-length(IY1)
-#     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
+      #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
       Imd2<-tdata[,2]*100+tdata[,3]
       Ids.leap<-c(1:length(Imd2))[Imd2==229]
       Nl<-length(Ids.leap)
