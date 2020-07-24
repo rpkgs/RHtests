@@ -7,7 +7,7 @@ Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 # profvis::profvis({
 {
   output  =  "OUTPUT/example02/example02"
-  check_dir(output)
+  check_dir(dirname(output))
 
   U  <- FindU.wRef(Bseries, Rseries, output)
   UD <- FindUD.wRef(Bseries, Rseries, U$turningPoint, output)

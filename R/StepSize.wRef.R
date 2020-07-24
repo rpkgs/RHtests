@@ -1,5 +1,6 @@
-StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99",
-                        p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0)
+StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99", 
+  p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
+  is_plot = TRUE)
 {
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
   if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
@@ -119,17 +120,7 @@ StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99"
         else if(PTx0>=PTx95L&PTx0<PTx95U) Idc<-"?   "
         else if(PTx0>=PTx95U) Idc<-"Yes "
       }
-      # cat(paste(sprintf("%1.0f",Id)," ",
-      #           sprintf("%-4.4s",Idc),
-      #           sprintf("%10.0f",IY0[Ic])," (",
-      #           sprintf("%10.4f",probL),"-",
-      #           sprintf("%10.4f",probU),")",
-      #           sprintf("%6.3f",plev),
-      #           sprintf("%10.4f",PTx0)," (",
-      #           sprintf("%10.4f",PTx95L),"-",
-      #           sprintf("%10.4f",PTx95U),")\n",sep=""),
-      #     file=ofileIout,
-      #     append=TRUE)
+
       cat(paste("PMT : c=", sprintf("%4.0f",Ic),
                 "; (Time ", sprintf("%10.0f",IY0[Ic]),
                 "); Type= ",sprintf("%4.0f",Id),
@@ -356,9 +347,12 @@ StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99"
     meanhatD <- EPB + muD + betaD * Ti
   }
 
-  plot_StepSize.ref(output, Base, EB, EB1, B,
-                    oY0, omuDif, otmp, meanhatD,
-                    QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj)
+  if (is_plot)
+    plot_StepSize.ref(
+      output, Base, EB, EB1, B,
+      oY0, omuDif, otmp, meanhatD,
+      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
+    )
 
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
       file=ofileSout,append=TRUE)
@@ -446,5 +440,6 @@ StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99"
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("StepSize.wRef finished successfully...\n")
-
-
+    list(fit = odata, turningPoint = d_TP)
+  }
+}

@@ -1,17 +1,29 @@
-plot_StepSize.ref <- function(output, Base, EB, EB1, B, 
-  oY0, omuDif, otmp, meanhatD, 
+
+plot_FindU.ref <- function(output, Base, EB, EB1, B, 
+  oY0, omuDif, otmp, meanhatD,
   QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, ...)
 {
-  pdf(file = paste0(output, "_F.pdf"), onefile = TRUE, paper = "letter")
+  N = length(Base)
+
+  ofilePdf  <- paste(output,"_U.pdf",sep="")
+  file.create(ofilePdf)
+
+  pdf(file=ofilePdf,onefile=T,paper='letter')
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
-  on.exit({ par(op); dev.off() })
+  par(mfrow=c(4,1))
+  par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
 
-  par(mfrow=c(4, 1))
-  par(mar=c(3,4,3,2)+.1,mgp=c(1,.5,0),cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
+  uyrs<-unique(floor(ori.bdata[,1]/5))*5
+  labels<-NULL
+  ats<-NULL
+  for(i in 1:length(uyrs)){
+    if(!is.na(match(uyrs[i],ori.bdata[,1]))){
+      labels<-c(labels,uyrs[i])
+      ats<-c(ats,match(uyrs[i],ori.bdata[,1]))
+    }
+  }
 
-  uyrs   <- unique(floor(ori.bdata$year / 10)) * 10 # decades
-  ats    <- match(uyrs, ori.bdata$year) %>% rm_empty()
-  labels <- ori.bdata$year[ats]
+  IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
 
   IYori <- ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
   rtmp  <- cbind(IY0,oY0,omuDif)
@@ -20,7 +32,7 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
 
   plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
        ylim=c(min(oY0),max(oY0)),
-       xaxt="n",col="black",lwd=0.5,
+       xaxt="n",col="black",lwd=.5,
        main="a. Base-minus-reference series")
   axis(side=1,at=ats,labels=labels)
 
@@ -30,7 +42,7 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
   pdata[owflg]<-Base
   plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
        ylim=c(min(Base,otmp$meanhat),max(Base,otmp$meanhat)),
-       xaxt="n",col="black",lwd=0.5,
+       xaxt="n",col="black",lwd=.5,
        main="b. De-seasonalized base series")
   axis(side=1,at=ats,labels=labels)
   pdata[owflg]<-otmp$meanhat
@@ -39,7 +51,7 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
   pdata[owflg]<-Base+EB
   plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
        ylim=c(min(Base+EB),max(Base+EB)),
-       xaxt="n",col="black",lwd=0.5,
+       xaxt="n",col="black",lwd=.5,
        main="c. Base series")
   axis(side=1,at=ats,labels=labels)
   pdata[owflg]<-otmp$meanhat+mean(EB1)
@@ -51,7 +63,8 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
   if(abs(yrr-max(Base+EB))<abs(yrr-min(Base+EB))) {
     yrr1<-min(Base+EB)+.2*(max(Base+EB)-min(Base+EB))
     yrr2<-min(Base+EB)+.05*(max(Base+EB)-min(Base+EB))
-  } else {
+  }
+  else {
     yrr1<-max(Base+EB)-.05*(max(Base+EB)-min(Base+EB))
     yrr2<-max(Base+EB)-.2*(max(Base+EB)-min(Base+EB))
   }
@@ -61,11 +74,11 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
   pdata[owflg]<-adj
   plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
        ylim=c(min(c(adj,B)),max(c(adj,B))),
-       xaxt="n",col="black",lwd=0.5,
+       xaxt="n",col="black",lwd=.5,
        main="d. Mean-adjusted base series")
   axis(side=1,at=ats,labels=labels)
   pdata[owflg]<-adjB
-  lines(1:dim(ori.bdata)[1],pdata,col="red")
+  lines(1:dim(ori.bdata)[1],pdata,col="red",lwd=.5)
 
   xr<-dim(ori.bdata)[1]*.1; yrr<-mean(adj[1:xr])
   if(abs(yrr-max(c(adj,B)))<abs(yrr-min(c(adj,B)))) {
@@ -83,7 +96,7 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
     pdata[owflg]<-B
     plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
          ylim=c(min(c(adj,B)),max(c(adj,B))),
-         xaxt="n",col="black",lwd=0.5,
+         xaxt="n",col="black",lwd=.5,
          main="e. QM-adjusted base series")
     axis(side=1,at=ats,labels=labels)
   }
@@ -133,4 +146,7 @@ plot_StepSize.ref <- function(output, Base, EB, EB1, B,
       else np<-np+1
     }
   }
+
+  par(op)
+  dev.off()
 }

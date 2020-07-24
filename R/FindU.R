@@ -649,8 +649,3 @@ plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
     }
 
 }
-
-plot2 <- function(at, labels, ...) {
-    plot(..., xaxt = "n")
-    axis(side = 1, at = at, labels = labels)
-}

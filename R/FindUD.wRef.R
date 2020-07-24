@@ -1,5 +1,6 @@
 FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
-  p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0)
+  p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
+  is_plot = TRUE)
 {
   ErrorMSG<-NA
   assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
@@ -576,9 +577,12 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
     meanhatD <- EEBd + muD + betaD * Ti
   }
 
-  plot_FindU.ref(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD, betaD,
-                           oY0, omuDif, otmp, meanhatD,
-                           QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj)
+  if (is_plot)
+    plot_FindUD.ref(
+      output, Base, EB, EB1, B,
+      oY0, omuDif, otmp, meanhatD,
+      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
+    )
   
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
       file=ofileSout,append=TRUE)
@@ -652,6 +656,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
   }
 
   odata %<>% set_colnames(fitdata_varnames_ref) %>% data.table()
+  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
   write.table(odata, paste0(output, "_UD.dat"), 
     col.names=TRUE, row.names=F,na=MissingValueCode)
 
@@ -659,7 +664,6 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("FindUD.wRef finished successfully...\n")
-    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
     list(fit = odata, turningPoint = d_TP)
   }
 }

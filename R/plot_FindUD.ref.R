@@ -1,6 +1,6 @@
-plot_FindU.ref <- function(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD, betaD,
-                           oY0, omuDif, otmp, meanhatD,
-                           QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, ...)
+plot_FindUD.ref <- function(output, Base, EB, EB1, B,
+    oY0, omuDif, otmp, meanhatD,
+    QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, ...)
 {
      pdf(file = paste0(output, "_UD.pdf"), onefile = T, paper = "letter")
      op <- par(no.readonly = TRUE) # the whole list of settable par's.
@@ -170,5 +170,4 @@ plot_FindU.ref <- function(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD
              }
          }
      }
-
 }
