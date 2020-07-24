@@ -249,17 +249,10 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   file.create(ofileSout)
   cat(paste("Input Base Series:",Bseries,"\n"),file=ofileSout)
   cat(paste("Input Ref Series:",Rseries,"\n"),file=ofileSout,append=T)
-  if(Ns==0) {
-    cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,
-              paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
-                    sprintf("%10.0f",19000101),")",sep=""),"\n"),file=ofileIout)
-    cat("PMT finds no Type-1 changepoints in the series!\n")
-  } else{
-    cat(paste("The adj-diff. autocor is:",round(cor,4),"(",round(corl,4),
-              ",",round(corh,4),"p=",round(p.cor,4),")\n"), file=ofileSout,append=T)
-    cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,"\n"),
-        file=ofileIout,append=T)
-    for(i in 1:Ns){
+  
+  d_TP <- list()
+  if (Ns > 0) {
+    for(i in 1:Ns) {
       I0<- if(i==1) 0 else Ips[i-1]
       Ic<-Ips[i]
       I3<-Ips[i+1]
@@ -280,17 +273,6 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
       else if(otmp$PTk>=PTx95l&otmp$PTk<PTx95h) Idc<-"?   "
       else if(otmp$PTk>=PTx95h) Idc<-"Yes "
       #     }
-      cat(paste(sprintf("%1.0f",1)," ",
-                sprintf("%-4.4s",Idc),
-                sprintf("%10.0f", IY0[Ic])," (",
-                sprintf("%6.4f",probL),"-",
-                sprintf("%6.4f",probU),")",
-                sprintf("%6.3f",plev),
-                sprintf("%10.4f",otmp$PTk)," (",
-                sprintf("%10.4f",PTx95l),"-",
-                sprintf("%10.4f",PTx95h),")\n",sep=""),
-          file=ofileIout,
-          append=TRUE)
       cat(paste("PMT : c=", sprintf("%4.0f",Ic),
                 "; (Time ", sprintf("%10.0f",IY0[Ic]),
                 "); Type= 1; p=",sprintf("%10.4f",probW),"(",
@@ -301,27 +283,44 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
                 "(", sprintf("%10.4f",PTx95l),
                 "-", sprintf("%10.4f",PTx95h),
                 "); Nseg=", sprintf("%4.0f",Nseg),"\n",sep=""),
-          file=ofileSout,append=TRUE)
+          file=ofileSout, append=TRUE)
+      d_TP[[i]] <- data.table(kind = 1, Idc, date = IY0[Ic],
+                probL, probU, plev, PFx = otmp$PTk, PFx95l = PTx95l, PFx95h = PTx95h)
     }
   }
 
+  if(Ns==0) {
+    cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,
+              paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
+                    sprintf("%10.0f",19000101),")",sep=""),"\n"),file=ofileIout)
+    cat("PMT finds no Type-1 changepoints in the series!\n")
+  } else{
+    cat(paste("The adj-diff. autocor is:",round(cor,4),"(",round(corl,4),
+              ",",round(corh,4),"p=",round(p.cor,4),")\n"), file=ofileSout,append=T)
+    cat(paste(Ns,"changepoints in Series", Bseries,",",Rseries,"\n"),
+        file=ofileIout,append=T)
+  }
+  d_TP %<>% do.call(rbind, .)
+  d_TP[, 4:9] %<>% lapply(round, digits = 4)
+  fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
+
   # estimate delta from Y0 (Base-Ref)
-  otmp<-Rphi(Y0,Ips,Ns)
-  cor<-otmp$cor
-  muDif<-rep(0,Ns+1)
-  Ro<-Y0
-  Wo<-Y0
-  omuDif<-Y0
-  oY0<-Y0
+  otmp   <- Rphi(Y0,Ips,Ns)
+  cor    <- otmp$cor
+  muDif  <- rep(0,Ns+1)
+  Ro     <- Y0
+  Wo     <- Y0
+  omuDif <- Y0
+  oY0    <- Y0
   for(i in 1:(Ns+1)){
-    I0<- if(i==1) 1 else Ips[i-1]+1
-    I2<- if(i>Ns) length(Y0) else Ips[i]
+    I0 <- if(i==1) 1 else Ips[i-1]+1
+    I2 <- if(i>Ns) length(Y0) else Ips[i]
     muDif[i]<-mean(Y0[I0:I2])
     omuDif[I0:I2]<-muDif[i]
     Ro[I0:I2]<-Y0[I0:I2]-muDif[i]
   }
-  Wo[1]<-Ro[1]
-  Wo[2:N]<-Ro[2:N]-cor*Ro[1:(N-1)]*IY0flg[1:(N-1)] # use IY0flg to identify
+  Wo[1]   <- Ro[1]
+  Wo[2:N] <- Ro[2:N]-cor*Ro[1:(N-1)]*IY0flg[1:(N-1)] # use IY0flg to identify
   # missing date, this is same as -- if missing Ro else Ro-cor*Ro[n-1]
   # write.table(cbind(IY0,round(oY0,4),round(omuDif,4),round(Wo,4)),
   #             file=ofileRout,col.names=F,row.names=F)
@@ -329,12 +328,12 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   # start fitting de-seasonalized Base series
 
   # transfer Ips(Base-Ref) to Ips(Base)
-  Ips0<-Ips
-  IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
-  IYM<-bdata[,2]*100+bdata[,3]
-  inds<-sort(unique(IYM))
-  rtmp<-cbind(1:length(IY1),IY1)
-  Ips<-merge(IY0[Ips0],rtmp,by.x=1,by.y="IY1")[,2]
+  Ips0 <- Ips
+  IY1  <- bdata[,1]*10000+bdata[,2]*100+bdata[,3]
+  IYM  <- bdata[,2]*100+bdata[,3]
+  inds <- sort(unique(IYM))
+  rtmp <- cbind(1:length(IY1),IY1)
+  Ips  <- merge(IY0[Ips0],rtmp,by.x=1,by.y="IY1")[,2]
   Ips[Ns+1]<-length(IY1)
 
   Ti<-TiB
@@ -342,9 +341,9 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   IY0flg<-IYBflg
   assign("IY0flg",IY0flg,envir=.GlobalEnv)
 
-  dtmp<-rmCycle(bdata)
-  adjBase<-dtmp$Base
-  EB<-rep(0,length(IY1))
+  dtmp    <- rmCycle(bdata)
+  adjBase <- dtmp$Base
+  EB      <- rep(0,length(IY1))
   for(i in 1:length(IY1))
     EB[i]<-dtmp$EB[inds==IYM[i]]
   N<-length(adjBase)
@@ -354,35 +353,35 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
     DeltaD<-muDif[i]-muDif[Iseg.adj]
     adjBase[I0:I2]<-adjBase[I0:I2]+EB[I0:I2]-DeltaD # adjBase is base series adj to Iseg.adj
   }
-  EPBa<-mean(adjBase)
+  EPBa  <- mean(adjBase)
 
-  Ydata<-cbind(bdata[,1:3],adjBase)
-  dtmp<-rmCycle(Ydata)  # adjusted and de-seasonalized Base series
-  EB0<-dtmp$EB
-  EEBd<-mean(EB0)
-  EB<-rep(0,length(IY1))
+  Ydata <- cbind(bdata[,1:3],adjBase)
+  dtmp  <- rmCycle(Ydata)  # adjusted and de-seasonalized Base series
+  EB0   <- dtmp$EB
+  EEBd  <- mean(EB0)
+  EB    <- rep(0,length(IY1))
   for(i in 1:length(IY1))
     EB[i]<-dtmp$EB[inds==IYM[i]]
-  Aadj<-dtmp$Base  # de-seasonalize Badj
-  Ipd<-c(N)
-  dtmp<-LSmultipleRed(Aadj,Ti,Ipd)
-  # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
-  muD<-dtmp$mu[1]
-  betaD<-dtmp$trend
-  betaDL<-dtmp$betaL
-  betaDU<-dtmp$betaU
-  corD<-dtmp$cor
-  corDL<-dtmp$corl
-  corDU<-dtmp$corh
-  p.trD<-dtmp$p.tr
+  Aadj   <- dtmp$Base  # de-seasonalize Badj
+  Ipd    <- c(N)
+  dtmp   <- LSmultipleRed(Aadj,Ti,Ipd)
+  # muD  <- dtmp$mu[1]+EPBa-mean(bdata[,4])
+  muD    <- dtmp$mu[1]
+  betaD  <- dtmp$trend
+  betaDL <- dtmp$betaL
+  betaDU <- dtmp$betaU
+  corD   <- dtmp$cor
+  corDL  <- dtmp$corl
+  corDU  <- dtmp$corh
+  p.trD  <- dtmp$p.tr
 
-  dtmp<-rmCycle(bdata) # de-seasonalized Base series
-  tbase<-dtmp$Base
-  Ipd<-length(tbase)
-  dtmp<-LSmultipleRed(tbase,Ti,Ipd)
-  beta0<-dtmp$trend
-  meanhat0<-dtmp$meanhat
-  Ehat0<-mean(meanhat0)
+  dtmp     <- rmCycle(bdata) # de-seasonalized Base series
+  tbase    <- dtmp$Base
+  Ipd      <- length(tbase)
+  dtmp     <- LSmultipleRed(tbase,Ti,Ipd)
+  beta0    <- dtmp$trend
+  meanhat0 <- dtmp$meanhat
+  Ehat0    <- mean(meanhat0)
 
   cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
             "(",round(dtmp$betaL,6),",",round(dtmp$betaU,6),")",
@@ -408,15 +407,15 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   tt<-TRUE
   Niter<-0
   while(tt){
-    Niter<-Niter+1
-    EB00<-EB
-    otmp<-LSmultipleRed(Base,Ti,Ips)
-    meanhat<-otmp$meanhat
-    df<-(N-2-Nt-Ns)
-    p.cor<-pt(abs(otmp$cor)*sqrt(df/(1-otmp$cor^2)),df)
-    corout<-c(otmp$cor,otmp$corl,otmp$corh,p.cor)
-    sig<-otmp$sig
-    p.tro<-otmp$p.tr
+    Niter   <- Niter+1
+    EB00    <- EB
+    otmp    <- LSmultipleRed(Base,Ti,Ips)
+    meanhat <- otmp$meanhat
+    df      <- (N-2-Nt-Ns)
+    p.cor   <- pt(abs(otmp$cor)*sqrt(df/(1-otmp$cor^2)),df)
+    corout  <- c(otmp$cor,otmp$corl,otmp$corh,p.cor)
+    sig     <- otmp$sig
+    p.tro   <- otmp$p.tr
     for(i in 1:(Ns+1)){
       I0<- if(i==1) 1 else Ips[i-1]+1
       I2<- if(i>Ns) length(Base) else Ips[i]
@@ -430,9 +429,9 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
     for(i in 1:length(IY1))
       EB[i]<-EB1[inds==IYM[i]]
     for(i in 1:(Ns+1)){
-      I0<- if(i==1) 1 else Ips[i-1]+1
-      I2<- if(i>Ns) length(Base) else Ips[i]
-      Delta<- sig[i+1]-sig[Iseg.adj+1]
+      I0    <- if(i==1) 1 else Ips[i-1]+1
+      I2    <- if(i>Ns) length(Base) else Ips[i]
+      Delta <- sig[i+1]-sig[Iseg.adj+1]
       Base[I0:I2]<-Base[I0:I2]-EB[I0:I2]+Delta
     }
     VEB<-sqrt(var(EB1))
@@ -478,13 +477,121 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   # else B<-Base-otmp$trend*Ti+EB
   # B<-B+otmp$trend*Ti
 
-  ofileAout<-paste(output,"_U.dat",sep="")
-  ofilePdf<-paste(output,"_U.pdf",sep="")
-  file.create(ofileAout)
+  adj  <- Base+EB
+  adjB <- Base+EB
+  meanhatD<-rep(0,N)
+  if(Ns>0) for(i in 1:(Ns+1)){
+    I1 <- if(i==1) 1 else Ips[i-1]+1
+    I2 <- Ips[i]
+    ind = seq(I1, I2)
+    Delta  <- sig[Iseg.adj+1] - sig[i+1]
+    DeltaD <- muDif[Iseg.adj] - muDif[i]
+
+    adj[ind]      <- adj[ind] + Delta
+    adjB[ind]     <- adjB[ind] + DeltaD
+    meanhatD[ind] <- EEBd + muD + betaD*Ti[ind] - DeltaD
+  } else meanhatD <- EEBd+muD+betaD*Ti
+
+  plot_FindU.ref(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD, betaD, 
+    oY0, omuDif, otmp, meanhatD, 
+    QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj)
+
+  cat("Common trend TPR fit to the de-seasonalized Base series:\n",
+      file=ofileSout,append=TRUE)
+  cat(paste("#steps= ",Ns,"; trend=",round(sig[2],6),"(p=",
+            round(p.tro,4),"); cor=",
+            round(corout[1],4),"(",round(corout[2],4),",",round(corout[3],4),
+            ")  p=",round(corout[4],4),"\n"),
+      file=ofileSout,append=TRUE)
+  oout<-NULL
+  for(i in 1:Ns){
+    stepsize <- if(i==1) sig[i+2] else sig[i+2]-sig[i+1]
+    oout <- c(oout,stepsize)
+  }
+  cat(round(oout,4),file=ofileSout,append=TRUE,fill=80)
+
+  odata <- matrix(NA,dim(ori.bdata)[1],12) %>% set_colnames(fitdata_varnames_ref)
+  
+  odata[owflg,1]   <- Ti
+  odata[,2]        <- ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
+  # odata[owflg,3] <- round(Base+EB,4)
+  odata[,3]        <- ori.bdata[,4]
+  odata[owflg,4]   <- round(meanhatD,4)
+  odata[owflg,5]   <- round(adjB,4)
+  odata[owflg,6]   <- round(otmp$meanhat + mean(EB1),4)
+  odata[owflg,7]   <- round(adj,4)
+  odata[owflg,8]   <- round(Base,4)
+  odata[owflg,9]   <- round(otmp$meanhat,4)
+  odata[owflg,10]  <- round(otmp$meanhat+EB,4)
+  if(Ns>0) if(QMout$Mq>1) odata[owflg,11] <- round(B,4) # QM
+  odata[owflg,12]<-round(meanhat0,4) 
+
+  Imd1<-ori.bdata[,2]*100+ori.bdata[,3]
+  if(sum(is.na(ori.bdata[,4])==F&Imd1==229)>0){
+    if(Ns>0){
+      tdata   <- ori.bdata[is.na(ori.bdata[,4])==F,]
+      IY1     <- tdata[,1]*10000+tdata[,2]*100+tdata[,3]
+      Ips.ymd <- IY0[Ips]
+      Ips.1   <- rep(NA,Ns+1)
+      for(i in 1:Ns) Ips.1[i]<-c(1:length(IY1))[IY1==Ips.ymd[i]]
+      Ips.1[Ns+1]<-length(IY1)
+      #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
+      Imd2<-tdata[,2]*100+tdata[,3]
+      Ids.leap<-c(1:length(Imd2))[Imd2==229]
+      Nl  <- length(Ids.leap)
+      Rb  <- Base-otmp$trend*Ti+EB
+      Rb1 <- tdata[,4]; Rb1[-Ids.leap]<-Rb
+      Ti1 <- rep(NA,length(IY1)); Ti1[-Ids.leap]<-Ti
+      for(i in 1:length(Ids.leap)) {
+        Rb1[Ids.leap[i]] <- tdata[Ids.leap[i],4]+Rb1[Ids.leap[i]-1]-tdata[Ids.leap[i]-1,4]
+        Ti1[Ids.leap[i]] <- Ti1[Ids.leap[i]-1]
+      }
+      if(QMout$Mq>1){
+        B1      <- QMadjGaussian(Rb1,Ips.1,Mq,Iseg.adj,Nadj)$PA
+        B1      <- B1+otmp$trend*Ti1
+        B1.leap <- B1[Ids.leap]
+        odata[is.na(odata[,3])==F&Imd1==229,11]<-round(B1.leap,4)
+      }
+    }
+    else
+      odata[Imd1==229,11]<-odata[Imd1==229,3]
+    Ids.leapo<-c(1:dim(ori.bdata)[1])[is.na(ori.bdata[,4])==F&Imd1==229]
+    for(jth in 1:length(Ids.leapo)){
+      kth<-Ids.leapo[jth]
+      if(Ns>0){
+        k1th<-if(odata[kth-1,2]%in%IY0[Ips]) (kth+1) else (kth-1)
+      }
+      else k1th<-kth-1
+      for(pth in c(4,6,9,10,12)) odata[kth,pth]<-odata[k1th,pth]
+      for(pth in c(5,7,8)){delta1<-odata[k1th,3]-odata[k1th,pth]; odata[kth,pth]<-odata[kth,3]-delta1}
+    }
+  }
+
+  ofileAout <- paste(output,"_U.dat",sep="")
+  write.table(file=ofileAout,odata,col.names=TRUE,row.names=F,na=MissingValueCode)
+  if(GUI) return(0)
+  else{
+    file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
+    cat("FindU.wRef finished successfully...\n")
+    odata %<>% as.data.table()
+    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+    list(fit = odata, turningPoint = d_TP)
+  }
+}
+
+
+plot_FindU.ref <- function(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD, betaD,
+  oY0, omuDif, otmp, meanhatD, 
+  QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, ...)
+{
+  N = length(Base)
+
+  ofilePdf  <- paste(output,"_U.pdf",sep="")
   file.create(ofilePdf)
+
   pdf(file=ofilePdf,onefile=T,paper='letter')
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
-  par(mfrow=c(3,1))
+  par(mfrow=c(4,1))
   par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
 
   uyrs<-unique(floor(ori.bdata[,1]/5))*5
@@ -498,24 +605,11 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   }
 
   IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
-  adj<-Base+EB
-  adjB<-Base+EB
-  meanhatD<-rep(0,N)
-  if(Ns>0) for(i in 1:(Ns+1)){
-    I1<-if(i==1) 1 else Ips[i-1]+1
-    I2<-Ips[i]
-    Delta<-sig[Iseg.adj+1]-sig[i+1]
-    DeltaD<-muDif[Iseg.adj]-muDif[i]
-    adj[I1:I2]<-adj[I1:I2]+Delta
-    adjB[I1:I2]<-adjB[I1:I2]+DeltaD
-    meanhatD[I1:I2]<-EEBd+muD+betaD*Ti[I1:I2]-DeltaD
-  }
-  else meanhatD<-EEBd+muD+betaD*Ti
-
-  IYori<-ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
-  rtmp<-cbind(IY0,oY0,omuDif)
-  stmp<-merge(rtmp,t(t(IYori)),all.y=TRUE,by.x="IY0",by.y=1)
-  pdata<-stmp[,2]
+  
+  IYori <- ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
+  rtmp  <- cbind(IY0,oY0,omuDif)
+  stmp  <- merge(rtmp,t(t(IYori)),all.y=TRUE,by.x="IY0",by.y=1)
+  pdata <- stmp[,2]
 
   plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
        ylim=c(min(oY0),max(oY0)),
@@ -636,80 +730,4 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
 
   par(op)
   dev.off()
-  cat("Common trend TPR fit to the de-seasonalized Base series:\n",
-      file=ofileSout,append=TRUE)
-  cat(paste("#steps= ",Ns,"; trend=",round(sig[2],6),"(p=",
-            round(p.tro,4),"); cor=",
-            round(corout[1],4),"(",round(corout[2],4),",",round(corout[3],4),
-            ")  p=",round(corout[4],4),"\n"),
-      file=ofileSout,append=TRUE)
-  oout<-NULL
-  for(i in 1:Ns){
-    stepsize<-if(i==1) sig[i+2] else sig[i+2]-sig[i+1]
-    oout<-c(oout,stepsize)
-  }
-  cat(round(oout,4),file=ofileSout,append=TRUE,fill=80)
-
-  odata<-matrix(NA,dim(ori.bdata)[1],12)
-  odata[owflg,1]<-Ti
-  odata[,2]<-ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
-  # odata[owflg,3]<-round(Base+EB,4)
-  odata[,3]<-ori.bdata[,4]
-  odata[owflg,4]<-round(meanhatD,4)
-  odata[owflg,5]<-round(adjB,4)
-  odata[owflg,6]<-round(otmp$meanhat+mean(EB1),4)
-  odata[owflg,7]<-round(adj,4)
-  odata[owflg,8]<-round(Base,4)
-  odata[owflg,9]<-round(otmp$meanhat,4)
-  odata[owflg,10]<-round(otmp$meanhat+EB,4)
-  if(Ns>0) if(QMout$Mq>1) odata[owflg,11]<-round(B,4)
-  odata[owflg,12]<-round(meanhat0,4)
-
-  Imd1<-ori.bdata[,2]*100+ori.bdata[,3]
-  if(sum(is.na(ori.bdata[,4])==F&Imd1==229)>0){
-    if(Ns>0){
-      tdata<-ori.bdata[is.na(ori.bdata[,4])==F,]
-      IY1<-tdata[,1]*10000+tdata[,2]*100+tdata[,3]
-      Ips.ymd<-IY0[Ips]
-      Ips.1<-rep(NA,Ns+1)
-      for(i in 1:Ns) Ips.1[i]<-c(1:length(IY1))[IY1==Ips.ymd[i]]
-      Ips.1[Ns+1]<-length(IY1)
-      #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
-      Imd2<-tdata[,2]*100+tdata[,3]
-      Ids.leap<-c(1:length(Imd2))[Imd2==229]
-      Nl<-length(Ids.leap)
-      Rb<-Base-otmp$trend*Ti+EB
-      Rb1<-tdata[,4]; Rb1[-Ids.leap]<-Rb
-      Ti1<-rep(NA,length(IY1)); Ti1[-Ids.leap]<-Ti
-      for(i in 1:length(Ids.leap)) {
-        Rb1[Ids.leap[i]]<-tdata[Ids.leap[i],4]+Rb1[Ids.leap[i]-1]-tdata[Ids.leap[i]-1,4]
-        Ti1[Ids.leap[i]]<-Ti1[Ids.leap[i]-1]
-      }
-      if(QMout$Mq>1){
-        B1<-QMadjGaussian(Rb1,Ips.1,Mq,Iseg.adj,Nadj)$PA
-        B1<-B1+otmp$trend*Ti1
-        B1.leap<-B1[Ids.leap]
-        odata[is.na(odata[,3])==F&Imd1==229,11]<-round(B1.leap,4)
-      }
-    }
-    else
-      odata[Imd1==229,11]<-odata[Imd1==229,3]
-    Ids.leapo<-c(1:dim(ori.bdata)[1])[is.na(ori.bdata[,4])==F&Imd1==229]
-    for(jth in 1:length(Ids.leapo)){
-      kth<-Ids.leapo[jth]
-      if(Ns>0){
-        k1th<-if(odata[kth-1,2]%in%IY0[Ips]) (kth+1) else (kth-1)
-      }
-      else k1th<-kth-1
-      for(pth in c(4,6,9,10,12)) odata[kth,pth]<-odata[k1th,pth]
-      for(pth in c(5,7,8)){delta1<-odata[k1th,3]-odata[k1th,pth]; odata[kth,pth]<-odata[kth,3]-delta1}
-    }
-  }
-
-  write.table(file=ofileAout,odata,col.names=F,row.names=F,na=MissingValueCode)
-  if(GUI) return(0)
-  else{
-    file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-    cat("FindU.wRef finished successfully...\n")
-  }
 }

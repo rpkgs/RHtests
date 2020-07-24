@@ -123,39 +123,39 @@ Rphi<-function(Y0,Ips,Ns){
 # output: cor -- autocorrelation; W -- prewhitenning vector of Y0
 #  corl -- lower bound of cor; corh -- upper bound of cor
 # if(Ns!=length(Ips)-1) stop("input data length error in Rphi")
-  Y<-Y0
-  N<-length(Y0)
-  mu<-rep(0,Ns+1)
+  Y  <- Y0
+  N  <- length(Y0)
+  mu <- rep(0,Ns+1)
   for(i in 0:Ns){
-    I1<- if(i==0) 1 else Ips[i]+1
-    I2<-Ips[i+1]
+    I1 <- if(i==0) 1 else Ips[i]+1
+    I2 <- Ips[i+1]
     mu[i+1]<-mean(Y0[I1:I2])
     Y[I1:I2]<-Y0[I1:I2]-mu[i+1]
   }
-  cor<-autocorlh(Y,IY0flg)
-  W1<-Y
-  W2<-Y
-  W3<-Y
+  cor <- autocorlh(Y,IY0flg)
+  W1  <- Y
+  W2  <- Y
+  W3  <- Y
   W1[2:N]<-Y[2:N]-Y[1:(N-1)]*cor$cor
   W2[2:N]<-Y[2:N]-Y[1:(N-1)]*cor$corl
   W3[2:N]<-Y[2:N]-Y[1:(N-1)]*cor$corh
-  W<-IY0flg*W1+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
-  WL<-IY0flg*W2+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
-  WU<-IY0flg*W3+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
+  W  <- IY0flg*W1+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
+  WL <- IY0flg*W2+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
+  WU <- IY0flg*W3+(!IY0flg)*Y # if IY0flg==1 (continuous), W1; else Y
   for(i in 0:Ns){
-    I1<- if(i==0) 1 else Ips[i]+1
-    I2<-Ips[i+1]
+    I1 <- if(i==0) 1 else Ips[i]+1
+    I2 <- Ips[i+1]
     W[I1:I2]<-W[I1:I2]+mu[i+1]
     WL[I1:I2]<-WL[I1:I2]+mu[i+1]
     WU[I1:I2]<-WU[I1:I2]+mu[i+1]
   }
   oout<-list()
-  oout$cor<-cor$cor
-  oout$corl<-cor$corl
-  oout$corh<-cor$corh
-  oout$W<-W
-  oout$WL<-WL
-  oout$WU<-WU
+  oout$cor  <- cor$cor
+  oout$corl <- cor$corl
+  oout$corh <- cor$corh
+  oout$W    <- W
+  oout$WL   <- WL
+  oout$WU   <- WU
   return(oout)
 }
 

@@ -470,21 +470,21 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
             Ic   <- Ips[i]
             I3   <- Ips[i+1]
             Nseg <- I3-I1+1
-            PFx95  <- getPFx95(cor,Nseg)
-            PFx95l <- getPFx95(corl,Nseg)
-            PFx95h <- getPFx95(corh,Nseg)
-            SSEf.Iseg<-sum(resi[I1:I3]^2)
-            Ips1<-Ips[-i]
-            otmp1<-LSmultiple(Y1,Ti,Ips1)
-            SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
-            Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
-            Pk1<-Pk.PMFT(Nseg)
-            PFx<-Fx*Pk1[Ic-I1+1]
+            PFx95     <- getPFx95(cor,Nseg)
+            PFx95l    <- getPFx95(corl,Nseg)
+            PFx95h    <- getPFx95(corh,Nseg)
+            SSEf.Iseg <- sum(resi[I1:I3]^2)
+            Ips1  <- Ips[-i]
+            otmp1 <- LSmultiple(Y1,Ti,Ips1)
+            SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
+            Fx        <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
+            Pk1       <- Pk.PMFT(Nseg)
+            PFx       <- Fx*Pk1[Ic-I1+1]
 
-            SSEf.Iseg<-sum(resiW[I1:I3]^2)
-            otmp1<-LSmultiple(W,Ti,Ips1)
-            SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
-            Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
+            SSEf.Iseg <- sum(resiW[I1:I3]^2)
+            otmp1     <- LSmultiple(W,Ti,Ips1)
+            SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
+            Fx        <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
             if(Fx>0) prob<-pf(Fx,1,Nseg-3)
             else{
                 Fx<-0

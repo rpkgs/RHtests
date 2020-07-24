@@ -119,29 +119,28 @@ QMadjGaussian<-function(P,Ips,Mq,Iseg.adj,Nadj){
 
 #' @rdname QMadjGaussian
 #' @export
-QMadjGaussian.wRef<-function(B,Dif,Ips,Mq,Iseg.adj,Nadj,Nt,Ny4a){
-  Ns<-length(Ips)-1
-  N<-length(B)
-  Nmin.Mq<- if(Nt<=12) 5 else 20
-
-  Nseg.mn<-N
+QMadjGaussian.wRef<-function(B, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
+  Ns      <- length(Ips)-1
+  N       <- length(B)
+  Nmin.Mq <- if(Nt<=12) 5 else 20
+  Nseg.mn <- N
 
   for(i in 1:(Ns+1)){
-    I1<-if(i==1) 1 else Ips[i-1]+1
-    I2<-Ips[i]
-    Nseg<-0
-    DD<-Dif[I1:I2]
-    Nseg<-sum(ifelse(is.na(DD), 0, 1))
-    if(Nseg<Nseg.mn) Nseg.mn<-Nseg
+    I1   <- if(i==1) 1 else Ips[i-1]+1
+    I2   <- Ips[i]
+    Nseg <- 0
+    DD   <- Dif[I1:I2]
+    Nseg <- sum(!is.na(DD))
+    if(Nseg < Nseg.mn) Nseg.mn<-Nseg
   }
 
-  if(Mq<0) { # not include equal
-    Mq<-min(floor(Nseg.mn/Nmin.Mq),100)
+  if( Mq < 0) { # not include equal
+    Mq <- min(floor(Nseg.mn/Nmin.Mq),100)
     #   if(Nt<=12) Mq<-min(floor(Nseg.mn/5),20)
   } else {
-    Mq1<-min(floor(Nseg.mn/Nmin.Mq),Mq)
+    Mq1 <- min(floor(Nseg.mn/Nmin.Mq),Mq)
     #   if(Nt<=12) Mq1<-min(floor(Nseg.mn/5),Mq)
-    Mq<-Mq1
+    Mq  <- Mq1
   }
   if(Mq>100) Mq<-100
   if(Mq==0) Mq<-1

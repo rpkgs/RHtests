@@ -8,3 +8,13 @@ fitdata_varnames_noref <-
     # "base_minus_annualC", "fit_of_base_minus_annualC",
     "QM_adjusted",              # 9
     "fit_of_deseason_base")     # 10
+
+# fitdata_varnames_ref <- 
+#     c("id", "date", "base", 
+#     "meanhatD", "adjB", "meanhat+EB1", "adj", "base",
+#     "meanhat", "meanhat+EB", "B", "meanhat0")
+fitdata_varnames_ref <- 
+    c("id", "date", "base", 
+    "meanhatD", "adjB", "meanhat+EB1", "adj", "base",
+    "meanhat", "meanhat+EB", "B", "meanhat0")
+  

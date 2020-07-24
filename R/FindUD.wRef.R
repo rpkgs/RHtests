@@ -1,4 +1,6 @@
-FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0){
+FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
+  p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0)
+{
   ErrorMSG<-NA
   assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
   Nmin<-5
@@ -18,11 +20,13 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   # readin PTmax table
   readPTtable(N,pkth)
   # readin Ips
-  itmp<-readLines(InCs)
+  TP = if (is.character(InCs)) fread(InCs) else InCs
+  Ns = nrow(TP) # number of changing points
+
   Pk0<-Pk.PMT(N)
   ofileIout<-paste(output,"_pCs.txt",sep="")
   file.create(ofileIout)
-  if(length(itmp)<2){ # no input changepoints
+  if(Ns == 0) { # no input changepoints
     Pk0<-Pk.PMT(N)
     oout<-PTK(Y0,Pk0)
     I0<-0
@@ -47,17 +51,19 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     Ids.ini<-Ids
   }
   else{
-    Ns<-length(itmp)-1
     Ips<-c(rep(0,Ns),N)
     Ids<-rep(0,Ns)
     for(i in 1:Ns){ # using YYYYMMDD as index, searching for the largest
       # date less or equal to given YYYYMMDD
-      ymdtmp<-as.numeric(substr(itmp[i+1],7,16))
+      # ymdtmp<-as.numeric(substr(itmp[i+1],7,16))
+      ymdtmp <- TP$date[i]
       it<-match(ymdtmp,IY0)
       if(!is.na(it)) Ips[i]<-it
       else Ips[i]<-max(c(1:N)[IY0<=ymdtmp])
-      Ids[i]<-as.numeric(substr(itmp[i+1],1,1))
+      # Ids[i]<-as.numeric(substr(itmp[i+1],1,1))
     }
+    Ids = TP$kind
+
     if(sum(is.na(Ips))>0|!identical(Ips,sort(Ips))){
       ErrorMSG<<-paste("FindUD.wRef: Ips read in from ",InCs,"error!\n",
                        get("ErrorMSG",env=.GlobalEnv),"\n")
@@ -297,8 +303,8 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   else if(Iadj==0)Iseg.adj<-Iseg.longest
   else Iseg.adj<-Iadj
 
-  ofileMout<-paste(output,"_mCs.txt",sep="")
-  ofileSout<-paste(output,"_UDstat.txt",sep="")
+  ofileMout <- paste(output,"_mCs.txt",sep="")
+  ofileSout <- paste(output,"_UDstat.txt",sep="")
   # ofileRout<-paste(output,"_Base_Ref.fitUD",sep="")
   file.create(ofileSout)
   # file.create(ofileRout)
@@ -325,25 +331,26 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     cat(paste(Ns,"changepoints in Series", Bseries,"\n"),
         file=ofileIout)
   }
+  d_TP <- list()
   for(i in 1:Ns){
-    Ic<-Ips[i]
-    Id<-Ids[i]
-    I0<-if(i==1) 0 else Ips[i-1]
-    I3<-Ips[i+1]
-    Nseg<-I3-I0
-    PTx95<-getPTx95(cor,Nseg)
-    PTx95L<-getPTx95(corl,Nseg)
-    PTx95U<-getPTx95(corh,Nseg)
+    Ic     <- Ips[i]
+    Id     <- Ids[i]
+    I0     <- if(i==1) 0 else Ips[i-1]
+    I3     <- Ips[i+1]
+    Nseg   <- I3-I0
+    PTx95  <- getPTx95(cor,Nseg)
+    PTx95L <- getPTx95(corl,Nseg)
+    PTx95U <- getPTx95(corh,Nseg)
 
-    Pk0<-Pk.PMT(Nseg)
-    otmp<-PTKIc(W[(I0+1):I3],Pk0,Ic-I0)
-    prob<-otmp$prob
-    otmp<-PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)
-    probL0<-otmp$prob
-    otmp<-PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)
-    probU0<-otmp$prob
-    probL<-min(probL0,probU0)
-    probU<-max(probL0,probU0)
+    Pk0    <- Pk.PMT(Nseg)
+    otmp   <- PTKIc(W[(I0+1):I3],Pk0,Ic-I0)
+    prob   <- otmp$prob
+    otmp   <- PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)
+    probL0 <- otmp$prob
+    otmp   <- PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)
+    probU0 <- otmp$prob
+    probL  <- min(probL0,probU0)
+    probU  <- max(probL0,probU0)
 
     otmp<-PTKIc(Y0[(I0+1):I3],Pk0,Ic-I0)
     PTx0<-otmp$PTk
@@ -359,16 +366,6 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
       else if(PTx0>=PTx95U) Idc<-"Yes "
     }
 
-    cat(paste(sprintf("%1.0f",as.numeric(Id))," ",
-              sprintf("%-4.4s",Idc),
-              sprintf("%10.0f",IY0[Ic])," (",
-              sprintf("%10.4f",probL),"-",
-              sprintf("%10.4f",probU),")",
-              sprintf("%6.3f",plev),
-              sprintf("%10.4f",PTx0)," (",
-              sprintf("%10.4f",PTx95L),"-",
-              sprintf("%10.4f",PTx95U),")\n",sep=""),
-        file=ofileIout, append=TRUE)
     cat(paste("PMT : c=", sprintf("%4.0f",Ic),
               "; (Time ", sprintf("%10.0f",IY0[Ic]),
               "); Type=",sprintf("%4.0f",as.numeric(Id)),
@@ -381,19 +378,24 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
               "-",sprintf("%10.4f",PTx95U),
               "); Nseg=",sprintf("%4.0f",Nseg),"\n",sep=""),
         file=ofileSout,append=TRUE)
+    d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic], 
+      probL, probU, plev, PFx = otmp$PTk, PFx95l = PTx95L, PFx95h = PTx95U)
   }
+  d_TP %<>% do.call(rbind, .)
+  d_TP[, 4:9] %<>% lapply(round, digits = 4)
+  fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
 
   # estimate delta and final output
-  otmp<-Rphi(Y0,Ips,Ns)
-  cor<-otmp$cor
-  muDif<-rep(0,Ns+1)
-  Ro<-Y0
-  Wo<-Y0
-  omuDif<-Y0
-  oY0<-Y0
+  otmp   <- Rphi(Y0,Ips,Ns)
+  cor    <- otmp$cor
+  muDif  <- rep(0,Ns+1)
+  Ro     <- Y0
+  Wo     <- Y0
+  omuDif <- Y0
+  oY0    <- Y0
   for(i in 1:(Ns+1)){
-    I0<- if(i==1) 1 else Ips[i-1]+1
-    I2<- if(i>Ns) length(Y0) else Ips[i]
+    I0 <- if(i==1) 1 else Ips[i-1]+1
+    I2 <- if(i>Ns) length(Y0) else Ips[i]
     muDif[i]<-mean(Y0[I0:I2])
     omuDif[I0:I2]<-muDif[i]
     Ro[I0:I2]<-Y0[I0:I2]-muDif[i]
@@ -404,12 +406,12 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   #             file=ofileRout,col.names=F,row.names=F)
 
   # transfer Ips(Base-Ref) to Ips(Base)
-  Ips0<-Ips
-  IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
-  IYM<-bdata[,2]*100+bdata[,3]
-  inds<-sort(unique(IYM))
-  rtmp<-cbind(1:length(IY1),IY1)
-  Ips<-merge(IY0[Ips0],rtmp,by.x=1,by.y="IY1",sort=T)[,2]
+  Ips0 <- Ips
+  IY1  <- bdata[,1]*10000+bdata[,2]*100+bdata[,3]
+  IYM  <- bdata[,2]*100+bdata[,3]
+  inds <- sort(unique(IYM))
+  rtmp <- cbind(1:length(IY1),IY1)
+  Ips  <- merge(IY0[Ips0],rtmp,by.x=1,by.y="IY1",sort=T)[,2]
   Ips[Ns+1]<-length(IY1)
 
   Ti<-TiB
@@ -556,164 +558,28 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   # else B<-Base-otmp$trend*Ti+EB
   # B<-B+otmp$trend*Ti
 
-  ofileAout<-paste(output,"_UD.dat",sep="")
-  ofilePdf<-paste(output,"_UD.pdf",sep="")
-  file.create(ofileAout)
-  file.create(ofilePdf)
-  pdf(file=ofilePdf,onefile=T,paper='letter')
-  op <- par(no.readonly = TRUE) # the whole list of settable par's.
-  par(mfrow=c(3,1))
-  par(mar=c(3,4,3,2)+.1,cex.main=0.8,cex.lab=0.8,cex.axis=.8,cex=.8)
-
-  uyrs<-unique(floor(ori.bdata[,1]/10))*10
-  labels<-NULL
-  ats<-NULL
-  for(i in 1:length(uyrs)){
-    if(!is.na(match(uyrs[i],ori.bdata[,1]))){
-      labels<-c(labels,uyrs[i])
-      ats<-c(ats,match(uyrs[i],ori.bdata[,1]))
+  IY1      <- bdata[,1]*10000+bdata[,2]*100+bdata[,3]
+  adj      <- Base+EB
+  adjB     <- Base+EB
+  meanhatD <- rep(0,N)
+  if (Ns > 0) {
+    for (i in 1:(Ns + 1)) {
+      I1     <- if (i == 1) 1 else Ips[i - 1] + 1
+      I2     <- Ips[i]
+      Delta  <- sig[Iseg.adj + 1] - sig[i + 1]
+      DeltaD <- muDif[Iseg.adj] - muDif[i]
+      adj[I1:I2] <- adj[I1:I2] + Delta
+      adjB[I1:I2] <- adjB[I1:I2] + DeltaD
+      meanhatD[I1:I2] <- EEBd + muD + betaD * Ti[I1:I2] - DeltaD
     }
+  } else {
+    meanhatD <- EEBd + muD + betaD * Ti
   }
 
-  IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
-  adj<-Base+EB
-  adjB<-Base+EB
-  meanhatD<-rep(0,N)
-  if(Ns>0) for(i in 1:(Ns+1)){
-    I1<-if(i==1) 1 else Ips[i-1]+1
-    I2<-Ips[i]
-    Delta<-sig[Iseg.adj+1]-sig[i+1]
-    DeltaD<-muDif[Iseg.adj]-muDif[i]
-    adj[I1:I2]<-adj[I1:I2]+Delta
-    adjB[I1:I2]<-adjB[I1:I2]+DeltaD
-    meanhatD[I1:I2]<-EEBd+muD+betaD*Ti[I1:I2]-DeltaD
-  }
-  else  meanhatD<-EEBd+muD+betaD*Ti
-
-  IYori<-ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
-  rtmp<-cbind(IY0,oY0,omuDif)
-  stmp<-merge(rtmp,t(t(IYori)),all.y=TRUE,by.x="IY0",by.y=1)
-  pdata<-stmp[,2]
-
-  plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
-       ylim=c(min(oY0),max(oY0)),
-       xaxt="n",col="black",lwd=.5,
-       main="a. Base-minus-reference series")
-  axis(side=1,at=ats,labels=labels)
-
-  pdata<-stmp[,3]
-  lines(1:dim(ori.bdata)[1],pdata,col="red")
-
-  pdata[owflg]<-Base
-  plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
-       ylim=c(min(Base),max(Base)),
-       xaxt="n",col="black",lwd=.5,
-       main="b. De-seasonalized base series")
-  axis(side=1,at=ats,labels=labels)
-  pdata[owflg]<-otmp$meanhat
-  lines(1:dim(ori.bdata)[1],pdata,col="red")
-
-  pdata[owflg]<-Base+EB
-  plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
-       ylim=c(min(Base+EB),max(Base+EB)),
-       xaxt="n",col="black",lwd=.5,
-       main="c. Base series")
-  axis(side=1,at=ats,labels=labels)
-  pdata[owflg]<-otmp$meanhat+mean(EB1)
-  lines(1:dim(ori.bdata)[1],pdata,col="red")
-  pdata[owflg]<-meanhatD
-  lines(1:dim(ori.bdata)[1],pdata,col="blue")
-
-  xr<-dim(ori.bdata)[1]*.1; yrr<-mean((Base+EB)[1:xr])
-  if(abs(yrr-max(Base+EB))<abs(yrr-min(Base+EB))) {
-    yrr1<-min(Base+EB)+.2*(max(Base+EB)-min(Base+EB))
-    yrr2<-min(Base+EB)+.05*(max(Base+EB)-min(Base+EB))
-  }
-  else {
-    yrr1<-max(Base+EB)-.05*(max(Base+EB)-min(Base+EB))
-    yrr2<-max(Base+EB)-.2*(max(Base+EB)-min(Base+EB))
-  }
-  text(2,yrr1,"Adjustments estimated from Base",adj=0,cex=.8); lines(dim(ori.bdata)[1]*c(.31,.33),rep(yrr1,2),col="red")
-  text(2,yrr2,"Adjustments estimated from Diff",adj=0,cex=.8); lines(dim(ori.bdata)[1]*c(.31,.33),rep(yrr2,2),col="blue")
-
-  pdata[owflg]<-adj
-  plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
-       ylim=c(min(c(adj,B)),max(c(adj,B))),
-       xaxt="n",col="black",lwd=.5,
-       main="d. Mean-adjusted base series")
-  axis(side=1,at=ats,labels=labels)
-  pdata[owflg]<-adjB
-  lines(1:dim(ori.bdata)[1],pdata,col="red")
-
-  xr<-dim(ori.bdata)[1]*.1; yrr<-mean(adj[1:xr])
-  if(abs(yrr-max(c(adj,B)))<abs(yrr-min(c(adj,B)))) {
-    yrr1<-min(c(adj,B))+.2*(max(c(adj,B))-min(c(adj,B)))
-    yrr2<-min(c(adj,B))+.05*(max(c(adj,B))-min(c(adj,B)))
-  }
-  else {
-    yrr1<-max(c(adj,B))-.05*(max(c(adj,B))-min(c(adj,B)))
-    yrr2<-max(c(adj,B))-.2*(max(c(adj,B))-min(c(adj,B)))
-  }
-  text(2,yrr1,"Adjustments estimated from Base",adj=0,cex=.8); lines(dim(ori.bdata)[1]*c(.31,.33),rep(yrr1,2),col="black")
-  text(2,yrr2,"Adjustments estimated from Diff",adj=0,cex=.8); lines(dim(ori.bdata)[1]*c(.31,.33),rep(yrr2,2),col="red")
-
-  if(Ns>0) if(QMout$Mq>1){
-    pdata[owflg]<-B
-    plot(1:dim(ori.bdata)[1],pdata,type="l",xlab="",ylab="",
-         ylim=c(min(c(adj,B)),max(c(adj,B))),
-         xaxt="n",col="black",lwd=.5,
-         main="e. QM-adjusted base series")
-    axis(side=1,at=ats,labels=labels)
-  }
-
-  # test plot
-  if(Ns>0) if(QMout$Mq>1){
-    par(mar=c(4,5,3,2)+.1,cex=.8,mfrow=c(2,2),mgp=c(1.2,.5,0))
-    col=0
-    np<-0
-    osp<-QMout$osp
-    osmean<-QMout$osmean
-    for(i in 1:(Ns+1)){
-      Fd<-.5/QMout$Mq
-      I1<-if(i==1) 1 else Ips[i-1]+1
-      I2<-Ips[i]
-      ymax<-max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
-      if(i!=Iseg.adj){
-        np<-np+1
-        if(col==0) {
-          col<-2
-          plot(osp[I1:I2,2],osp[I1:I2,3],xlim=c(0,1),ylim=c(ymin,ymax),
-               type="l",lwd=1,col=col,xlab="Cumulative Frequency",
-               ylab="QM Adjustment")
-          title(cex.main=.9,main=paste("distribution of QM adjustments with Mq=",QMout$Mq),line=.5)
-          icol<-2*np
-          for(j in 1:QMout$Mq){
-            lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-                  c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-            if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-                                      c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
-          }
-        }
-        else{
-          col<-col+1
-          lines(osp[I1:I2,2],osp[I1:I2,3],lwd=1,col=col)
-          icol<-2*np
-          for(j in 1:QMout$Mq){
-            lines(c(osmean[(j+1),icol]-Fd,osmean[(j+1),icol]+Fd),
-                  c(rep(osmean[(j+1),(icol+1)],2)),col=col,lty=2,lwd=.5)
-            if(j>=1&j<QMout$Mq) lines(rep(osmean[(j+1),icol]+Fd,2),
-                                      c(osmean[(j+1),(icol+1)],osmean[(j+2),(icol+1)]),col=col,lty=2,lwd=.5)
-          }
-        }
-        text(.15,ymax-np*(ymax-ymin)/(Ns*3),paste("Seg.",i))
-        lines(c(.25,.30),rep(ymax-np*(ymax-ymin)/(Ns*3),2),lwd=2,col=col)
-      }
-      else np<-np+1
-    }
-  }
-
-  par(op)
-  dev.off()
+  plot_FindU.ref(oout, output, Base, EB, EB1, B, sig, muDif, EEBd, muD, betaD,
+                           oY0, omuDif, otmp, meanhatD,
+                           QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj)
+  
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
       file=ofileSout,append=TRUE)
   cat(paste("#steps= ",Ns,"; trend=",round(sig[2],6),"(p=",
@@ -729,17 +595,17 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
   cat(round(oout,4),file=ofileSout,append=TRUE,fill=80)
 
   odata<-matrix(NA,dim(ori.bdata)[1],12)
-  odata[owflg,1]<-Ti
-  odata[,2]<-ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
-  # odata[owflg,3]<-round(Base+EB,4)
-  odata[,3]<-ori.bdata[,4]
-  odata[owflg,4]<-round(meanhatD,4)
-  odata[owflg,5]<-round(adjB,4)
-  odata[owflg,6]<-round(otmp$meanhat+mean(EB1),4)
-  odata[owflg,7]<-round(adj,4)
-  odata[owflg,8]<-round(Base,4)
-  odata[owflg,9]<-round(otmp$meanhat,4)
-  odata[owflg,10]<-round(otmp$meanhat+EB,4)
+  odata[owflg,1]   <- Ti
+  odata[,2]        <- ori.bdata[,1]*10000+ori.bdata[,2]*100+ori.bdata[,3]
+  # odata[owflg,3] <- round(Base+EB,4)
+  odata[,3]        <- ori.bdata[,4]
+  odata[owflg,4]   <- round(meanhatD,4)
+  odata[owflg,5]   <- round(adjB,4)
+  odata[owflg,6]   <- round(otmp$meanhat+mean(EB1),4)
+  odata[owflg,7]   <- round(adj,4)
+  odata[owflg,8]   <- round(Base,4)
+  odata[owflg,9]   <- round(otmp$meanhat,4)
+  odata[owflg,10]  <- round(otmp$meanhat+EB,4)
   # odata[owflg,11]<-round(Ro,4)
   if(Ns>0) if(Mq>1) odata[owflg,11]<-round(B,4)
   odata[owflg,12]<-round(meanhat0,4)
@@ -785,10 +651,15 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode,p.lev=0.95,Ia
     }
   }
 
-  write.table(file=ofileAout,odata,col.names=F,row.names=F,na=MissingValueCode)
+  odata %<>% set_colnames(fitdata_varnames_ref) %>% data.table()
+  write.table(odata, paste0(output, "_UD.dat"), 
+    col.names=TRUE, row.names=F,na=MissingValueCode)
+
   if(GUI) return(0)
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("FindUD.wRef finished successfully...\n")
+    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+    list(fit = odata, turningPoint = d_TP)
   }
 }
