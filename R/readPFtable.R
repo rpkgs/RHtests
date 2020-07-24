@@ -1,9 +1,14 @@
-readPFtable<-function(Nx, pkth=4, ...){
+readPFtable<-function(Nx, plev=0.95){
   # ,ifile="PFmax31red_Nmin10_CVs"
   # read in PTmax table, assign PTmax table as global variable;
   # phi -- vector for cor catalog -- as global variable
   # itmp <- matrix(scan(ifile,skip=2,quiet=T),ncol=6,byrow=T)
   # itmp <- read.table("PFtable.csv", header = FALSE) %>% as.matrix()
+  if (!plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
+    stop(paste0("invalid : input plev = ", plev, " !\n"))
+  }
+  pkth <- match(plev, c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999))
+
   itmp <- PFtable
   # itmp<-itmp[,c(1,2,2,2,3,4,5,6)] # temp, will remove later
   Nmax  <- max(itmp[,1])

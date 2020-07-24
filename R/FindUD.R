@@ -1,6 +1,6 @@
 #' @export
 FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
-    GUI=FALSE, p.lev=0.95, Iadj=10000,Mq=10,Ny4a=0, is_plot = FALSE)
+    GUI=FALSE, plev=0.95, Iadj=10000,Mq=10,Ny4a=0, is_plot = FALSE)
 {
     if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
 
@@ -10,19 +10,10 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     flog <- paste(output,".log",sep="")
     Nmin <- 10
     if(Ny4a>0&Ny4a<=5) Ny4a<-5
-    if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-        ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
-                         get("ErrorMSG",env=.GlobalEnv),"\n")
-        if(!GUI) cat(ErrorMSG)
-        return(-1)
-    }
-    plev<-p.lev
-    pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
+    
     assign("Nmin",Nmin,envir=.GlobalEnv)
-
     N <- length(Y0); Nadj <- Ny4a*Nt
-    readPFtable(N, pkth)
-
+    
     # change InCs
     TP = if (is.character(InCs)) fread(InCs) else InCs
     Ns = nrow(TP) # number of changing points

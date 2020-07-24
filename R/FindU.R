@@ -12,8 +12,8 @@
 #' @param output prefix of the outputs
 #' @param MissingValueCode string, missing value code
 #' @param GUI boolean
-#' @param p.lev p.lev is the nominal level of confidence; (1 - p.lev) is the
-#' nominal level of significance, choose one of the following 6 p.lev values:
+#' @param plev plev is the nominal level of confidence; (1 - plev) is the
+#' nominal level of significance, choose one of the following 6 plev values:
 #' 0.75, 0.80, 0.90, 0.95, 0.99, 0.9999
 #' @param Iadj If Iadj = 0, the data series is adjusted to the longest segment;
 #' otherwise the data series is adjusted to the chosen segment Iadj (if the
@@ -65,7 +65,7 @@
 #' @import foreach
 #' @export
 FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-999.99",
-	GUI=FALSE, p.lev=0.95,
+	GUI=FALSE, plev=0.95,
 	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
 {
     if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
@@ -74,14 +74,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
     Nmin <- 10
     if(Ny4a>0&Ny4a<=5) Ny4a<-5
-    if(!p.lev %in% c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-        ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
-                         get("ErrorMSG",env=.GlobalEnv),"\n")
-        if(!GUI) cat(ErrorMSG)
-        return(-1)
-    }
-    plev<-p.lev
-    pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
+
     assign("Nmin",Nmin,envir=.GlobalEnv)
     # if(is.null(data)){
     #     ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
@@ -104,7 +97,8 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     N <- length(Y0); Nadj <- Ny4a*Nt
     cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
     cat(paste("Input data filename:", InSeries, "N=",N, "\n"),file=ofileSout,append=T)
-    readPFtable(N, pkth)
+    readPFtable(N, plev)
+
     Pk0  <- Pk.PMFT(N)
     oout <- rmCycle(itable)
     Y1   <- oout$Base

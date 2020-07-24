@@ -1,7 +1,7 @@
 readPTtable<-function(Nx, plev)
 {
   if (!plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
-    stop(paste0("FindU: input plev = ", plev, " error!\n"))
+    stop(paste0("invalid : input plev = ", plev, " !\n"))
   }
   pkth <- match(plev, c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999))
 

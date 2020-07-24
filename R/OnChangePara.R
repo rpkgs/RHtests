@@ -11,7 +11,7 @@ Chg.Para<-function(){
 
   textPlev<<-tclVar(paste(PlevStr))
   Entry.Plev<-tkentry(tt,width="10",textvariable=textPlev)
-  tkgrid(tklabel(tt,text="Please enter the nominal conf. level p.lev value."),
+  tkgrid(tklabel(tt,text="Please enter the nominal conf. level plev value."),
          sticky="w",column=1,row=2)
   tkgrid(Entry.Plev,column=2,row=2)
 
@@ -46,7 +46,7 @@ Chg.Para<-function(){
 
     PlevStr<-tclvalue(textPlev)
     if(!as.numeric(PlevStr)%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-      GuiErrorMSG<-paste(GuiErrorMSG,"p.lev must be one of these: 0.75,0.80,0.90,0.95,0.99,0.9999. Please re-enter\n")
+      GuiErrorMSG<-paste(GuiErrorMSG,"plev must be one of these: 0.75,0.80,0.90,0.95,0.99,0.9999. Please re-enter\n")
       oflg<-0
     }
 
@@ -80,7 +80,7 @@ Chg.Para<-function(){
       assign("Ny4aStr",Ny4aStr,envir=.GlobalEnv)
 
       tkinsert(txt,"end",paste("MissingValueCode set to:",MissingStr,"..\n",sep=" "))
-      tkinsert(txt,"end",paste("The nominal level p.lev = ",PlevStr,"..\n",sep=" "))
+      tkinsert(txt,"end",paste("The nominal level plev = ",PlevStr,"..\n",sep=" "))
       tkinsert(txt,"end",paste("Current Iadj value is",AdjStr,"..\n",sep=" "))
       tkinsert(txt,"end",paste("Current Mq value is",Mq0Str,"..\n",sep=" "))
       tkinsert(txt,"end",paste("Current Ny4a value is",Ny4aStr,"..\n",sep=" "))

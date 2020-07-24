@@ -164,7 +164,7 @@ GUI <- function(){
   tkgrid(tklabel(frameMiddle,text="Current Missing Value Code:"),
           column=1,row=1,sticky="w")
   tkgrid(tklabel(frameMiddle,text=omiss,width=40),column=2,row=1,sticky="w")
-  tkgrid(tklabel(frameMiddle,text="Current nominal level of confidence (p.lev):"),
+  tkgrid(tklabel(frameMiddle,text="Current nominal level of confidence (plev):"),
           column=1,row=2,sticky="w")
   tkgrid(tklabel(frameMiddle,text=oplev,width=40),column=2,row=2,sticky="e")
   tkgrid(tklabel(frameMiddle,text="Segment to which to adjust the series (Iadj):"),

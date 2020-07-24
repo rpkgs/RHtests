@@ -14,9 +14,9 @@ NULL
 #*****************************
 
 # NT=1, 12, and 365 for annual, monthly, and daily series, respectively
-# p.lev is the nominal level of confidence; (1 - p.lev) is the nominal level
+# plev is the nominal level of confidence; (1 - plev) is the nominal level
 #     of significance
-# choose one of the following 6 p.lev values: 0.75, 0.80, 0.90, 0.95, 0.99,
+# choose one of the following 6 plev values: 0.75, 0.80, 0.90, 0.95, 0.99,
 #     0.9999
 # Mq (=0, 1, 2, ..., 20) is the number of points (categories) on which
 #     the empirical cumulative distribution function are estimated.

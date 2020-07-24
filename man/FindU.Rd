@@ -9,7 +9,7 @@ FindU(
   output = "./OUTPUT/example01",
   MissingValueCode = "-999.99",
   GUI = FALSE,
-  p.lev = 0.95,
+  plev = 0.95,
   Iadj = 10000,
   Mq = 10,
   Ny4a = 0,
@@ -25,8 +25,8 @@ FindU(
 
 \item{GUI}{boolean}
 
-\item{p.lev}{p.lev is the nominal level of confidence; (1 - p.lev) is the
-nominal level of significance, choose one of the following 6 p.lev values:
+\item{plev}{plev is the nominal level of confidence; (1 - plev) is the
+nominal level of significance, choose one of the following 6 plev values:
 0.75, 0.80, 0.90, 0.95, 0.99, 0.9999}
 
 \item{Iadj}{If Iadj = 0, the data series is adjusted to the longest segment;

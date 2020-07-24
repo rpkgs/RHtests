@@ -92,7 +92,7 @@ OnFindU<-function(){
       }
 
       itmp <- FindU(InSeries=ifname, output=ofname,
-        MissingValueCode=MissingStr, p.lev=as.numeric(PlevStr),
+        MissingValueCode=MissingStr, plev=as.numeric(PlevStr),
         Iadj=as.numeric(AdjStr), Mq=as.numeric(Mq0Str), Ny4a=as.numeric(Ny4aStr),
         GUI=TRUE)
       if (itmp<0) {
@@ -237,7 +237,7 @@ OnFindUD<-function(){
       assign("ofbody",ofbody,envir=.GlobalEnv)
       assign("ofname",ofname,envir=.GlobalEnv)
       itmp<-FindUD(InSeries=ifname,output=ofname,InCs=iDIpsName,
-            MissingValueCode=MissingStr,p.lev=as.numeric(PlevStr),
+            MissingValueCode=MissingStr, plev=as.numeric(PlevStr),
 	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),
 	    GUI=TRUE)
       if(itmp<0){
@@ -364,7 +364,7 @@ OnFindU.wRef<-function(){
       }
       ofname<-paste(paste(outdir,ofbody,sep="/"),ofrbody,sep="_")
       itmp<-FindU.wRef(Bseries=ifname,Rseries=ifrname,output=ofname,
-            MissingValueCode=MissingStr,p.lev=as.numeric(PlevStr),
+            MissingValueCode=MissingStr,plev=as.numeric(PlevStr),
     	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),
 	    GUI=T)
       if(itmp<0){ # Error happens
@@ -518,7 +518,7 @@ OnFindUD.wRef<-function(){
       }
       ofname<-paste(paste(outdir,ofbody,sep="/"),ofrbody,sep="_")
       itmp<-FindUD.wRef(Bseries=ifname,Rseries=ifrname,InCs=iDIpsName,
-            output=ofname,MissingValueCode=MissingStr,p.lev=as.numeric(PlevStr),
+            output=ofname,MissingValueCode=MissingStr,plev=as.numeric(PlevStr),
     	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),GUI=T)
       if(itmp<0){ # Error happens
         tkinsert(txt,"end",ErrorMSG)
