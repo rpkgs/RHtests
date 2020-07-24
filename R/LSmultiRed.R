@@ -154,13 +154,13 @@ LSmultiRedCycle<-function(Y0,Ti,Ips,Iseg.adj){
 }
 
 rmCycle<-function(idata){
-  tdata<-cbind(idata[,2]*100+idata[,3],idata[,4])
-  inds<-sort(unique(tdata[,1]))
-  nx<-length(inds)
-  mu<-rep(0,nx)
+  tdata <- cbind(idata[,2]*100+idata[,3],idata[,4])
+  inds  <- sort(unique(tdata[,1]))
+  nx    <- length(inds)
+  mu    <- rep(0,nx)
   for(i in 1:nx){
-    mu[i]<-mean(tdata[tdata[,1]==inds[i],2],na.rm=T)
-    tdata[tdata[,1]==inds[i],2]<-tdata[tdata[,1]==inds[i],2]-mu[i]
+    mu[i] <- mean(tdata[tdata[,1]==inds[i], 2], na.rm=T)
+    tdata[tdata[,1]==inds[i],2] <- tdata[tdata[,1]==inds[i],2]-mu[i]
   }
   oout<-list()
   oout$EB<-mu

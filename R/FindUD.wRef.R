@@ -256,17 +256,17 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
       Iseg.mn<-0
       for(i in 1:Ns){  # check all changepoints
         if(Ids[i]==0){ # check those un-documented
-          I0<- if(i==1) 0 else Ips[i-1]
-          I3<-Ips[i+1]
-          Ic<-Ips[i]
-          Nseg<-I3-I0
-          Pk0<-Pk.PMT(Nseg)
-          PTx<-PTKIc(Y0[(I0+1):I3],Pk0,Ic-I0)$PTk
-          prob1<-PTKIc(W[(I0+1):I3],Pk0,Ic-I0)$prob
-          prob2<-PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)$prob
-          prob3<-PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)$prob
-          probU<-otmp$prob
-          probL<-min(prob1,prob2,prob3)
+          I0    <- if(i==1) 0 else Ips[i-1]
+          I3    <- Ips[i+1]
+          Ic    <- Ips[i]
+          Nseg  <- I3-I0
+          Pk0   <- Pk.PMT(Nseg)
+          PTx   <- PTKIc(Y0[(I0+1):I3],Pk0,Ic-I0)$PTk
+          prob1 <- PTKIc(W[(I0+1):I3],Pk0,Ic-I0)$prob
+          prob2 <- PTKIc(WL[(I0+1):I3],Pk0,Ic-I0)$prob
+          prob3 <- PTKIc(WU[(I0+1):I3],Pk0,Ic-I0)$prob
+          probU <- otmp$prob
+          probL <- min(prob1,prob2,prob3)
           if(probL<probL.mn){
             probL.mn<-probL
             Iseg.mn<-i

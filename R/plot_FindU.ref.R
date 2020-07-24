@@ -13,15 +13,9 @@ plot_FindU.ref <- function(output, Base, EB, EB1, B,
   par(mfrow=c(4,1))
   par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
 
-  uyrs<-unique(floor(ori.bdata[,1]/5))*5
-  labels<-NULL
-  ats<-NULL
-  for(i in 1:length(uyrs)){
-    if(!is.na(match(uyrs[i],ori.bdata[,1]))){
-      labels<-c(labels,uyrs[i])
-      ats<-c(ats,match(uyrs[i],ori.bdata[,1]))
-    }
-  }
+  uyrs   <- unique(floor(ori.bdata$year / 10)) * 10 # decades
+  ats    <- match(uyrs, ori.bdata$year) %>% rm_empty()
+  labels <- ori.bdata$year[ats]
 
   IY1<-bdata[,1]*10000+bdata[,2]*100+bdata[,3]
 

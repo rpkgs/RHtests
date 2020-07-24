@@ -1,14 +1,15 @@
-library(foreach)
-library(iterators)
+# library(foreach)
+# library(iterators)
 load_all()
 Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
 Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
-# profvis::profvis({
-{
+profvis::profvis({
+# {
   output  =  "OUTPUT/example02/example02"
   check_dir(dirname(output))
 
+  Read.wRef(Bseries, Rseries)
   U  <- FindU.wRef(Bseries, Rseries, output)
   UD <- FindUD.wRef(Bseries, Rseries, U$turningPoint, output)
 
@@ -31,5 +32,5 @@ Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
         r <- StepSize.wRef(Bseries, Rseries, TP2, output)
       } else break
     }
-}
-# })
+# }
+})

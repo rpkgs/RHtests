@@ -17,6 +17,7 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
 
   Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
+  
   N<-length(Y0); Nadj<-Ny4a*Nt # Y0 is Base-Ref on common period
   readPTtable(N,pkth) # read in PTmax table
   Pk0<-Pk.PMT(N) # calculate penalty vector for target Y0 series

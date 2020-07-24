@@ -362,10 +362,11 @@ StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99"
             ")  p=",round(corout[4],4), "\n"),
       file=ofileSout,append=TRUE)
   if(Ns>0){
-    # for(i in 1:Ns){
-    #   stepsize<-if(i==1) sig[i+2] else sig[i+2]-sig[i+1]
-    # }
-    stepsizes = c(sig[3], diff(sig)[-(1:2)])
+    stepsizes <- c()
+    for(i in 1:Ns){
+      stepsizes[i] <-if(i==1) sig[i+2] else sig[i+2]-sig[i+1]
+    }
+    # stepsizes = c(sig[3], diff(sig)[-(1:2)])
     cat(round(stepsizes, 4), file = ofileSout, append = TRUE, fill = 80)
   }
 
