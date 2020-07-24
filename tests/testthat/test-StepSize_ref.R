@@ -1,11 +1,4 @@
-# library(foreach)
-# library(iterators)
-# load_all()
-
-profvis::profvis({
-})
-
-{
+test_that("StepSize.wRef works", {
   Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
   Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
@@ -37,9 +30,7 @@ profvis::profvis({
     } else {
       break
     }
-  }
+  } 
 
-  # expect_equal(nrow(r$turningPoint), 11)
-}
-
-
+  expect_equal(nrow(r$turningPoint), 11)
+})

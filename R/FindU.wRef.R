@@ -1,31 +1,23 @@
+#' @export
 FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99", 
-  p.lev=0.95,Iadj=10000,Mq=10,GUI=FALSE,Ny4a=0, 
+  plev=0.95,Iadj=10000,Mq=10,GUI=FALSE,Ny4a=0, 
   is_plot = TRUE)
 {
-  ErrorMSG<-NA
-  assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
   Nmin<-5 # set global parameter of Nmin
   assign("Nmin",Nmin,envir=.GlobalEnv)
-  if(Ny4a>0&Ny4a<=5) Ny4a<-5
-  if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-    ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
-                     get("ErrorMSG",env=.GlobalEnv),"\n")
-    if(!GUI) cat(ErrorMSG)
-    return(-1)
-  }
-  plev<-p.lev
-  pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
+  if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
   Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
-  
-  N<-length(Y0); Nadj<-Ny4a*Nt # Y0 is Base-Ref on common period
-  readPTtable(N,pkth) # read in PTmax table
-  Pk0<-Pk.PMT(N) # calculate penalty vector for target Y0 series
-  oout<-PTK(Y0,Pk0) # find 1st break point, then get 2 more, pick max(prob)
+
+  N <- length(Y0); Nadj<-Ny4a*Nt # Y0 is Base-Ref on common period
+  readPTtable(N, plev) # read in PTmax table
+
+  Pk0  <- Pk.PMT(N) # calculate penalty vector for target Y0 series
+  oout <- PTK(Y0,Pk0) # find 1st break point, then get 2 more, pick max(prob)
   # as official first break point
-  I0<-0
-  I2<-oout$KPx
-  I4<-N
+  I0 <- 0
+  I2 <- oout$KPx
+  I4 <- N
   oout1<-PTKI0I2(Y0,I0,I2)
   I1<-oout1$Ic
   oout2<-PTKI0I2(Y0,I2,I4)

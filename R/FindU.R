@@ -93,7 +93,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     ofileAout <- paste(output,"_U.dat",sep="")
     ofilePdf  <- paste(output,"_U.pdf",sep="")
     ofileSout <- paste(output,"_Ustat.txt",sep="")
-	ofileIout <- paste(output,"_1Cs.txt",sep="")
+    ofileIout <- paste(output,"_1Cs.txt",sep="")
     ofileMout <- paste(output,"_mCs.txt",sep="")
 
     file.create(ofileAout)

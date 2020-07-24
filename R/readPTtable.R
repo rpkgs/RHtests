@@ -1,5 +1,10 @@
-readPTtable<-function(Nx,pkth)
+readPTtable<-function(Nx, plev)
 {
+  if (!plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
+    stop(paste0("FindU: input plev = ", plev, " error!\n"))
+  }
+  pkth <- match(plev, c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999))
+
   # read in PTmax table, assign PTmax table as global variable;
   # phi -- vector for cor catalog -- as global variable
   # itmp <- read.table("PTtable.csv", header = FALSE) %>% as.matrix()

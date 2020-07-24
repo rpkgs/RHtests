@@ -1,17 +1,17 @@
-library(foreach)
-library(iterators)
-load_all()
-infile <- system.file("extdata/Example1.dat", package = "RHtests")
+# library(foreach)
+# library(iterators)
+# load_all()
 
-profvis::profvis({
+# profvis::profvis({
 {
+  infile <- system.file("extdata/Example1.dat", package = "RHtests")
   output  =  "OUTPUT/example01/example01"
-  check_dir(output)
+  check_dir(dirname(output))
 
   d       <- Read(infile)
   TP_meta <- data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
   # profvis::profvis({
-    U   <- FindU(NULL, is_plot = FALSE)
+    U   <- FindU(NULL, output, is_plot = FALSE)
     UD  <- FindUD(NULL, InCs = U$turningPoint, output, is_plot = FALSE)
 
     TP  <- UD$turningPoint
@@ -28,8 +28,9 @@ profvis::profvis({
         r <- StepSize(infile, TP2, output)
       } else break
     }
+    expect_equal(nrow(r$turningPoint), 3)
 }
-})
+# })
 
 # TP1 %<>% cbind(info)
 library(ggplot2)

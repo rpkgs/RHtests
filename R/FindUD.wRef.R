@@ -1,5 +1,6 @@
+#' @export
 FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
-  p.lev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
+  plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
   is_plot = TRUE)
 {
   ErrorMSG<-NA
@@ -7,19 +8,11 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
   Nmin<-5
   assign("Nmin",Nmin,envir=.GlobalEnv)
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
-  if(!p.lev%in%c(0.75,0.8,0.9,0.95,0.99,0.9999)){
-    ErrorMSG<<-paste("FindU: input p.lev",p.lev,"error\n",
-                     get("ErrorMSG",env=.GlobalEnv),"\n")
-    if(!GUI) cat(ErrorMSG)
-    return(-1)
-  }
-  plev<-p.lev
-  pkth<-match(p.lev,c(0.75,0.8,0.9,0.95,0.99,0.9999))
 
   Read.wRef(Bseries,Rseries,MissingValueCode)
-  N<-length(Y0); Nadj<-Nt*Ny4a
-  # readin PTmax table
-  readPTtable(N,pkth)
+  N <- length(Y0)
+  Nadj <- Nt * Ny4a
+  
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
   Ns = nrow(TP) # number of changing points

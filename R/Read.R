@@ -1,6 +1,6 @@
 #' read input of RHtestsV4
 #'
-#' Remove NA values and flag y[t] as 0 when it has not corresponding y[t+1] values.
+#' Remove NA values and flag `y[t]` as 0 when it has not corresponding `y[t+1]` values.
 #'
 #' @inheritParams FindU
 #'
@@ -8,7 +8,7 @@
 #' If failed, NULL will be returned. If success, a data.table with the following
 #' columns will be returned:
 #' - `IY0`: numeric, `year*1000 + month*100 + day`, e.g. '19980100'
-#' - `IY0flg`: 0 or 1, is y[t] has y[t+1] for autocorrelation?
+#' - `IY0flg`: 0 or 1, is `y[t]` has `y[t+1]` for autocorrelation?
 #' - `Imd`: numeric, `month*100 + day`, e.g. '100'
 #' - `Ti`: index or original Y
 #' - `Y0`: original Y after eliminating NA values

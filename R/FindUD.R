@@ -1,3 +1,4 @@
+#' @export
 FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     GUI=FALSE, p.lev=0.95, Iadj=10000,Mq=10,Ny4a=0, is_plot = FALSE)
 {

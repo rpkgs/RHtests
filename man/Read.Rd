@@ -16,7 +16,7 @@ If failed, NULL will be returned. If success, a data.table with the following
 columns will be returned:
 \itemize{
 \item \code{IY0}: numeric, \code{year*1000 + month*100 + day}, e.g. '19980100'
-\item \code{IY0flg}: 0 or 1, is y\link{t} has y\link{t+1} for autocorrelation?
+\item \code{IY0flg}: 0 or 1, is \code{y[t]} has \code{y[t+1]} for autocorrelation?
 \item \code{Imd}: numeric, \code{month*100 + day}, e.g. '100'
 \item \code{Ti}: index or original Y
 \item \code{Y0}: original Y after eliminating NA values
@@ -25,7 +25,7 @@ columns will be returned:
 \code{NT}=1, 12, and 365 for annual, monthly, and daily series, respectively.
 }
 \description{
-Remove NA values and flag y\link{t} as 0 when it has not corresponding y\link{t+1} values.
+Remove NA values and flag \code{y[t]} as 0 when it has not corresponding \code{y[t+1]} values.
 }
 \examples{
 infile = system.file("extdata/Example1.dat", package = "RHtests")
