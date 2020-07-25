@@ -243,8 +243,8 @@ StepSize <- function(InSeries = NULL, InCs, output,
   RWL <- LSmultiple(WL,Ti,Ips)$resi
   RWU <- LSmultiple(WU,Ti,Ips)$resi
 
+  d_TP <- list()
   if (Ns > 0) {
-    d_TP <- list()
     for(i in 1:Ns){
       I1   <- if(i==1) 1 else Ips[i-1]+1
       I3   <- Ips[i+1]
@@ -330,7 +330,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
     return(0)
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-    cat("StepSize finished successfully...\n")
+    # cat("StepSize finished successfully...\n")
     list(data = as.data.table(odata), turningPoint = d_TP) # fit = odata,
   }
 }

@@ -456,9 +456,9 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
     otmpWU <- LSmultiple(WU,Ti,Ips)
     resiWU <- otmpWU$resi
 
+    d_TP <- list()
     if (Ns > 0) {
         # d_TP = foreach(i = 1:Ns) %do% {
-        d_TP <- list()
         for(i in 1:Ns){
             I1   <- if(i==1) 1 else Ips[i-1]+1
             Ic   <- Ips[i]
@@ -544,7 +544,7 @@ FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-99
         return(0)
     else {
         file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-        cat("FindU finished successfully...\n")
+        # cat("FindU finished successfully...\n")
         odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
         list(fit = odata, turningPoint = d_TP)
     }

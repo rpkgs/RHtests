@@ -414,9 +414,9 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     RWL <- LSmultiple(WL, Ti, Ips)$resi
     RWU <- LSmultiple(WU, Ti, Ips)$resi
 
+    d_TP <- list()
     if (Ns > 0) {
         # d_TP = foreach(i = 1:Ns) %do% {
-        d_TP = list()
         for(i in 1:Ns){
             I1   <- if(i==1) 1 else Ips[i-1]+1
             I3   <- Ips[i+1]
@@ -505,7 +505,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
         return(0)
     else{
         file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-        cat("FindUD finished successfully...\n")
+        # cat("FindUD finished successfully...\n")
         list(turningPoint = d_TP) # fit = odata,
     }
 

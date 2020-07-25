@@ -578,7 +578,7 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   if(GUI) return(0)
   else{
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-    cat("FindU.wRef finished successfully...\n")
+    # cat("FindU.wRef finished successfully...\n")
     odata %<>% as.data.table()
     odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
     list(fit = odata, turningPoint = d_TP)

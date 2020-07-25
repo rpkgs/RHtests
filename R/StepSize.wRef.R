@@ -443,7 +443,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   if(GUI) return(0)
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-    cat("StepSize.wRef finished successfully...\n")
+    # cat("StepSize.wRef finished successfully...\n")
     list(data = odata, turningPoint = d_TP)
   }
 }

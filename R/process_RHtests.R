@@ -19,13 +19,14 @@ process_RHtests <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
     if (has_ref) {
         Read.wRef(data, data.ref)
         U  <- FindU.wRef(NULL, NULL, prefix, is_plot = is_plot)
-        UD <- FindUD.wRef(NULL, NULL, U$turningPoint, prefix, is_plot = is_plot)
+        UD <- FindUD.wRef(NULL, NULL, InCs = U$turningPoint, prefix, is_plot = is_plot)
     } else {
         d <- Read(data)
         U <- FindU(NULL, prefix, is_plot = is_plot)
         UD <- FindUD(NULL, InCs = U$turningPoint, prefix, is_plot = is_plot)
     }
-
+    if (nrow(U$turningPoint) == 0) return(NULL)
+    
     FUN_step = if(has_ref) StepSize.wRef else StepSize
     TP  <- UD$turningPoint
     TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)

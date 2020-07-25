@@ -662,7 +662,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
   if(GUI) return(0)
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
-    cat("FindUD.wRef finished successfully...\n")
+    # cat("FindUD.wRef finished successfully...\n")
     list(fit = odata, turningPoint = d_TP)
   }
 }
