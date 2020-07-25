@@ -64,7 +64,7 @@
 #' FindU(infile)
 #' @import foreach
 #' @export
-FindU <- function(InSeries, output = "./OUTPUT/example01", MissingValueCode="-999.99",
+FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, plev=0.95,
 	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
 {

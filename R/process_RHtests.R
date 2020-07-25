@@ -7,33 +7,37 @@
 #'
 #' @example man/examples/run_ex01.R
 #' @example man/examples/run_ex02.R
-#' 
+#'
 #' @export
 process_RHtests <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/example02",
-    maxgap = 90, 
+    maxgap = 90,
     is_plot = TRUE, verbose = TRUE)
 {
     check_dir(dirname(prefix))
 
     has_ref = !is.null(data.ref)
+    FUN_FindUD <- if (has_ref) FindUD.wRef else FindUD
+    FUN_step <- if (has_ref) StepSize.wRef else StepSize
+
     if (has_ref) {
         Read.wRef(data, data.ref)
-        U  <- FindU.wRef(NULL, NULL, prefix, is_plot = is_plot)
-        UD <- FindUD.wRef(NULL, NULL, InCs = U$turningPoint, prefix, is_plot = is_plot)
+        U  <- FindU.wRef(NULL, NULL, prefix, is_plot = is_plot)        
     } else {
         d <- Read(data)
-        U <- FindU(NULL, prefix, is_plot = is_plot)
-        UD <- FindUD(NULL, InCs = U$turningPoint, prefix, is_plot = is_plot)
+        U <- FindU(output = prefix, is_plot = is_plot)
     }
-    if (nrow(U$turningPoint) == 0) return(NULL)
+    if (is_empty(U$turningPoint)) return(NULL)
+
+    UD <- FUN_FindUD(InCs = U$turningPoint, output = prefix, is_plot = is_plot)
+    if (is_empty(UD$turningPoint)) return(NULL)
     
-    FUN_step = if(has_ref) StepSize.wRef else StepSize
     TP  <- UD$turningPoint
     TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)
     r   <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot)
 
     times <- 1
     while (times < nrow(TP)) {
+        if (length(r$turningPoint) == 0) return(NULL)
         TP2 <- adjust_step_TP(r)
 
         if (nrow(TP2) < nrow(r$turningPoint)) {
@@ -47,6 +51,7 @@ process_RHtests <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
     r
 }
 
+is_empty <- function(x) length(x) == 0
 
 #' @import ggplot2
 #' @export
@@ -57,7 +62,7 @@ plot_RHtests <- function(r, outfile = "RHtests-noref.pdf", is_plotly = FALSE) {
     p <- ggplot(d2, aes(id, value, color = variable)) +
         geom_line(data = data, aes(id, base, color = NULL), color = alpha("black", 0.6)) +
         geom_line()
-    
+
     latticeGrob::write_fig(p, outfile, 10, 6)
     if (is_plotly) plotly::ggplotly(p)
 }

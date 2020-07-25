@@ -1,10 +1,10 @@
 #' StepSize
-#' 
+#'
 #' @example man/examples/run_ex01.R
 #' @export
-StepSize <- function(InSeries = NULL, InCs, output, 
+StepSize <- function(InSeries = NULL, InCs, output,
   MissingValueCode="-999.99",
-  GUI=FALSE, plev=0.95, Iadj=10000, Mq=10, Ny4a=0, 
+  GUI=FALSE, plev=0.95, Iadj=10000, Mq=10, Ny4a=0,
   is_plot = TRUE)
 {
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
@@ -16,6 +16,8 @@ StepSize <- function(InSeries = NULL, InCs, output,
 
   TP = if (is.character(InCs)) fread(InCs) else InCs
   Ns = nrow(TP) # number of changing points
+  if (is.null(Ns)) Ns <- 0
+
   if(Ns >= 1){
     Ips <- c(rep(0,Ns),N)
     Ids <- rep(0,Ns)
@@ -158,7 +160,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
             round(cor,4),"(",round(corl,4),",",round(corh,4),")",
             round(pcor,4),"\n"),
       file=ofileSout,append=T)
-  
+
   stepsizes = NULL
   if (Ns > 0) {
     for (i in 1:(Ns + 1)) {
@@ -181,7 +183,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
     plot_stepsize(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
       Ips, Iseg.adj, otmp)
 
-  odata            <- matrix(NA,dim(ori.itable)[1],10) %>% 
+  odata            <- matrix(NA,dim(ori.itable)[1],10) %>%
     set_colnames(fitdata_varnames_noref)
   # odata[ooflg,1] <- Ti
   odata[,1]        <- c(1:dim(ori.itable)[1])
@@ -313,7 +315,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
                 "); Nseg=", sprintf("%4.0f",Nseg),
                 "\n", sep=""), file=ofileSout, append=T)
         d_TP[[i]] <- data.table(kind = Id, Idc,
-          date = IY0[Ic], Ic, Nseg, stepsize = stepsizes[i], 
+          date = IY0[Ic], Ic, Nseg, stepsize = stepsizes[i],
           probL, probU, plev, PFx, PFx95l, PFx95h, prob, PFx95)
     }
 
@@ -329,7 +331,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
   if(GUI)
     return(0)
   else {
-    file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
+    # file.copy(from=ofileIout, to=ofileMout,overwrite=TRUE)
     # cat("StepSize finished successfully...\n")
     list(data = as.data.table(odata), turningPoint = d_TP) # fit = odata,
   }

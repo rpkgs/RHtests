@@ -1,5 +1,5 @@
 #' @export
-FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99", 
+FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-999.99", 
   plev=0.95,Iadj=10000,Mq=10,GUI=FALSE,Ny4a=0, 
   is_plot = TRUE)
 {

@@ -5,7 +5,7 @@
 \title{Penalized maximal F (PMF) test}
 \usage{
 FindU(
-  InSeries,
+  InSeries = NULL,
   output = "./OUTPUT/example01",
   MissingValueCode = "-999.99",
   GUI = FALSE,

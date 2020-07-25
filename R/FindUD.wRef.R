@@ -1,5 +1,6 @@
 #' @export
-FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
+FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output, 
+  MissingValueCode="-999.99",
   plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0,
   is_plot = TRUE)
 {
@@ -22,6 +23,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
   Ns = nrow(TP) # number of changing points
+  if (is.null(Ns)) Ns <- 0
 
   Pk0<-Pk.PMT(N)
   ofileIout<-paste(output,"_pCs.txt",sep="")

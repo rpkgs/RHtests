@@ -22,6 +22,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
   Ns = nrow(TP) # number of changing points
+  if (is.null(Ns)) Ns <- 0
 
   if(Ns == 0) {
     #   stop("There is no input Ips")

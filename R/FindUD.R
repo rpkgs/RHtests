@@ -1,5 +1,5 @@
 #' @export
-FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
+FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
     GUI=FALSE, plev=0.95, Iadj=10000,Mq=10,Ny4a=0, is_plot = FALSE)
 {
     if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
@@ -10,13 +10,14 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
     flog <- paste(output,".log",sep="")
     Nmin <- 10
     if(Ny4a>0&Ny4a<=5) Ny4a<-5
-    
+
     assign("Nmin",Nmin,envir=.GlobalEnv)
     N <- length(Y0); Nadj <- Ny4a*Nt
-    
+
     # change InCs
     TP = if (is.character(InCs)) fread(InCs) else InCs
     Ns = nrow(TP) # number of changing points
+    if (is.null(Ns)) Ns <- 0
 
     Pk0  <- Pk.PMFT(N)
     oout <- rmCycle(itable)
@@ -496,7 +497,7 @@ FindUD<-function(InSeries, InCs, output, MissingValueCode="-999.99",
 
         if (Ns == 0) cat("PMF finds the series to be homogeneous!\n")
         cat(paste("# ", Ns, "changepoints in Series", InSeries, "\n"), file = ofileIout)
-        
+
         d_TP %<>% do.call(rbind, .)
         d_TP[, 4:9] %<>% lapply(round, digits = 4)
         fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
