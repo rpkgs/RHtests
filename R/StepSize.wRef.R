@@ -1,10 +1,22 @@
+#' StepSize.wRef
+#' 
+#' @example man/examples/run_ex02.R
 #' @export
-StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99",
+StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output, 
+  MissingValueCode="-999.99",
   plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
   is_plot = TRUE)
 {
+  Read.wRef(Bseries, Rseries, MissingValueCode)
+
+  back_Ti <- Ti
+  back_IY0flg <- IY0flg
+  on.exit({
+    assign("Ti", back_Ti, envir = .GlobalEnv)
+    assign("IY0flg", back_IY0flg, envir = .GlobalEnv)
+  })
+
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
-  Read.wRef(Bseries,Rseries,MissingValueCode)
   N<-length(Y0); Nadj<-Nt*Ny4a
   # readin PTmax table
   # readin Ips
@@ -432,6 +444,6 @@ StepSize.wRef<-function(Bseries, Rseries,InCs,output, MissingValueCode="-999.99"
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("StepSize.wRef finished successfully...\n")
-    list(fit = odata, turningPoint = d_TP)
+    list(data = odata, turningPoint = d_TP)
   }
 }

@@ -2,35 +2,13 @@ test_that("StepSize.wRef works", {
   Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
   Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
-  # print(getwd())
-  output <- "../../OUTPUT/example02/example02"
-  check_dir(dirname(output))
+  metadata <- data.table(date = c("19740200", "19751100"))
+  prefix <- "../../OUTPUT/example02/example02"
 
-  Read.wRef(Bseries, Rseries)
-  U <- FindU.wRef(Bseries, Rseries, output)
-  UD <- FindUD.wRef(Bseries, Rseries, U$turningPoint, output)
-
-  #   d       <- Read(Bfile)
-  TP_meta <- data.table(date = c("1974-02-01", "1975-11-01"))
-  # profvis::profvis({
-  # U   <- FindU(Bfile, Rfile, is_plot = FALSE)
-  # UD  <- FindUD(NULL, InCs = U$turningPoint, output, is_plot = FALSE)
-  TP <- UD$turningPoint
-  TP2 <- adjust_TP(TP, TP_meta, maxgap = 90)
-  r <- StepSize.wRef(Bseries, Rseries, TP2, output)
-  times <- 1
-  while (times < nrow(TP)) {
-    TP2 <- adjust_step_TP(r)
-
-    if (nrow(TP2) < nrow(r$turningPoint)) {
-      print(TP2)
-      times <- times + 1
-      # print(times)
-      r <- StepSize.wRef(Bseries, Rseries, TP2, output)
-    } else {
-      break
-    }
-  } 
-
-  expect_equal(nrow(r$turningPoint), 11)
+  r <- process_RHtests(Bseries, Rseries, metadata, prefix)
+  plot_RHtests(r)
+  # expect_equal(nrow(r$turningPoint), 11)
+  expect_equal(as.character(r$turningPoint[kind == 0]$date),
+               metadata$date)
+  expect_equal(nrow(r$data), 612)
 })

@@ -1,7 +1,11 @@
+#' StepSize
+#' 
+#' @example man/examples/run_ex01.R
 #' @export
-StepSize <- function(InSeries, InCs, output, MissingValueCode="-999.99",
-    GUI=FALSE, plev=0.95, Iadj=10000,Mq=10,Ny4a=0, 
-    is_plot = TRUE)
+StepSize <- function(InSeries = NULL, InCs, output, 
+  MissingValueCode="-999.99",
+  GUI=FALSE, plev=0.95, Iadj=10000, Mq=10, Ny4a=0, 
+  is_plot = TRUE)
 {
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
 

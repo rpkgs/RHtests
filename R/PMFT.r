@@ -3,7 +3,7 @@ Pk.PMFT<-function(N){
   # if(floor(N)!=N) stop("input data error in Pk")
   Nlt40<- if(N<40) TRUE else FALSE
   Nle500<- if(N<=500) TRUE else FALSE
-  
+
   K<-seq(1,(N-1))
   Kmin<- if(floor((N-1)/2)==(N-1)/2) c(1:floor((N-1)/2),floor((N-1)/2):1)
          else c(1:(floor((N-1)/2)+1),floor((N-1)/2):1)
@@ -118,7 +118,7 @@ PMFxKxI0I2<-function(Y,T,I0,I2){
   return(oout)
 }
 
-Rphi<-function(Y0,Ips,Ns){
+Rphi <- function(Y0,Ips,Ns){
 # calculate auto-correlation of given data vector Y0 and breakpoints Ips
 # output: cor -- autocorrelation; W -- prewhitenning vector of Y0
 #  corl -- lower bound of cor; corh -- upper bound of cor
@@ -129,10 +129,11 @@ Rphi<-function(Y0,Ips,Ns){
   for(i in 0:Ns){
     I1 <- if(i==0) 1 else Ips[i]+1
     I2 <- Ips[i+1]
-    mu[i+1]<-mean(Y0[I1:I2])
-    Y[I1:I2]<-Y0[I1:I2]-mu[i+1]
+    mu[i+1] <- mean(Y0[I1:I2])
+    Y[I1:I2] <- Y0[I1:I2]-mu[i+1]
   }
-  cor <- autocorlh(Y,IY0flg)
+
+  cor <- autocorlh(Y, IY0flg)
   W1  <- Y
   W2  <- Y
   W3  <- Y
@@ -162,15 +163,15 @@ Rphi<-function(Y0,Ips,Ns){
 autocorlh<-function(Y,IY){
 # calculate autocorrelation of given data vector, using given time vector to
 # judge continuouse
-  N<-length(Y)
-  cnt<-sum(IY)
-  m0<-mean(Y,na.rm=T)
-  xsd0<-0
-  xsd1<-0
-  S1<-sum(((Y-m0)^2*IY)[1:(N-1)])
-  S2<-sum(((Y-m0)*(c(Y[2:N],0)-m0)*IY)[1:(N-1)])
-  cor<-S2/S1
-# else stop("too few available data in autocor") 
+  N    <- length(Y)
+  cnt  <- sum(IY)
+  m0   <- mean(Y, na.rm = T)
+  xsd0 <- 0
+  xsd1 <- 0
+  S1   <- sum(((Y - m0)^2 * IY)[1:(N - 1)])
+  S2   <- sum(((Y - m0) * (c(Y[2:N], 0) - m0) * IY)[1:(N - 1)])
+  cor  <- S2 / S1
+# else stop("too few available data in autocor")
   z975 <- 1.96
   z    <- .5*log((1+cor)/(1-cor))
   df   <- sum(IY[1:(N-1)])
@@ -180,11 +181,12 @@ autocorlh<-function(Y,IY){
   ch   <- tanh(zh)
   corl <- min(c(cl,ch))
   corh <- max(c(cl,ch))
-  oout<-list()
-  oout$cor<-cor
-  oout$corl<-corl
-  oout$corh<-corh
-  return(oout)
+  listk(cor, corl, corh)
+  # oout<-list()
+  # oout$cor<-cor
+  # oout$corl<-corl
+  # oout$corh<-corh
+  # return(oout)
 }
 
 getPFx95<-function(cor,N){
@@ -212,13 +214,13 @@ getPFx95<-function(cor,N){
 }
 
 PMFxIseg<-function(Y0,Ti,Ips,Iseg){
-  Ns<-length(Ips)-1
-  N<-length(Y0)
-  I0<- if(Iseg==1) 0 else Ips[Iseg-1]
-  I3<-Ips[Iseg+1]
-  Ic<-Ips[Iseg]
-  Nseg<-I3-I0
-  Ip0<-Ips[-Iseg]
+  Ns   <- length(Ips)-1
+  N    <- length(Y0)
+  I0   <- if(Iseg==1) 0 else Ips[Iseg-1]
+  I3   <- Ips[Iseg+1]
+  Ic   <- Ips[Iseg]
+  Nseg <- I3-I0
+  Ip0  <- Ips[-Iseg]
 
   otmp   <- LSmultipleRed(Y0,Ti,Ips)
   cor    <- otmp$cor
@@ -231,11 +233,11 @@ PMFxIseg<-function(Y0,Ti,Ips,Iseg){
   PFx95L <- getPFx95(corl,Nseg)
   PFx95U <- getPFx95(corh,Nseg)
 
-  otmp<-LSmultiple(W,Ti,Ip0)
-  SSE0.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
-  otmp<-LSmultiple(W,Ti,Ips)
-  SSEf.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
-  Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
+  otmp      <- LSmultiple(W,Ti,Ip0)
+  SSE0.Iseg <- sum(otmp$resi[(I0+1):I3]^2)
+  otmp      <- LSmultiple(W,Ti,Ips)
+  SSEf.Iseg <- sum(otmp$resi[(I0+1):I3]^2)
+  Fx        <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
   if(Fx<0){
     Fx<-0
     PFx<-0
@@ -274,14 +276,14 @@ PMFxIseg<-function(Y0,Ti,Ips,Iseg){
   PFx<-Fx*Pk0[Ic-I0]
 
   oout<-list()
-  oout$Fx<-Fx
-  oout$PFx<-PFx
-  oout$prob<-prob
-  oout$probL<-probL
-  oout$probU<-probU
-  oout$PFx95<-PFx95
-  oout$PFx95L<-PFx95L
-  oout$PFx95U<-PFx95U
+  oout$Fx     <- Fx
+  oout$PFx    <- PFx
+  oout$prob   <- prob
+  oout$probL  <- probL
+  oout$probU  <- probU
+  oout$PFx95  <- PFx95
+  oout$PFx95L <- PFx95L
+  oout$PFx95U <- PFx95U
   return(oout)
 }
 
@@ -410,7 +412,7 @@ getPTx95<-function(cor,N){
 str40<-function(vari.name,vari.value){
   olen<-40
   b20<-"                    "
-  if(!exists(vari.name,env=sys.parent())) 
+  if(!exists(vari.name,env=sys.parent()))
     otmp<-paste(b20,"                  NA",sep="")
   else{
     if(nchar(vari.value)>olen) otmp<-paste("...",substr(vari.value,

@@ -3,11 +3,18 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   plev=0.95,Iadj=10000,Mq=10,GUI=FALSE,Ny4a=0, 
   is_plot = TRUE)
 {
+  Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
+
+  back_Ti <- Ti
+  back_IY0flg <- IY0flg
+  on.exit({
+    assign("Ti", back_Ti, envir = .GlobalEnv)
+    assign("IY0flg", back_IY0flg, envir = .GlobalEnv)
+  })
+  
   Nmin<-5 # set global parameter of Nmin
   assign("Nmin",Nmin,envir=.GlobalEnv)
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
-
-  Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
 
   N <- length(Y0); Nadj<-Ny4a*Nt # Y0 is Base-Ref on common period
   readPTtable(N, plev) # read in PTmax table
@@ -314,8 +321,9 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
     Ro[I0:I2]<-Y0[I0:I2]-muDif[i]
   }
   Wo[1]   <- Ro[1]
-  Wo[2:N] <- Ro[2:N]-cor*Ro[1:(N-1)]*IY0flg[1:(N-1)] # use IY0flg to identify
-  # missing date, this is same as -- if missing Ro else Ro-cor*Ro[n-1]
+  Wo[2:N] <- Ro[2:N]-cor*Ro[1:(N-1)]*IY0flg[1:(N-1)] 
+  # use IY0flg to identify missing date, this is same as -- 
+  #     if missing Ro else Ro-cor*Ro[n-1]
   # write.table(cbind(IY0,round(oY0,4),round(omuDif,4),round(Wo,4)),
   #             file=ofileRout,col.names=F,row.names=F)
 
@@ -330,10 +338,11 @@ FindU.wRef<-function(Bseries, Rseries, output, MissingValueCode="-999.99",
   Ips  <- merge(IY0[Ips0],rtmp,by.x=1,by.y="IY1")[,2]
   Ips[Ns+1]<-length(IY1)
 
-  Ti<-TiB
+  ## those two variables changed, kongdd, 20200725
+  Ti <- TiB
   assign("Ti",Ti,envir=.GlobalEnv)
-  IY0flg<-IYBflg
-  assign("IY0flg",IY0flg,envir=.GlobalEnv)
+  IY0flg <- IYBflg
+  assign("IY0flg", IY0flg, envir=.GlobalEnv)
 
   dtmp    <- rmCycle(bdata)
   adjBase <- dtmp$Base

@@ -1,15 +1,15 @@
 #' adjust TP according to station meta info
 #' @export
-adjust_TP <- function(TP, TP_meta, maxgap = 90) {
+adjust_TP <- function(TP, metadata, maxgap = 90) {
   TP$date %<>% as.character() %>% gsub("00$|01$", "01", .) %>% as.Date("%Y%m%d")
-  # TP_meta = data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
-  TP_meta$date %<>% as.Date()
+  # metadata = data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
+  metadata$date %<>% gsub("00$|01$", "01", .) %>% gsub("-", "", .) %>% as.Date("%Y%m%d")
 
   # 寻找距离最近的日期
   info <- foreach(i = 1:nrow(TP)) %do% {
-    diff = difftime(TP$date[i], TP_meta$date, units = "days") %>% as.numeric()
+    diff = difftime(TP$date[i], metadata$date, units = "days") %>% as.numeric()
     I = which.min(abs(diff))
-    data.table(date_meta = TP_meta$date[I], diff = diff[I])
+    data.table(date_meta = metadata$date[I], diff = diff[I])
   } %>% do.call(rbind, .)
   TP %<>% {cbind(.[, 1:9], info)}
 

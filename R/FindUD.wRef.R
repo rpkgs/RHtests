@@ -1,18 +1,24 @@
 #' @export
 FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
-  plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
+  plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0,
   is_plot = TRUE)
 {
-  ErrorMSG<-NA
-  assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
+  Read.wRef(Bseries, Rseries, MissingValueCode)
+  
+  back_Ti <- Ti
+  back_IY0flg <- IY0flg
+  on.exit({
+    assign("Ti", back_Ti, envir = .GlobalEnv)
+    assign("IY0flg", back_IY0flg, envir = .GlobalEnv)
+  })
+
   Nmin<-5
-  assign("Nmin",Nmin,envir=.GlobalEnv)
+  assign("Nmin", Nmin, envir=.GlobalEnv)
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
 
-  Read.wRef(Bseries,Rseries,MissingValueCode)
   N <- length(Y0)
   Nadj <- Nt * Ny4a
-  
+
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
   Ns = nrow(TP) # number of changing points
@@ -127,18 +133,18 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
     }
   } # end of searching for all possible changepoints
 
-  Ns.initial<-Ns
-  oout<-Rphi(Y0,Ips,Ns)
-  cor<-oout$cor
-  corL<-oout$corl
-  corU<-oout$corh
-  W<-oout$W
-  WL<-oout$WL
-  WU<-oout$WU
+  Ns.initial <- Ns
+  oout <- Rphi(Y0, Ips, Ns)
+  cor  <- oout$cor
+  corL <- oout$corl
+  corU <- oout$corh
+  W    <- oout$W
+  WL   <- oout$WL
+  WU   <- oout$WU
 
-  Ns<-Ns.ini
-  Ips<-Ips.ini
-  Ids<-Ids.ini
+  Ns   <- Ns.ini
+  Ips  <- Ips.ini
+  Ids  <- Ids.ini
 
   if(Ns==0){ # search for 1st possible changepoint
     Pk0<-Pk.PMT(N)
@@ -372,7 +378,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
               "-",sprintf("%10.4f",PTx95U),
               "); Nseg=",sprintf("%4.0f",Nseg),"\n",sep=""),
         file=ofileSout,append=TRUE)
-    d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic], 
+    d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic],
       probL, probU, plev, PFx = otmp$PTk, PFx95l = PTx95L, PFx95h = PTx95U)
   }
   d_TP %<>% do.call(rbind, .)
@@ -576,7 +582,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
       oY0, omuDif, otmp, meanhatD,
       QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
     )
-  
+
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
       file=ofileSout,append=TRUE)
   cat(paste("#steps= ",Ns,"; trend=",round(sig[2],6),"(p=",
@@ -650,7 +656,7 @@ FindUD.wRef<-function(Bseries,Rseries,InCs,output,MissingValueCode="-999.99",
 
   odata %<>% set_colnames(fitdata_varnames_ref) %>% data.table()
   odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
-  write.table(odata, paste0(output, "_UD.dat"), 
+  write.table(odata, paste0(output, "_UD.dat"),
     col.names=TRUE, row.names=F,na=MissingValueCode)
 
   if(GUI) return(0)

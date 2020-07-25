@@ -5,7 +5,7 @@
 \alias{adjust_step_TP}
 \title{adjust TP according to station meta info}
 \usage{
-adjust_TP(TP, TP_meta, maxgap = 90)
+adjust_TP(TP, metadata, maxgap = 90)
 
 adjust_step_TP(r)
 }

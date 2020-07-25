@@ -11,16 +11,16 @@
 Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99"){
     if (is.null(Bseries) || is.null(Rseries)) return()
 
-    sep = ifelse(is.csv(Bseries), ",", "")
-
     var_colnames <- c("year", "month", "day", "data")
     # var_colnames <- c("id1", "id2", "id3", "data")
     itable <- if (is.character(Bseries)) {
+        sep = ifelse(is.csv(Bseries), ",", "")
         read.table(Bseries, sep = sep, header = FALSE,
             na.strings = MissingValueCode, colClasses = "real")
     } else Bseries
 
     rtable <- if (is.character(Rseries)) {
+        sep = ifelse(is.csv(Rseries), ",", "")
         read.table(Rseries, sep = sep, header = FALSE,
             na.strings = MissingValueCode, colClasses = "real")
     } else Rseries
@@ -96,26 +96,27 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99"){
     IY0    <- cind[,"IY0"]
     IY0flg <- rep(0,length(IY0))
     # construct flag vector for autocor calculation
-    Iyr    <- floor(IY0/10000)
-    Imd    <- IY0-Iyr*10000
-    Ti     <- IY0
-    for(i in 1:length(IY0)){
-        ith   <- match(Imd[i],Icy)
-        Ti[i] <- (Iyr[i]-iyrbegin)*Nt+ith
+    Iyr <- floor(IY0 / 10000)
+    Imd <- IY0 - Iyr * 10000
+    Ti <- IY0
+    for (i in 1:length(IY0)) {
+        ith <- match(Imd[i], Icy)
+        Ti[i] <- (Iyr[i] - iyrbegin) * Nt + ith
     }
-    IyrB <- floor(icol.base/10000)
-    ImdB <- icol.base-IyrB*10000
-    TiB  <- rep(0,Nx1)
-    for(i in 1:Nx1){
-        ith    <- match(ImdB[i],Icy)
-        TiB[i] <- (IyrB[i]-iyrbegin)*Nt+ith
+    IyrB <- floor(icol.base / 10000)
+    ImdB <- icol.base - IyrB * 10000
+    TiB <- rep(0, Nx1)
+    for (i in 1:Nx1) {
+        ith <- match(ImdB[i], Icy)
+        TiB[i] <- (IyrB[i] - iyrbegin) * Nt + ith
     }
-    for(i in 1:(length(IY0)-1)){
-        if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
+    for (i in 1:(length(IY0) - 1)) {
+        if (Ti[i + 1] - Ti[i] == 1) IY0flg[i] <- 1
     }
-    IYBflg<-rep(0,length(TiB))
-    for(i in 1:(length(TiB)-1))
-        if(TiB[i+1]-TiB[i]==1) IYBflg[i]<-1
+    IYBflg <- rep(0, length(TiB))
+    for (i in 1:(length(TiB) - 1)) {
+          if (TiB[i + 1] - TiB[i] == 1) IYBflg[i] <- 1
+      }
     ind.base <- cind[,"ind.base"]
     ind.ref  <- cind[,"ind.ref"]
 
