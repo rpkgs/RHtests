@@ -5,12 +5,15 @@
 \alias{adjust_step_TP}
 \title{adjust TP according to station meta info}
 \usage{
-adjust_TP(TP, metadata, maxgap = 90)
+adjust_TP(TP, metadata, maxgap = 366)
 
 adjust_step_TP(r)
 }
 \arguments{
 \item{r}{object returned by \code{\link[=StepSize]{StepSize()}}}
+}
+\value{
+An adjusted date
 }
 \description{
 adjust TP according to station meta info

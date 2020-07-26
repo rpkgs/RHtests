@@ -22,6 +22,7 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
 
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
+  if (is.Date(TP$date)) TP$date %<>% date2num()
   Ns = nrow(TP) # number of changing points
   if (is.null(Ns)) Ns <- 0
 
@@ -657,7 +658,7 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   }
 
   odata %<>% set_colnames(fitdata_varnames_ref) %>% data.table()
-  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+  odata$date %<>% num2date()
   write.table(odata, paste0(output, "_UD.dat"),
     col.names=TRUE, row.names=F,na=MissingValueCode)
 

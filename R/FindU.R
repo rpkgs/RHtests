@@ -539,7 +539,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             Ips, Iseg.adj)
 
     odata = as.data.table(odata)
-    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+    odata$date %<>% num2date()
     write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
 
     if(GUI)

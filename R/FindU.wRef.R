@@ -574,7 +574,7 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
   }
 
   odata %<>% as.data.table()
-  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+  odata$date %<>% num2date()
   write.table(file=paste0(output,"_U.dat"),odata,col.names=TRUE,row.names=F,na=MissingValueCode)
 
   if(GUI) return(0)

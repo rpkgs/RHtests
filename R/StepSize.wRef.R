@@ -21,6 +21,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   # readin PTmax table
   # readin Ips
   TP = if (is.character(InCs)) fread(InCs) else InCs
+  if (is.Date(TP$date)) TP$date %<>% date2num()
   Ns = nrow(TP) # number of changing points
   if (is.null(Ns)) Ns <- 0
 
@@ -431,7 +432,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   }
 
   odata %<>% as.data.table()
-  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+  odata$date %<>% num2date()
   write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=F, na=MissingValueCode)
 
   d_TP %<>% do.call(rbind, .)

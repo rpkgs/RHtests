@@ -15,16 +15,19 @@ StepSize <- function(InSeries = NULL, InCs, output,
   Nadj <- Ny4a * Nt
 
   TP = if (is.character(InCs)) fread(InCs) else InCs
+  if (is.Date(TP$date)) TP$date %<>% date2num()
   Ns = nrow(TP) # number of changing points
   if (is.null(Ns)) Ns <- 0
 
   if(Ns >= 1){
     Ips <- c(rep(0,Ns),N)
     Ids <- rep(0,Ns)
+
     for(i in 1:Ns){ # using YYYYMMDD as index, searching for the largest
       # date less or equal to given YYYYMMDD
       # ymdtmp <- as.numeric(substr(itmp[i+1],7,16))
       ymdtmp <- TP$date[i]
+
       it <- match(ymdtmp,IY0)
 
       if (!is.na(it)) {
@@ -198,7 +201,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
   odata[ooflg,10]<-round(meanhat0,4)
 
   Imd1<-ori.itable[,2]*100+ori.itable[,3]
-  if(sum(is.na(ori.itable[,4])==F&Imd1==229)>0){
+  if(sum(is.na(ori.itable[,4])==FALSE & Imd1==229)>0){
     if(Ns>0){
       tdata   <- ori.itable[is.na(ori.itable[,4])==F,]
       IY1     <- tdata[,1]*10000+tdata[,2]*100+tdata[,3]
@@ -286,15 +289,19 @@ StepSize <- function(InSeries = NULL, InCs, output,
       probL     <- min(probL0,probU0)
       probU     <- max(probL0,probU0)
 
-      if (Id==0) { # type-0 changepoints
-        if(probU<plev) Idc<-"No  "
-        else if(probL<plev&probU>=plev) Idc<-"?   "
-        else if(probL>=plev) Idc<-"YifD"
-        if(PFx>=PFx95h) Idc <-"Yes "
-      } else if (Id==1) { # type-1 changepoints
-        if(PFx<PFx95l) Idc<-"No  "
-        else if(PFx>=PFx95l&PFx<PFx95h) Idc<-"?   "
-        else if(PFx>=PFx95h) Idc<-"Yes "
+      if (Id == 0) { # type-0 changepoints
+        if (probU < plev) {
+          Idc <- "No  "
+        } else if (probL < plev & probU >= plev) {
+          Idc <- "?   "
+        } else if (probL >= plev) Idc <- "YifD"
+        if (PFx >= PFx95h) Idc <- "Yes "
+      } else if (Id == 1) { # type-1 changepoints
+        if (PFx < PFx95l) {
+          Idc <- "No  "
+        } else if (PFx >= PFx95l & PFx < PFx95h) {
+          Idc <- "?   "
+        } else if (PFx >= PFx95h) Idc <- "Yes "
       }
 
       # PMF: Regression
@@ -325,7 +332,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
   }
 
   odata %<>% as.data.table()
-  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+  odata$date %<>% num2date()
   write.table(file=paste0(output,"_F.dat"), odata,na=MissingValueCode, col.names=TRUE,row.names=F)
 
   if(GUI)

@@ -16,6 +16,7 @@ FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
 
     # change InCs
     TP = if (is.character(InCs)) fread(InCs) else InCs
+    if (is.Date(TP$date)) TP$date %<>% date2num()
     Ns = nrow(TP) # number of changing points
     if (is.null(Ns)) Ns <- 0
 
@@ -502,7 +503,7 @@ FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
     }
 
     odata %<>% as.data.table()
-    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+    odata$date %<>% num2date()
     write.table(file=paste0(output,"_UD.dat"),odata,na=MissingValueCode, col.names=TRUE, row.names=F)
 
     if(GUI)

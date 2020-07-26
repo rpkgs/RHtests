@@ -18,7 +18,7 @@ RHtests_process <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
     has_ref = !is.null(data.ref)
     FUN_FindU  <- if (has_ref) FindU.wRef else FindU
     FUN_FindUD <- if (has_ref) FindUD.wRef else FindUD
-    
+
     RHtests_read(data, data.ref)
     U  <- FUN_FindU(output = prefix, is_plot = is_plot)
     if (is_empty(U$TP)) return(NULL)
@@ -28,9 +28,10 @@ RHtests_process <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
 
     TP  <- UD$TP
     TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)
-    
-    r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref, 
+
+    r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
         prefix, is_plot, verbose)
+    r$TP %<>% merge_metainfo(metadata)
     r
 }
 
@@ -44,8 +45,8 @@ RHtests_read <- function(data, data.ref = NULL, plev = 0.95) {
 }
 
 #' @export
-RHtests_stepsize <- function(data = NULL, data.ref = NULL, TP2, 
-    has_ref = !is.null(data.ref), 
+RHtests_stepsize <- function(data = NULL, data.ref = NULL, TP2,
+    has_ref = !is.null(data.ref),
     prefix = "./OUTPUT/example03", is_plot = FALSE, verbose = TRUE)
 {
     RHtests_read(data, data.ref)

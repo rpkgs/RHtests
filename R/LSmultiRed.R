@@ -192,7 +192,7 @@ LSmultiple<-function(Y,T,Ips, ...){
       D<-cbind(D,tmp)
     }
   }
-  lm_solve(D, X, ...)  
+  lm_solve(D, X, ...)
 }
 
 #' Piecewise Linear regression (same slope, different interception)
@@ -219,7 +219,7 @@ LSmatrix<-function(Y, T_anorm, Ic, ...){
   if(!is.na(Ic)) {
     D <- cbind(D, c(rep(0,Ic), rep(1,Nx-Ic)))
   }
-  lm_solve(D, X, ...)  
+  lm_solve(D, X, ...)
 }
 
 lm_solve <- function(D, X, only.SSE = FALSE, ...) {
