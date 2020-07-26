@@ -34,7 +34,7 @@ adjust_TP <- function(TP, metadata, maxgap = 90) {
 #' @rdname adjust_TP
 #' @export
 adjust_step_TP <- function(r) {
-  TP2   <- r$turningPoint
+  TP2   <- r$TP
   I_del <- TP2[, which.min(abs(stepsize))]
   kind  <- TP2$kind[I_del]
   if (kind == 0) {

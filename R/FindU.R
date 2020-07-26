@@ -104,7 +104,8 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     Y1   <- oout$Base
     EB   <- oout$EB
     assign("EB",EB,envir=.GlobalEnv)
-    if(length(EB)!=length(Icy)) {
+
+    if(length(EB) != length(Icy)) {
         ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
                          "\n",get("ErrorMSG",env=.GlobalEnv),"\n")
         if(!GUI) print(ErrorMSG)
@@ -444,9 +445,6 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         }
     }
 
-    odata = as.data.table(odata)
-    write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
-
     otmp   <- LSmultiple(Y1,Ti,Ips)
     resi   <- otmp$resi
     otmpW  <- LSmultiple(W,Ti,Ips)
@@ -540,12 +538,15 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
             Ips, Iseg.adj)
 
+    odata = as.data.table(odata)
+    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+    write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
+
     if(GUI)
         return(0)
     else {
         file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
         # cat("FindU finished successfully...\n")
-        odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
-        list(fit = odata, turningPoint = d_TP)
+        list(fit = odata, TP = d_TP)
     }
 }

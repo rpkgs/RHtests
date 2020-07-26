@@ -18,7 +18,8 @@
 #' infile = system.file("extdata/Example1.dat", package = "RHtests")
 #' Read(infile, "-999.99")
 #' @export
-Read <- function(InSeries, MissingValueCode = "-999.99"){    
+Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95){    
+
     itable <- if (is.character(InSeries)) {
         sep = ifelse(is.csv(InSeries), ",", " ")
         fread(InSeries, sep = sep, na.strings = MissingValueCode)
@@ -31,17 +32,19 @@ Read <- function(InSeries, MissingValueCode = "-999.99"){
     ooflg      <- itable[, which(isnot_0229 & !is.na(data))]
 
     # get rid of Feb 29th data
-    Nall <- n <- nrow(itable)
+    
     itable   <- itable[isnot_0229, ]
     iyrbegin <- itable$year[1]
     imdbegin <- itable$month[1]*100 + itable$day[1]
+    n <- nrow(itable)
     iyrend   <- itable$year[n]
     imdend   <- itable$month[n]*100 + itable$day[n]
 
     # check input data (both base and ref), no jump with begin and end
-    Icy  <- ori.itable[, sort(unique(month*100+day))]
+    Icy <- itable[, sort(unique(month * 100 + day))]
     # Icy  <- sort(unique(ori.itable[ooflg, 2]*100+ori.itable[ooflg,3]))
     Ind2 <- iyrbegin*10000 + Icy[Icy>=imdbegin] # first year
+
     if (iyrend > (iyrbegin + 1)) {
         for (i in (iyrbegin + 1):(iyrend - 1)) {
             Ind2 <- c(Ind2, i * 10000 + Icy)
@@ -79,6 +82,9 @@ Read <- function(InSeries, MissingValueCode = "-999.99"){
         ErrorMSG<<-paste("Too many missing values in ", InSeries, "to estimate autocorrelation\n")
         return(-1)
     }
+
+    N <- length(Y0)
+    readPFtable(N, plev)
 
     itable <- itable[!is.na(data), ]
     assign("ori.itable", as.data.frame(ori.itable), envir = .GlobalEnv)
@@ -376,8 +382,8 @@ ReadDLY.g<-function(InSeries,MissingValueCode){
 
     iyrbegin<-itable[1,1]
     imdbegin<-itable[1,2]*100+itable[1,3]
-    iyrend<-itable[dim(itable)[1],1]
-    imdend<-itable[dim(itable)[1],2]*100+itable[dim(itable)[1],3]
+    iyrend <- itable[dim(itable)[1],1]
+    imdend <- itable[dim(itable)[1],2]*100+itable[dim(itable)[1],3]
     # keep input base data as ori.itable
     ori.itable<-itable
     # check input data (both base and ref), no jump with begin and end

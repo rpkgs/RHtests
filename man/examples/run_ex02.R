@@ -5,7 +5,7 @@ Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 metadata <- data.table(date = c("19740200", "19751100"))
 prefix <- "../../OUTPUT/example02/example02"
 
-r <- process_RHtests(Bseries, Rseries, metadata, prefix)
+r <- RHtests_process(Bseries, Rseries, metadata, prefix)
 plot_RHtests(r)
 
 # expect_equal(nrow(r$turningPoint), 11)

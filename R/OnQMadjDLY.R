@@ -12,8 +12,7 @@ OnQMadjDLY<-function(){
         if(length(outdirtmp)<=2){
             curdir<-paste(outdirtmp[1])
             outdir<-paste(outdirtmp[1],"output",sep=":/")
-        }
-        else{
+        } else {
             curdir<-outdirtmp[1]
             for(i in 2:(length(outdirtmp)-1))
                 curdir<-paste(curdir,outdirtmp[i],sep="/")

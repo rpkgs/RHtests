@@ -4,12 +4,16 @@
 \alias{Read}
 \title{read input of RHtestsV4}
 \usage{
-Read(InSeries, MissingValueCode = "-999.99")
+Read(InSeries, MissingValueCode = "-999.99", plev = 0.95)
 }
 \arguments{
 \item{InSeries}{file path of the input data}
 
 \item{MissingValueCode}{string, missing value code}
+
+\item{plev}{plev is the nominal level of confidence; (1 - plev) is the
+nominal level of significance, choose one of the following 6 plev values:
+0.75, 0.80, 0.90, 0.95, 0.99, 0.9999}
 }
 \value{
 If failed, NULL will be returned. If success, a data.table with the following

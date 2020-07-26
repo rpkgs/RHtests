@@ -573,15 +573,15 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
     }
   }
 
-  ofileAout <- paste(output,"_U.dat",sep="")
-  write.table(file=ofileAout,odata,col.names=TRUE,row.names=F,na=MissingValueCode)
+  odata %<>% as.data.table()
+  odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
+  write.table(file=paste0(output,"_U.dat"),odata,col.names=TRUE,row.names=F,na=MissingValueCode)
+
   if(GUI) return(0)
   else{
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     # cat("FindU.wRef finished successfully...\n")
-    odata %<>% as.data.table()
-    odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
-    list(fit = odata, turningPoint = d_TP)
+    list(fit = odata, TP = d_TP)
   }
 }
 

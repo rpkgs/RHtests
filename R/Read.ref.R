@@ -8,7 +8,7 @@
 #             for autocorrelation calculation
 #  bdata  --  matrix of non-missing base data, 4 columns, yyyy,mm,dd,data
 #  ori.bdata  -- original base data matrix, also 4 columns, same as bdata
-Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99"){
+Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95){
     if (is.null(Bseries) || is.null(Rseries)) return()
 
     var_colnames <- c("year", "month", "day", "data")
@@ -158,6 +158,9 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99"){
     # c("id", "date", "value", "is_continue")
     # listk(Ti, IY0, Y0, IY0flg) %>% str()
     # listk(bdata = itable.nmb, ori.bdata = ori.itable, TiB, IYBflg, owflg, Icy, Nt) %>% str()
+
+    N <- length(Y0)
+    readPTtable(N, plev)
 
     ## data
     assign("bdata"    , as.data.frame(itable.nmb), envir = .GlobalEnv) # non-missing table for base data

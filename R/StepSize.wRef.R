@@ -74,10 +74,8 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   ofileMout <- paste0(output,"_mCs.txt")
   ofilePdf  <- paste0(output,"_F.pdf")
   ofileSout <- paste0(output,"_Fstat.txt")
-  ofileAout <- paste0(output,"_F.dat")
   # ofileRout<-paste(output,"_Base_Ref.fitUDfinal",sep="")
   file.create(ofileSout)
-  file.create(ofileAout)
   file.create(ofileIout)
   # file.create(ofilePdf)
   # file.create(ofileRout)
@@ -434,7 +432,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
 
   odata %<>% as.data.table()
   odata$date %<>% add(1) %>% as.character() %>% as.Date("%Y%m%d")
-  write.table(file=ofileAout, odata,col.names=TRUE,row.names=F,na=MissingValueCode)
+  write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=F, na=MissingValueCode)
 
   d_TP %<>% do.call(rbind, .)
   d_TP$stepsize <- stepsizes
@@ -445,6 +443,6 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     # cat("StepSize.wRef finished successfully...\n")
-    list(data = odata, turningPoint = d_TP)
+    list(data = odata, TP = d_TP)
   }
 }

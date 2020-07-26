@@ -665,6 +665,6 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   else {
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     # cat("FindUD.wRef finished successfully...\n")
-    list(fit = odata, turningPoint = d_TP)
+    list(fit = odata, TP = d_TP)
   }
 }
