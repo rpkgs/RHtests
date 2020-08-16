@@ -41,7 +41,7 @@ FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
     file.create(ofilePdf)
     file.create(ofileSout)
     cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
-    cat(paste("Input data filename:", InSeries,"N=",N,"\n"),file=ofileSout,append=T)
+    cat(paste("Input data filename:","N=",N,"\n"),file=ofileSout,append=T)
 
     Ip0      <- N
     oout     <- LSmultiRedCycle(Y1,Ti,Ip0,1)
@@ -132,7 +132,7 @@ FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
         Imx     <- c(I1,I2,I3)[tmp$ix[1]]
         if(prob.mx < plev){
             #     cat("PMF finds the series to be homogeneous!\n",file=ofileIout)
-            cat(paste(0,"changepoints in Series", InSeries,"\n"),file=ofileIout)
+            cat(paste(0,"changepoints in Series","\n"),file=ofileIout)
             cat("PMF finds the series to be homogeneous!\n")
             #     return()
             Ns  <- 0
@@ -495,7 +495,7 @@ FindUD <- function(InSeries = NULL, InCs, output, MissingValueCode="-999.99",
         }
 
         if (Ns == 0) cat("PMF finds the series to be homogeneous!\n")
-        cat(paste("# ", Ns, "changepoints in Series", InSeries, "\n"), file = ofileIout)
+        cat(paste("# ", Ns, "changepoints in Series", "\n"), file = ofileIout)
 
         d_TP %<>% do.call(rbind, .)
         d_TP[, 4:9] %<>% lapply(round, digits = 4)

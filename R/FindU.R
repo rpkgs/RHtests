@@ -96,7 +96,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
 
     N <- length(Y0); Nadj <- Ny4a*Nt
     cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
-    cat(paste("Input data filename:", InSeries, "N=",N, "\n"),file=ofileSout,append=T)
+    cat(paste("Input data filename:", "N=",N, "\n"),file=ofileSout,append=T)
     readPFtable(N, plev)
 
     Pk0  <- Pk.PMFT(N)
@@ -207,7 +207,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     if(PFx.mx<PFx95L){
         Ns  <- 0
         Ips <- N
-        cat(paste(Ns,"changepoints in Series", InSeries,
+        cat(paste(Ns,"changepoints in Series",
                   paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
                         sprintf("%10.0f",19000101),")",sep=""),"\n"),file=ofileIout)
         cat("PMF finds no Type-1 changepoints in the series!\n")
@@ -522,11 +522,11 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         ## save turningPoints --------------------------------------------------
         if (Ns==0) {
             cat("PMF finds no Type-1 changepoints in the series!\n")
-            cat(paste("# ", Ns,"changepoints in Series", InSeries,
+            cat(paste("# ", Ns,"changepoints in Series",
                     paste("sample:(",sprintf("%1.0f",1)," ",sprintf("%-4.4s","YifD"),
                             sprintf("%10.0f",19000101),")",sep=""),"\n"), file=ofileIout)
         } else {
-            cat(paste("# ", Ns,"changepoints in Series", InSeries,"\n"), file=ofileIout)
+            cat(paste("# ", Ns,"changepoints in Series","\n"), file=ofileIout)
         }
 
         d_TP %<>% do.call(rbind, .)

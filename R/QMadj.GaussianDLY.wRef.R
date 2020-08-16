@@ -36,7 +36,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
 
   ofileSout<-paste(output,"_QMadjDLYstat.txt",sep="")
   file.create(ofileSout)
-  cat(paste("Input data filename:", InSeries,"; N=",N,"\n"),file=ofileSout)
+  cat(paste("Input data filename:","; N=",N,"\n"),file=ofileSout)
 
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])

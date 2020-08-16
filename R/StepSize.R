@@ -122,7 +122,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
   file.create(ofileIout)
   file.create(ofilePdf)
   cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
-  cat(paste("Input data filename:", InSeries,"N=",N,"\n"),file=ofileSout,append=T)
+  cat(paste("Input data filename:","N=",N,"\n"),file=ofileSout,append=T)
   cat(file=ofileSout,paste(" Ignore changepoints -> trend0 =",
                            round(beta0,6),"(",round(betaL0,6),",",round(betaU0,6),
                            ") (p=",round(p.tr0,4),"); cor=",round(corD,4),"(",round(corDL,4),
@@ -323,7 +323,7 @@ StepSize <- function(InSeries = NULL, InCs, output,
     }
 
     if (Ns == 0) cat("PMF finds the series to be homogeneous!\n")
-    cat(paste("# ", Ns, "changepoints in Series", InSeries, "\n"), file = ofileIout)
+    cat(paste("# ", Ns, "changepoints in Series", "\n"), file = ofileIout)
 
     d_TP %<>% do.call(rbind, .)
     d_TP[, 6:13] %<>% lapply(round, digits = 4)

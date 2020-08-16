@@ -79,7 +79,7 @@ Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95){
         if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
     }
     if(sum(IY0flg)<10){  # too few available data for autocorlh
-        ErrorMSG<<-paste("Too many missing values in ", InSeries, "to estimate autocorrelation\n")
+        ErrorMSG<<-paste("Too many missing values in ", "to estimate autocorrelation\n")
         return(-1)
     }
 
@@ -415,7 +415,7 @@ ReadDLY.g<-function(InSeries,MissingValueCode){
         if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
     }
     if(sum(IY0flg)<10){  # too few available data for autocorlh
-        ErrorMSG<<-paste("Too many missing values in ", InSeries, "to estimate autocorrelation\n")
+        ErrorMSG<<-paste("Too many missing values in ", "to estimate autocorrelation\n")
         return(-1)
     }
     itable <- itable[is.na(itable[, 4]) == F, ]
