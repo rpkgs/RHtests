@@ -2,7 +2,7 @@ test_that("StepSize.wRef works", {
   Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
   Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
-  metadata <- data.table(date = c("19740200", "19751100"))
+  metadata <- data.table(date = c("1974-02-01", "1975-11-01"))
   prefix <- "../../OUTPUT/example02/example02"
 
   r <- RHtests_process(Bseries, Rseries, metadata, prefix)

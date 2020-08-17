@@ -6,5 +6,5 @@ test_that("StepSize with noref works", {
   plot_RHtests(r)
 
   expect_equal(nrow(r$data), 636)
-  expect_equal(r$TP$date, c(197001, 197402, 197607) * 100)
+  expect_equal(r$TP$date %>% date2num(), c(197001, 197402, 197607) * 100 + 1)
 })

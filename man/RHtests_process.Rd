@@ -9,7 +9,7 @@ RHtests_process(
   data.ref = NULL,
   metadata,
   prefix = "./OUTPUT/example02",
-  maxgap = 90,
+  maxgap = 366,
   is_plot = TRUE,
   verbose = TRUE
 )

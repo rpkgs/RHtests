@@ -1,5 +1,6 @@
 #' @keywords internal
 #' @import data.table magrittr
+#' @import plyr
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
@@ -30,3 +31,4 @@ NULL
 #     given integer Iadj > Ns+1, we re-set Iadj=Ns+1, which corresponds to
 #     adjusting the series to the last segment). Set Iadj = 10000 if you want 
 #     to ensure that the series is adjusted to the last segment
+
