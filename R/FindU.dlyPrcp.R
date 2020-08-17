@@ -662,6 +662,6 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("FindU.dlyPrcp finished successfully...\n")
     # odata
-    list(fit = NULL, TP = d_TP)
+    list(data = odata, TP = d_TP)
   }
 }

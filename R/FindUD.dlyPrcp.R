@@ -474,25 +474,28 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
     }
     if(QMout$Mq==1) PA<-rep(NA,length(QMout$PA))
 
-    odata<-cbind(1:nrow(ori.itable),ori.itable[,1]*10000+ori.itable[,2]*100+ori.itable[,3],
+    odata<-cbind(1:nrow(ori.itable),
+      ori.itable[,1]*10000+ori.itable[,2]*100+ori.itable[,3],
                  #                ori.itable[,4],NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
                  ori.itable[,4],ori.itable[,4],ori.itable[,4],ori.itable[,4],ori.itable[,4],ori.itable[,4],
                  ori.itable[,4],ori.itable[,4],ori.itable[,4],0,0)
     Imd<-itable[,1]
-    odata[Imd,4]<-round(Pmeanhat,4)
-    odata[Imd,5]<-round(PA,4)
-    odata[Imd,6]<-round(PdA,4)
-    odata[Imd,7]<-round(PmeanhatA,4)
-    odata[Imd,8]<-round(Y1,4)
-    odata[Imd,9]<-round(meanhat,4)
-    odata[Imd,10]<-round(Y,4)
-    odata[Imd,11]<-round(meanhatA,4)
-    odata[Imd,12]<-round(PA-itable[,5],4)
-    odata[Imd,13]<-round(PdA-itable[,5],4)
+    odata[Imd,4]  <- round(Pmeanhat,4)
+    odata[Imd,5]  <- round(PA,4)
+    odata[Imd,6]  <- round(PdA,4)
+    odata[Imd,7]  <- round(PmeanhatA,4)
+    odata[Imd,8]  <- round(Y1,4)
+    odata[Imd,9]  <- round(meanhat,4)
+    odata[Imd,10] <- round(Y,4)
+    odata[Imd,11] <- round(meanhatA,4)
+    odata[Imd,12] <- round(PA-itable[,5],4)
+    odata[Imd,13] <- round(PdA-itable[,5],4)
+    
     odataP<-cbind(itable[,1],IY0,itable[,5],Pmeanhat,PA,PdA,PmeanhatA,
                   Y1,meanhat,Y,meanhatA,PA-itable[,5],PdA-itable[,5])
     otrend.ori<-getMtrendFdly(itable[,2:5])
     otrend.IBC<-getMtrendFdly(cbind(itable[,2:4],PdA))
+
     cat(paste("Linear trend in the original monthly total P is trend0=",
               round(otrend.ori,5),"mm/month\n"),file=ofileSout,append=T)
     if(QMout$Mq>1){
@@ -743,7 +746,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   else{
     file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     cat("FindUD.dlyprcp finished successfully...\n")
-    odata = NULL
-    list(fit = odata, TP = d_TP)
+    # odata = NULL
+    list(data = odata, TP = d_TP)
   }
 }

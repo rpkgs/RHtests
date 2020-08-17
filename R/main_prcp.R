@@ -32,5 +32,10 @@ getMtrendFdly<-function(idata){
     mmean[i]<-mean(tdata[tdata[,2]==i,3],na.rm=T)
     t1data[t1data[,2]==i,3]<-t1data[t1data[,2]==i,3]-mmean[i]
   }
-  return(summary(lm(t1data[,3]~c(1:dim(tdata)[1])))$coef[2,1])
+  y = t1data[, 3]
+  ind = which(!is.na(y))
+  y = y[ind]
+  # print(y)
+  # browser()
+  summary(lm(y~ind))$coef[2,1]
 }

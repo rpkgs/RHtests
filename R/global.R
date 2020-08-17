@@ -23,3 +23,21 @@ fitdata_varnames_ref <-
     "annualC+meanShifts", #"meanhat+EB",  # 10
     "QM_adjusted",  # B, 11
     "fit_of_deseason_base") # 12
+
+
+fitprcp_varnames_noref <- 
+    c("id", "date", "base",
+    "trend+meanShift_org", 
+    
+    "QM_adjusted" , #5
+    "mean_adj_orj", #6
+
+    "trend+meanShift_QM_adjusted", #7
+    "BoxCox_transf_org", #8
+
+    "trend+meanShift_BoxCox", #9
+    "mean_adj BoxCoxTransf_org" , #10
+
+    "trend+meanShift_mean_adj BoxCox", #11
+    "QM_adjusted - base",              # 12, (5-3)
+    "mean_adj - base") # 13     # 10
