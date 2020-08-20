@@ -4,17 +4,17 @@
 
 format_RHinput <- function(d) {
     varnames <- setdiff(colnames(d), c("site", "date"))
-    d[, .(year = year(date), month = month(date), day = day(date))] %>% 
+    d[, .(year = year(date), month = month(date), day = day(date))] %>%
         cbind(d[, ..varnames])
 }
 
 #' get the turning points of monthly and yearly data
-#' 
+#'
 #' @param df A data.frame with the columns at least of `site`, 'date', 'varname'
 #' @param st_moveInfo
-#' 
+#'
 #' @export
-RHtests_main <- function(df, st_moveInfo, sites, varname) {
+RHtests_main <- function(df, st_moveInfo, sites, varname, .parallel = FALSE) {
     sites %<>% set_names(., .)
     res <- foreach(sitename = sites, i = icount()) %dopar% {
         # for(i in seq_along(sites_rural[1:30])) {
@@ -25,8 +25,8 @@ RHtests_main <- function(df, st_moveInfo, sites, varname) {
             d <- df[site == sitename, .SD, .SDcols = c("date", varname)]
             date_begin = d$date[1]
             date_end = d$date[nrow(d)]
-            metadata = st_moveInfo[site == sitename, ] %>% 
-                .[period_date_begin > date_begin & 
+            metadata = st_moveInfo[site == sitename, ] %>%
+                .[period_date_begin > date_begin &
                     period_date_end < date_end, ]
             metadata[, date := period_date_begin]
 
@@ -35,8 +35,8 @@ RHtests_main <- function(df, st_moveInfo, sites, varname) {
             ## 以monthly为准
             prefix  = "./OUTPUT/example01"
             # browser()
-            r_month <- RHtests_process2(l$month, NULL, metadata, prefix, is_plot = FALSE, maxgap = 366)
-            r_year  <- RHtests_process2(l$year, NULL, metadata, prefix, is_plot = FALSE, maxgap = 366)
+            r_month <- RHtests_process(l$month, NULL, metadata, prefix, is_plot = FALSE, maxgap = 366)
+            r_year  <- RHtests_process(l$year, NULL, metadata, prefix, is_plot = FALSE, maxgap = 366)
             # TP <- r_month$TP
             # r_daily <- RHtests_stepsize(l$day, NULL, TP, prefix = prefix, is_plot = TRUE)
             list(year = r_year, month = r_month)
@@ -48,7 +48,7 @@ RHtests_main <- function(df, st_moveInfo, sites, varname) {
     # temp <- map(res, 2) %>% rm_empty()
     # sites_nonhomo <- names(temp)
     # TP <- melt_list(temp, "site")
-    # res2 <- res[sites_nonhomo]    
+    # res2 <- res[sites_nonhomo]
     # listk(sites_nonhomo, TP, result = res2)
 }
 
@@ -80,13 +80,6 @@ RHtests_adj_daily <- function(df, lst_TP, varname = "Tavg") {
     res_daily
 }
 
-# res2 <- RHtests_doubleCheck(res)
-RHtests_rm_empty <- function(res) {
-    I_left1 <- map(res, 1) %>% which.notnull()
-    I_left2 <- map(res, 2) %>% which.notnull()
-    I_left <- intersect(I_left1, I_left2) # %>% sort()
-    res[I_left]
-}
 
 tidy_TP <- function(res2) {
     sites_TP <- names(res2) %>% set_names(., .)
@@ -94,7 +87,7 @@ tidy_TP <- function(res2) {
         runningId(i, 100)
         meta = st_moveInfo[site == sitename, ] %>% plyr::mutate(date = period_date_begin)
         meta$date %<>% as.Date()
-        
+
         year = x$year$TP
         month = x$month$TP
         # year$date %<>% as.character() %>% as.Date("%Y%m%d")
@@ -108,7 +101,7 @@ tidy_TP <- function(res2) {
 
             diff_meta = difftime(date, meta$date, units = "days") %>% as.numeric()
             I_meta = which.min(abs(diff_meta))
-            
+
             cbind(month[j, 1:9],
                 date_year = year$date[I_year], day2_year = diff_year[I_year],
                 date_meta = meta$date[I_meta], day2_meta = diff_meta[I_meta]
@@ -128,7 +121,7 @@ plot_RHtests_multi <- function(obj, outfile = "RHtests.pdf") {
     dout <- map(obj$result, ~ .$data[, .(date = num2date(date), base, QM_adjusted)]) %>%
         melt_list("site")
     n = length(obj$result)
-    
+
     p <- ggplot(dout, aes(date, y = QM_adjusted - base)) +
         geom_line() +
         # geom_line(aes(date, QM_adjusted), color = "blue") +

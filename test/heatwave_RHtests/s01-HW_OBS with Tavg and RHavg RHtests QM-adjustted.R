@@ -46,19 +46,6 @@ if (run_RHtests){
 }
 
 ## DEBUG module ----------------------------------------------------------------
-merge_adjusted <- function(df, varname) {
-    infile = glue("OUTPUT/RHtests_{varname}_QMadjusted.RDS")
-    out <- readRDS(infile)
-    df_adj <- map(out, ~.$data[, .(date, base, QM_adjusted)]) %>% melt_list("site")
-    sites_adj <- sort(unique(df_adj$site))
-
-    varnames = c("site", "date", varname)
-    df_good = df[!(site %in% sites_adj), .SD, .SDcols = varnames] %>% cbind(QC = 1)
-    df_adj2 = df_adj[, .(site, date, QM_adjusted)] %>% set_colnames(varnames) %>% cbind(QC = 0)
-    ans = rbind(df_good, df_adj2) %>% set_colnames(c(varnames, paste0("QC_", varname)))
-    ans
-}
-
 {    
     d_Tavg = merge_adjusted(df, "Tavg")
     d_RHavg = merge_adjusted(df, "RHavg")

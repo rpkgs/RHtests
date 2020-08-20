@@ -107,39 +107,45 @@ revise_locaiton <- function(d, prefix = "",
     # listk(d, status)
 }
 
-get_moveInfo <- function(st, prefix = NULL) {
-    st$lon %<>% deg2dec() %>% dec2deg()
-    st$lat %<>% deg2dec() %>% dec2deg()
-    st$alt %<>% get_alt()
+#' Revise site moving information for all sites
+#'
+#' @param info site moving info returned by [get_moveInfo()]
+#' @param dist_max If the site moving distance beyond the `dist_max`, it will
+#' be regarded as outlier and will be fixed by [revise_location()].
+#'
+#' @details
+#' Continuous moving location outliers are also considered at here.
+#'
+#' @export
+revise_locaiton_main <- function(info, dist_max = 50) {
+    info$QC <- ""
+    sites <- info[dist >= dist_max]$site %>% unique()
+    info_bad <- info[site %in% sites, ]
 
-    st_moveInfo = ddply(st, .(site), function(d) {
-        # d = st[site == 58246]
-         # + alt
-        d$tag = d[, lon^2 + lat^2] %>%
-            {c(1, abs(diff(.)) > 0.1)} %>% cumsum()
-        # d$date = d[, make_date(year, month, day)]
-        date_begin = min(d$date)
-        date_end   = max(d$date)
-
-        d[, .(period_date_begin = min(date), period_date_end = max(date),
-              date_begin, date_end),
-            .(site, tag, lon, lat, alt)]
-    }, .progress = "text")
-
-    # st_moveInfo %<>% do.call(rbind, .)
-    st_moveInfo[, moveTimes := max(tag), .(site)]
-    st_moveInfo %<>% reorder_name(c("site", "moveTimes", "tag"))
-    st_moveInfo[, 7:10] %<>% map(as.Date)
-    # st_moveInfo[, alt := get_alt(alt)]
-    st_moveInfo[, `:=`(n_all = difftime(date_end, date_begin) %>% as.numeric() %>% add(1),
-                       n_period = difftime(period_date_end, period_date_begin, units = "days") %>% as.numeric() %>% add(1))]
-
-    st_moveInfo[, dist := get_dist(lon, lat, n_period), .(site)]
-    if (!is.null(prefix)) {
-        str_begin = st[1, format(date, "%Y%m")]
-        str_end   = st[nrow(st), format(date, "%Y%m")]
-        fwrite(st_moveInfo, glue::glue("data-raw/mete2481_站点变迁记录-{prefix}-({str_begin}-{str_end}).csv"))
+    temp <- foreach(sitename = sites, i = icount()) %do% {
+        d <- info[site == sitename, ]
+        # d$QC = "raw"
+        prefix <- sprintf("%02dth:%s", i, sitename)
+        r <- revise_locaiton(d, prefix, dist_max)
+        # r$status
+        r
     }
-    st_moveInfo
-}
+    # %>% reorder_name(c("site", "moveTimes", "tag", "lon", "lat", "alt", "dist", "n_period", "QC"))
+    df <- do.call(rbind, temp)
 
+    d_fixed <- df[QC %in% c("good", "margin"), .N, .(site)] # %>% nrow()
+    d_unsure <- df[QC %in% c("suspicious"), .N, .(site)] # %>% nrow()
+    d_unfixed <- df[QC %in% c("unfixed"), .N, .(site)]
+    sites_bad <- d_unsure$site
+    sites_unfixed <- setdiff(d_unfixed$site, d_unsure$site)
+    # n_fixed = length(sites) - length(sites_bad)
+    ok(sprintf(
+        "[info] %d sites fixed, %d sites unfixed, %s sites not sure\n",
+        nrow(d_fixed), length(sites_unfixed), length(sites_bad)
+    ))
+
+    info_final <- rbind(info[!(site %in% sites)], df)
+    info_final
+    # sites_bad = sites[which(unlist(temp) == "bad")]
+    # sites_bad = c("51058", "52378", "52607", "52884", "53730", "54287")
+}
