@@ -45,11 +45,36 @@ RHtests_main <- function(df, st_moveInfo, sites, varname, .parallel = FALSE) {
         })
     }
     res
-    # temp <- map(res, 2) %>% rm_empty()
-    # sites_nonhomo <- names(temp)
-    # TP <- melt_list(temp, "site")
-    # res2 <- res[sites_nonhomo]
-    # listk(sites_nonhomo, TP, result = res2)
+}
+
+#' @param d A data.frame with columns of date, varname, ref
+#' @param metedata A data.frame with column date indicating turning point
+#' 
+#' @export
+RHtests_site_ref <- function(d, metedata, varname) {
+    if (nrow(d) == 0) { message("no data!"); return() }
+    ## 以monthly为准
+    prefix  = "./OUTPUT/example01"
+
+    tryCatch({
+        l <- RHtests_input(d) # %>% str()
+        # prefix <- "../../OUTPUT/example02/example02"
+        # prefix <- "OUTPUT/example02/example02"
+        B_mon <- l$month[, c(1, 2, 3, 4)]
+        R_mon <- l$month[, c(1, 2, 3, 5)]
+
+        B_year <- l$year[, c(1, 2, 3, 4)]
+        R_year <- l$year[, c(1, 2, 3, 5)]
+
+        r_month <- RHtests_process(B_mon, R_mon, metadata, prefix, is_plot = FALSE, maxgap = 366)
+        r_year <- RHtests_process(B_year, R_year, metadata, prefix, is_plot = FALSE, maxgap = 366)
+        list(year = r_year, month = r_month)
+    }, error = function(e) {
+        message(sprintf('%s', emessage))
+    })
+    
+    # TP <- r_month$TP
+    # r_daily <- RHtests_stepsize(l$day, NULL, TP, prefix = prefix, is_plot = TRUE)
 }
 
 #' get the daily QM-adjusted results
@@ -78,43 +103,6 @@ RHtests_adj_daily <- function(df, lst_TP, varname = "Tavg") {
         })
     }
     res_daily
-}
-
-
-tidy_TP <- function(res2) {
-    sites_TP <- names(res2) %>% set_names(., .)
-    lst <- foreach(sitename = sites_TP, x = res2, i = icount()) %do% {
-        runningId(i, 100)
-        meta = st_moveInfo[site == sitename, ] %>% plyr::mutate(date = period_date_begin)
-        meta$date %<>% as.Date()
-
-        year = x$year$TP
-        month = x$month$TP
-        # year$date %<>% as.character() %>% as.Date("%Y%m%d")
-        # month$date %<>% as.character() %>% as.Date("%Y%m%d")
-
-        # for(j in 1:nrow(month)) {
-        month2 <- foreach(j = 1:nrow(month)) %do% {
-            date = month$date[j]
-            diff_year = difftime(date, year$date, units = "days") %>% as.numeric()
-            I_year = which.min(abs(diff_year))
-
-            diff_meta = difftime(date, meta$date, units = "days") %>% as.numeric()
-            I_meta = which.min(abs(diff_meta))
-
-            cbind(month[j, 1:9],
-                date_year = year$date[I_year], day2_year = diff_year[I_year],
-                date_meta = meta$date[I_meta], day2_meta = diff_meta[I_meta]
-            ) %>%
-                reorder_name(c(
-                    "kind", "Idc", "Ic", "date", "date_meta", "date_year",
-                    "day2_meta", "day2_year"))
-        } %>% do.call(rbind, .)
-        cbind(site = sitename, month2)
-        # listk(TP = month2, meta)
-    }
-    info <- do.call(rbind, lst)
-    info
 }
 
 plot_RHtests_multi <- function(obj, outfile = "RHtests.pdf") {

@@ -35,3 +35,44 @@ merge_adjusted <- function(df, varname) {
     ans
 }
 
+
+#' @param res2 object returned by [RHtests()]
+#' 
+tidy_TP <- function(res2) {
+    names <- names(res2)
+    if (is.null(names)) names <- seq_along(res2)
+    sites_TP <- set_names(names, names)
+
+    lst <- foreach(sitename = sites_TP, x = res2, i = icount()) %do% {
+        runningId(i, 100)
+        # meta = st_moveInfo[site == sitename, ] %>% plyr::mutate(date = period_date_begin)
+        # meta$date %<>% as.Date()
+
+        year = x$year$TP
+        month = x$month$TP
+        # year$date %<>% as.character() %>% as.Date("%Y%m%d")
+        # month$date %<>% as.character() %>% as.Date("%Y%m%d")
+
+        # for(j in 1:nrow(month)) {
+        month2 <- foreach(j = 1:nrow(month)) %do% {
+            date = month$date[j]
+            diff_year = difftime(date, year$date, units = "days") %>% as.numeric()
+            I_year = which.min(abs(diff_year))
+
+            diff_meta = difftime(date, month$date_meta, units = "days") %>% as.numeric()
+            I_meta = which.min(abs(diff_meta))
+
+            cbind(month[j, 1:9],
+                date_year = year$date[I_year], day2_year = diff_year[I_year],
+                date_meta = month$date_meta[I_meta], day2_meta = diff_meta[I_meta]
+            ) %>%
+                reorder_name(c(
+                    "kind", "Idc", "Ic", "date", "date_meta", "date_year",
+                    "day2_meta", "day2_year"))
+        } %>% do.call(rbind, .)
+        cbind(site = sitename, month2)
+        # listk(TP = month2, meta)
+    }
+    info <- do.call(rbind, lst)
+    info
+}

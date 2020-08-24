@@ -1,7 +1,8 @@
 #' @export
-RHtests_input <- function(d) {
+RHtests_input <- function(d, varnames = NULL) {
   vars_commom <- c("year", "month", "day")
-  varnames <- setdiff(colnames(d), c(vars_commom, "date"))
+  if (is.null(varnames))
+    varnames <- setdiff(colnames(d), c(vars_commom, "date"))
 
   if (all.equal(intersect(vars_commom, colnames(d)), vars_commom) != TRUE){
       d[, `:=`(year = year(date), month = month(date), day = day(date))]

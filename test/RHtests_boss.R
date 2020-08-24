@@ -7,6 +7,37 @@ library(missInfo)
 library(purrr)
 library(matrixStats)
 
+get_refer_sites <- function(df2, varname = "Tavg") {
+    date = seq(ymd("1951-01-01"), ymd("2019-12-31"), by = "day")
+    mat = dcast(df2, date ~ site, value.var = varname)[, -1] %>% as.matrix()
+
+    ## when aggregate daily to monthly scale, if more than 3 invalid values, monthly
+    # value will be set to NA
+    mat_month = apply_col(mat, by = format(date, "%Y-%m-01"))
+    mat_month_miss = apply_col(is.na(mat), by = format(date, "%Y-%m-01"), colSums2)
+    mat_month[mat_month_miss >= 3] = NA_real_
+
+    ## searching potential reference sites
+    # check site names order first
+    if (!all.equal(st$site %>% as.character(), colnames(mat)[-1])) {
+        stop("check site names order first!")
+    }
+
+    # 1. 站点长度至少大于30年（76个站点被移除）
+    st_refs = st_refer(st, dist, mat_month)
+    st_refs_opt = st_refer_opt(st_refs, sites_worst)
+    d_refs <- melt_list(st_refs_opt %>% rm_empty(), "target")
+    # save(st_refs, st_refs_opt, d_refs, file = "OUTPUT/mete2481_TEM_st_refer.rda")
+}
+
+get_metadata <- function(d, sitename, st_moveInfo) {
+    date_begin <- d$date[1]
+    date_end <- d$date[nrow(d)]
+    metadata <- st_moveInfo[site == sitename, ] %>%
+        .[period_date_begin > date_begin & period_date_end < date_end, ] %>%
+        .[, date := period_date_begin]
+}
+
 # ------------------------------------------------------------------------------
 dir_root <- "N:/DATA/China/2400climate data" %>% path.mnt()
 varnames <- c("EVP", "GST", "PRE", "PRS", "RHU", "SSD", "TEM", "WIN")
@@ -61,6 +92,7 @@ file_RHtests_monthly = glue("OUTPUT/RHtests_mete{nsite}_{varname}_monthly.RDS")
 file_RHtests_daily   = glue("OUTPUT/RHtests_{varname}_QMadjusted.RDS")
 
 InitCluster(14)
+## 1. PMF test -----------------------------------------------------------------
 res  <- RHtests_main(df2, st_moveInfo = info2_1961_2018, sites, varname)
 saveRDS(res, file_RHtests_monthly)
 
@@ -72,39 +104,28 @@ saveRDS(out, file_RHtests_daily)
 # monthly和yearly一致的，884 TPs
 # temp <- RHtests_main(df2, st_moveInfo = info2_1961_2018, sitename, varname)
 
+st_moveInfo = info2_1961_2018
+varname = "Tavg"
+d_refs = get_refer_sites(df2, varname)
+sites_miss = setdiff(sites, d_refs$target) %>% as.character()
 
-
-
-
-
-date = seq(ymd("1951-01-01"), ymd("2019-12-31"), by = "day")
-mat = dcast(df2, date ~ site, value.var = "Tavg")
-
-## when aggregate daily to monthly scale, if more than 3 invalid values, monthly
-# value will be set to NA
-mat_month = apply_col(mat[, -1] %>% as.matrix(), by = format(mat$date, "%Y-%m-01"))
-mat_month_miss = apply_col(mat[, -1] %>% as.matrix() %>% is.na(), by = format(mat$date, "%Y-%m-01"), colSums2)
-mat_month[mat_month_miss >= 3] = NA_real_
-
-## searching potential reference sites
-# check site names order first
-if (!all.equal(st$site %>% as.character(), colnames(mat)[-1]))
-    stop("check site names order first!")
-
-# 1. 站点长度至少大于30年（76个站点被移除）
-# st[n_all >= 30*365]
-# sites = st$site
-# i = 1
-# sitename = sites[i]
-st_refs = st_refer(st, dist, mat_month)
-which.isnull(st_refs) %>% length()
-
-# which.isnull(st_refs2) %>% length()
-d <- melt_list(st_refs2 %>% rm_empty(), "target")
-
-st_refs_opt = st_optRef(st_refs2)
+# 剩余的153个站点中，64个存在显著的突变点，21个不存在突变点，其余monthly和yearly数据的突变点不一致
 #  81 not ref-sites
 # 153 not ref-sites, sites_worst
 # 308 not ref-sites, sites_worse
+lst <- split(df2[, -1], df2$site)
+# setkeyv(df2, c("site", "date"))
 
-## select only one refers sites
+for (i in 1:nrow(d_refs)) {
+    site_target = d_refs$target[i]
+    site_refer  = d_refs$site[i]
+    i_t = match(site_target, sites)
+    i_r = match(site_refer, sites)
+
+    d_target = lst[[i_t]]
+    d_refer  = lst[[i_r]]
+    d = merge(d_target, d_refer %>% set_names(c("date", "ref")), all.x = TRUE)
+    metadata = get_metadata(d, site_target, st_moveInfo)
+
+        
+}

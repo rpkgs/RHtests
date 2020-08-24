@@ -27,7 +27,6 @@ st_refer <- function(st, dist, mat_month) {
         # y = st_ref[, .(date_begin, date_end)]
         st_ref$perc_cov = period_coverage(period_x, st_ref[, .(date_begin, date_end)])
         st_ref$perc_cov_period = period_coverage(period_x, st_ref[, .(period_date_begin, period_date_end)])
-        st_ref = st_ref[perc_cov > 0.8 & perc_cov_period > 0.8]
         # st_ref = st_ref[!(site %in% sites_bad), ]
 
         ## 计算一阶导的相关系数
@@ -58,23 +57,28 @@ st_refer_opt <- function(st_refs, sites_worst) {
         if (is.null(x)) {
             return(NULL)
         } else {
+            x <- x[perc_cov > 0.8 & perc_cov_period > 0.8]
             x <- x[!(site %in% sites_worst) & cor >= 0.8]
             if (nrow(x) == 0) return(NULL)
 
-            cor_min = 0.8
+            cor_min = 0.7
             if (nrow(x[cor >= 0.90]) >= 5) cor_min = 0.90
             if (nrow(x[cor >= 0.85]) >= 5) cor_min = 0.85
+            if (nrow(x[cor >= 0.80]) >= 5) cor_min = 0.80
             x <- x[cor >= cor_min, ]
             x
         }
     })
-    map(st_refs2, function(x) {
+    out = map(st_refs2, function(x) {
         if (is.null(x)) {
             return(x)
         } else {
             x[which.max(perc_cov), ]
         }
     })
+    nmiss <- which.isnull(out) %>% length()
+    warn(sprintf("[w] %s sites have no reference site!\n", nmiss))
+    out
 }
 
 
@@ -92,6 +96,7 @@ period_coverage <- function(x, y) {
     n_valid <- difftime(date_end, date_begin, units = units) %>% as.numeric()
     n_all <- difftime(x[2], x[1], units = units) %>% as.numeric()
     n_valid / n_all
+    
     # n = 0
     # n_miss_head = difftime(x[1], date_begin, units = "days")
     # n_miss_tail = -difftime(x[2], date_begin, units = "days")
