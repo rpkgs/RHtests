@@ -8,6 +8,7 @@
 #             for autocorrelation calculation
 #  bdata  --  matrix of non-missing base data, 4 columns, yyyy,mm,dd,data
 #  ori.bdata  -- original base data matrix, also 4 columns, same as bdata
+#' @export
 Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95){
     if (is.null(Bseries) || is.null(Rseries)) return()
 
