@@ -1,8 +1,11 @@
+is_empty <- function(x) {
+    if (is.data.frame(x)) nrow(x) == 0 else length(x) == 0 
+}
+
 rm_empty <- function(x) {
     if (is.list(x)) {
-        x[sapply(x, length) > 0]
-    }
-    else {
+        x[!sapply(x, is_empty)]
+    } else {
         x[!is.na(x)]
     }
 }

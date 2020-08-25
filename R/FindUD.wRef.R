@@ -384,9 +384,11 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
     d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic],
       probL, probU, plev, PFx = otmp$PTk, PFx95l = PTx95L, PFx95h = PTx95U)
   }
-  d_TP %<>% do.call(rbind, .)
-  d_TP[, 4:9] %<>% lapply(round, digits = 4)
-  fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
+  if (!is_empty(d_TP)) {
+      d_TP %<>% do.call(rbind, .)
+      d_TP[, 4:9] %<>% lapply(round, digits = 4)
+      fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
+  }
 
   # estimate delta and final output
   otmp   <- Rphi(Y0,Ips,Ns)

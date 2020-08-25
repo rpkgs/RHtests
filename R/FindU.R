@@ -529,9 +529,11 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             cat(paste("# ", Ns,"changepoints in Series","\n"), file=ofileIout)
         }
 
-        d_TP %<>% do.call(rbind, .)
-        d_TP[, 4:9] %<>% lapply(round, digits = 4)
-        fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
+        if (!is_empty(d_TP)) {
+            d_TP %<>% do.call(rbind, .)
+            d_TP[, 4:9] %<>% lapply(round, digits = 4)
+            fwrite(d_TP, ofileIout, append = TRUE, col.names = TRUE)
+        }
     }
 
     if (is_plot)

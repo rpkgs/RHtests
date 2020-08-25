@@ -1,3 +1,5 @@
+# ErrorMSG = "error:"
+
 fitdata_varnames_noref <-
     c("id", "date", "base",
     "base_trend+meanShift", "base_mean_adj",
