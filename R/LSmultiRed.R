@@ -171,9 +171,9 @@ rmCycle<-function(idata){
   list(EB = mu, Base = tdata[,2])
 }
 
-#' Multiple Linear Regression (same slope, different interception)
+#' Multiple breakpoints piecewise Regression (same slope, different interception)
 #'
-#' @param Ips what?
+#' @param Ips breakpoints
 #'
 #' @return
 #' - `sig`   : coefficients
@@ -195,8 +195,8 @@ LSmultiple<-function(Y,T,Ips, ...){
   lm_solve(D, X, ...)
 }
 
-#' Piecewise Linear regression (same slope, different interception)
-#'
+#' single-breakpoint piecewise regression (same slope, different interception)
+#' 
 #' @param Y The response vector
 #' @param T The predictor vector
 #'

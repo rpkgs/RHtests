@@ -2,12 +2,12 @@
 % Please edit documentation in R/LSmultiRed.R
 \name{LSmultiple}
 \alias{LSmultiple}
-\title{Multiple Linear Regression (same slope, different interception)}
+\title{Multiple breakpoints piecewise Regression (same slope, different interception)}
 \usage{
 LSmultiple(Y, T, Ips, ...)
 }
 \arguments{
-\item{Ips}{what?}
+\item{Ips}{breakpoints}
 }
 \value{
 \itemize{
@@ -17,5 +17,5 @@ LSmultiple(Y, T, Ips, ...)
 }
 }
 \description{
-Multiple Linear Regression (same slope, different interception)
+Multiple breakpoints piecewise Regression (same slope, different interception)
 }

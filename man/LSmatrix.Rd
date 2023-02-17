@@ -2,7 +2,7 @@
 % Please edit documentation in R/LSmultiRed.R
 \name{LSmatrix}
 \alias{LSmatrix}
-\title{Piecewise Linear regression (same slope, different interception)}
+\title{single-breakpoint piecewise regression (same slope, different interception)}
 \usage{
 LSmatrix(Y, T_anorm, Ic, ...)
 }
@@ -23,5 +23,5 @@ corresponding to the perid
 \item{T}{The predictor vector}
 }
 \description{
-Piecewise Linear regression (same slope, different interception)
+single-breakpoint piecewise regression (same slope, different interception)
 }
