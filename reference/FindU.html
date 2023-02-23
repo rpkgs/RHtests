@@ -121,32 +121,28 @@ the same segment).</p></dd>
     
 
 <p>Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf</p><ul><li><p>Example1_1Cs.txt</p>
-<p>Ns &gt;= 0 is the number of changepoints identified;
-changepoint positions are Ip(1), Ip(2),...,Ip(Ns)</p></li>
-</ul><ul><li><p>OutFile_U.dat</p><ul><li><p>index</p></li>
-<li><p>date</p></li>
-<li><p>original base series</p></li>
-<li><p>estimated linear trend line of the base series</p></li>
-<li><p>the mean-adjusted base series
-#'</p></li>
-<li><p>the 6 th and 7 th columns are similar to the 4 th and 5 th columns but for
-shift-sizes estimated from the de-seasonalized base series</p></li>
-<li><p>the 8 th and 9 th columns are respectively the de-seasonalized base series
-(i.e., the base series with its the mean annual cycle subtracted) and its
-multi-phase regression model fit;</p></li>
-<li><p>the 10 th column: the estimated mean annual cycle together with the linear trend
-and mean-shifts;</p></li>
-<li><p>the 11 th column: the QM-adjusted base series (the QM-adjustments here
-are estimated using the reference series);</p></li>
-<li><p>the 12 th column: the multi-phase regression model fit to the de-seasonalized base
-series without accounting for any shifts (i.e. ignore all shifts identified).</p></li>
-</ul></li>
+<p>Ns &gt;= 0 is the number of changepoints identified; changepoint positions are
+Ip(1), Ip(2),...,Ip(Ns)</p></li>
+<li><p>OutFile_U.dat</p></li>
+</ul><ul><li><p><code>id</code>   :</p></li>
+<li><p><code>date</code> :</p></li>
+<li><p><code>base</code> : the original input series</p></li>
+<li><p><code>base_trend+meanshift</code>: <code>trend</code> + <code>abrupt shift</code> (for base)</p></li>
+<li><p><code>base_mean_adj</code>: <code>base</code> - <code>abrupt shift</code></p></li>
+<li><p><code>base_anomaly</code>: <code>base</code> - <code>seasonal cycle</code></p></li>
+<li><p><code>fit_of_base_anomaly</code>: <code>trend</code> + <code>abrupt shift</code> (for anomaly)</p></li>
+<li><p><code>annualC+meanShifts</code>: <code>seasonal cycle</code> + <code>abrupt shift</code> (for base)</p></li>
+<li><p><code>QM_adjusted</code>:</p></li>
+<li><p><code>fit_of_deseason_base</code>: linear trend of <code>anomal</code>. A multi-phase regression
+model fit to the de-seasonalized base series without accounting for any
+shifts (i.e. ignore all shifts identified)</p></li>
 </ul></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">infile</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/Example1.dat"</span>, package <span class="op">=</span> <span class="st">"RHtests"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">FindU</span><span class="op">(</span><span class="va">infile</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/Example1.dat"</span>, package <span class="op">=</span> <span class="st">"RHtests"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r</span> <span class="op">=</span> <span class="fu">FindU</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $fit</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [data.table]: </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A data frame: 636 × 10</span></span>
@@ -175,6 +171,10 @@ series without accounting for any shifts (i.e. ignore all shifts identified).</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     1 <span style="color: #949494;">"</span>Yes <span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">740</span>200     1     1  0.95  23.4   13.3   17.7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>     1 <span style="color: #949494;">"</span>Yes <span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">760</span>600     1     1  0.95  21.4   14.5   19.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">plot_output</span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="FindU-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
