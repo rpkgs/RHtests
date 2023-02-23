@@ -67,6 +67,11 @@
 <dd><p>file path of the input data</p></dd>
 
 
+<dt>InCs</dt>
+<dd><p>A data.frame of detected turning points returned from <a href="FindU.html">FindU</a>,
+with the columns of <code>c("kind", "Idc", "date", "probL", "probU", "plev", "PFx", "PFx95l", "PFx95h")</code>.</p></dd>
+
+
 <dt>output</dt>
 <dd><p>prefix of the outputs</p></dd>
 
@@ -106,6 +111,48 @@ the same segment).</p></dd>
 
 </dl></div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/Example1.dat"</span>, package <span class="op">=</span> <span class="st">"RHtests"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r1</span> <span class="op">=</span> <span class="fu"><a href="FindU.html">FindU</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">r2</span> <span class="op">=</span> <span class="fu">FindUD</span><span class="op">(</span>InCs <span class="op">=</span> <span class="va">r1</span><span class="op">$</span><span class="va">TP</span>, output <span class="op">=</span> <span class="st">"OUTPUT/example1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [data.table]: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A data frame: 636 × 10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       id date        base base_trend+m…¹ base_…² base_…³ fit_o…⁴ annua…⁵ QM_ad…⁶</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1 1953-01-01 14.0            11.9    9.44    4.94    3.64    12.7    8.75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     2 1953-02-01 12.0            11.9    7.45    3.10    3.64    12.5    7.51</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     3 1953-03-01 13.0            11.9    8.48    3.77    3.64    12.9    8.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     4 1953-04-01 11.3            11.9    6.72    2.06    3.65    12.8    6.99</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     5 1953-05-01 12.2            11.9    7.67    3.79    3.65    12.1    7.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     6 1953-06-01 11.0            11.9    6.42    2.94    3.65    11.7    6.73</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     7 1953-07-01 11.5            11.9    6.94    4.27    3.65    10.9    7.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     8 1953-08-01  9.54           11.9    5.00    2.91    3.66    10.3    5.54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     9 1953-09-01 10.6            11.9    6.01    4.15    3.66    10.1    6.39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>    10 1953-10-01  9.89           11.9    5.35    2.67    3.66    10.9    5.87</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 626 more rows, 1 more variable: fit_of_deseason_base &lt;dbl&gt;, and</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   abbreviated variable names ¹​`base_trend+meanShift`, ²​base_mean_adj,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ³​base_anomaly, ⁴​fit_of_base_anomaly, ⁵​`annualC+meanShifts`, ⁶​QM_adjusted</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $TP</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [data.table]: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A data frame: 5 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    kind Idc        date probL probU  plev   PFx PFx95l PFx95h</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     0 <span style="color: #949494;">"</span>YifD<span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">661</span>100 0.958 0.963  0.95  4.59   13.9   18.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     1 <span style="color: #949494;">"</span>Yes <span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">700</span>100 1     1      0.95 49.3    13.2   17.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>     1 <span style="color: #949494;">"</span>Yes <span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">740</span>200 1     1      0.95 23.4    13.1   17.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>     1 <span style="color: #949494;">"</span>No  <span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">760</span>600 0.995 0.995  0.95  8.26   13.1   17.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     0 <span style="color: #949494;">"</span>YifD<span style="color: #949494;">"</span> 19<span style="text-decoration: underline;">800</span>500 0.961 0.972  0.95  5.56   14.3   19.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">plot_output</span><span class="op">(</span><span class="va">r2</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="FindUD-1.png" alt="" width="700" height="433"></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

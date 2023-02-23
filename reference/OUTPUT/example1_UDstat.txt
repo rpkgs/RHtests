@@ -1,0 +1,34 @@
+The nominal level of confidence (1-alpha)= 0.95 
+Input data filename: N= 633 
+Nseg_shortest = 28 ; Mq =  5 ; Ny4a =  0 
+
+ Adjust to segment 6 : from 330 to 633 
+#Fcat: frequency category boundaries
+#DP: Difference in the category means
+# Fcat.Seg1 DP.Seg1 Fcat.Seg2 DP.Seg2 Fcat.Seg3 DP.Seg3 Fcat.Seg4 DP.Seg4 Fcat.Seg5 DP.Seg5 
+1 -0.1 -3.9971 -0.1 -4.6739 -0.1 -2.279 -0.1 -0.7622 -0.1 -0.0772 -0.1 0
+2 0.1 -3.9971 0.1 -4.6739 0.1 -2.279 0.1 -0.7622 0.1 -0.0772 0.1 0
+3 0.3 -4.1836 0.3 -4.6397 0.3 -2.2604 0.3 -1.2519 0.3 0.0244 0.3 0
+4 0.5 -4.3629 0.5 -4.6578 0.5 -2.3505 0.5 -1.3294 0.5 -0.0929 0.5 0
+5 0.7 -4.8853 0.7 -4.9406 0.7 -2.9267 0.7 -1.5749 0.7 -0.4799 0.7 0
+6 0.9 -5.2832 0.9 -6.0751 0.9 -3.7407 0.9 -1.1901 0.9 -0.8809 0.9 0
+7 1.1 -5.2832 1.1 -6.0751 1.1 -3.7407 1.1 -1.1901 1.1 -0.8809 1.1 0
+Seg. 1: mean of QM-adjustments =-4.5463
+Seg. 2: mean of QM-adjustments =-5.0156
+Seg. 3: mean of QM-adjustments =-2.726
+Seg. 4: mean of QM-adjustments =-1.2312
+Seg. 5: mean of QM-adjustments =-0.3093
+ Ignore changepoints -> trend0 = -0.007288 ( -0.008475 , -0.006101 ) (p= 1 ); cor= 0.4816 ( 0.4192 , 0.5394 )
+Common trend TPR fit to the seasonal-cycle-adjusted Base series:
+#steps=  5 ; trend= 0.002848 ( 0.002153 , 0.003543 ) (p= 1 ); cor= 0.2003 ( 0.1241 , 0.2741 ) 1 
+167 19661100 stepsize= 0.4427 
+205 19700100 stepsize= -2.263 
+254 19740200 stepsize= -1.5126 
+282 19760600 stepsize= -0.8849 
+329 19800500 stepsize= -0.3201 
+633 20051200 stepsize= NA 
+PMF : c= 167; (Time   19661100); Type=    0; p=    0.9614(    0.9585-    0.9631); PFmax=    4.5890; CV95=   16.1393(   13.9334-   18.7098); Nseg= 205
+PMF : c= 205; (Time   19700100); Type=    1; p=    1.0000(    1.0000-    1.0000); PFmax=   49.2842; CV95=   15.2857(   13.2249-   17.6775); Nseg=  87
+PMF : c= 254; (Time   19740200); Type=    1; p=    1.0000(    1.0000-    1.0000); PFmax=   23.4044; CV95=   15.1336(   13.1030-   17.4929); Nseg=  77
+PMF : c= 282; (Time   19760600); Type=    1; p=    0.9950(    0.9947-    0.9949); PFmax=    8.2628; CV95=   15.0976(   13.0731-   17.4490); Nseg=  75
+PMF : c= 329; (Time   19800500); Type=    0; p=    0.9677(    0.9611-    0.9725); PFmax=    5.5643; CV95=   16.5502(   14.2667-   19.2069); Nseg= 351
