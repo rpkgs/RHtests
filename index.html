@@ -72,6 +72,30 @@
 <div class="section level2">
 <h2 id="使用步骤">使用步骤<a class="anchor" aria-label="anchor" href="#%E4%BD%BF%E7%94%A8%E6%AD%A5%E9%AA%A4"></a>
 </h2>
+<p>数据均一化一站式处理：</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">FUN_FindU</span>  <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">has_ref</span><span class="op">)</span> <span class="va">FindU.wRef</span> <span class="kw">else</span> <span class="va">FindU</span></span>
+<span><span class="va">FUN_FindUD</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">has_ref</span><span class="op">)</span> <span class="va">FindUD.wRef</span> <span class="kw">else</span> <span class="va">FindUD</span></span>
+<span></span>
+<span><span class="fu">RHtests_read</span><span class="op">(</span><span class="va">data</span>, <span class="va">data.ref</span><span class="op">)</span></span>
+<span><span class="va">U</span>  <span class="op">&lt;-</span> <span class="fu">FUN_FindU</span><span class="op">(</span>output <span class="op">=</span> <span class="va">prefix</span>, is_plot <span class="op">=</span> <span class="va">is_plot</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu">is_empty</span><span class="op">(</span><span class="va">U</span><span class="op">$</span><span class="va">TP</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">UD</span> <span class="op">&lt;-</span> <span class="fu">FUN_FindUD</span><span class="op">(</span>InCs <span class="op">=</span> <span class="va">U</span><span class="op">$</span><span class="va">TP</span>, output <span class="op">=</span> <span class="va">prefix</span>, is_plot <span class="op">=</span> <span class="va">is_plot</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu">is_empty</span><span class="op">(</span><span class="va">UD</span><span class="op">$</span><span class="va">TP</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">TP</span>  <span class="op">&lt;-</span> <span class="va">UD</span><span class="op">$</span><span class="va">TP</span></span>
+<span><span class="va">TP2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/TP_adjustByMeta.html">TP_adjustByMeta</a></span><span class="op">(</span><span class="va">TP</span>, <span class="va">metadata</span>, maxgap <span class="op">=</span> <span class="va">maxgap</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/RHtests_stepsize.html">RHtests_stepsize</a></span><span class="op">(</span>data <span class="op">=</span> <span class="cn">NULL</span>, data.ref <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">TP2</span>, <span class="va">has_ref</span>,</span>
+<span>    <span class="va">prefix</span>, <span class="va">is_plot</span>, <span class="va">verbose</span><span class="op">)</span></span></code></pre></div>
+<p>see details in <code>RHtests_process</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="版权">版权<a class="anchor" aria-label="anchor" href="#%E7%89%88%E6%9D%83"></a>
+</h2>
+<p>Please do not fork！</p>
+<p>若愿共同维护，可私信获取授权。</p>
 </div>
 </div>
   </div>
