@@ -2,8 +2,7 @@
 % Please edit documentation in R/RHtests_process.R
 \name{RHtests_stepsize}
 \alias{RHtests_stepsize}
-\title{RHtests_stepsize
-stepsize will not alter TP2, only delte non-significant record.}
+\title{RHtests_stepsize}
 \usage{
 RHtests_stepsize(
   data = NULL,
@@ -16,6 +15,5 @@ RHtests_stepsize(
 )
 }
 \description{
-RHtests_stepsize
 stepsize will not alter TP2, only delte non-significant record.
 }

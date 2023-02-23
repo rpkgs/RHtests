@@ -9,8 +9,9 @@ RHtests_read <- function(data, data.ref = NULL, plev = 0.95) {
 
 
 #' RHtests_stepsize
+#' 
 #' stepsize will not alter TP2, only delte non-significant record.
-#'
+#' 
 #' @export
 RHtests_stepsize <- function(data = NULL, data.ref = NULL, TP2,
     has_ref = !is.null(data.ref),
@@ -42,15 +43,20 @@ RHtests_stepsize <- function(data = NULL, data.ref = NULL, TP2,
 }
 
 #' process RHtests without reference series
-#'
-#' @param data A data.frame or data.table, with the columns of c('year', 'month', 'day', 'data')
-#' @param data.ref A data.frame or data.table, with the columns of c('year', 'month', 'day', 'data').
-#' The reference series of `data`, should have the same length as `data`.
-#' @param metadata A data.frame or data.table, with the columns of `TurningPoint` date.
-#'
+#' 
+#' @param data A data.frame or data.table, with the columns of c('year',
+#' 'month', 'day', 'data')
+#' 
+#' @param data.ref A data.frame or data.table, with the columns of c('year',
+#' 'month', 'day', 'data'). The reference series of `data`, should have the same
+#' length as `data`.
+#' 
+#' @param metadata A data.frame or data.table, with the columns of
+#' `TurningPoint` date.
+#' 
 #' @example R/examples/run_ex01.R
 #' @example R/examples/run_ex02.R
-#'
+#' 
 #' @export
 RHtests_process <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/example02",
     maxgap = 366,
@@ -76,32 +82,6 @@ RHtests_process <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
         prefix, is_plot, verbose)
     # if null returned,
     if (is.null(r$TP) || nrow(r$TP) == 0) return(NULL)
-    r$TP %<>% merge_metainfo(metadata)
-    r
-}
-
-RHtests_process2 <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/example02",
-    maxgap = 90,
-    is_plot = TRUE, verbose = FALSE)
-{
-    mkdir(dirname(prefix))
-
-    has_ref = !is.null(data.ref)
-    FUN_FindU  <- ifelse(has_ref, FindU.wRef, FindU)
-    FUN_FindUD <- ifelse(has_ref, FindUD.wRef, FindUD)
-
-    RHtests_read(data, data.ref)
-    U  <- FUN_FindU(output = prefix, is_plot = is_plot)
-    if (is_empty(U$TP)) return(NULL)
-
-    UD <- FUN_FindUD(InCs = U$TP, output = prefix, is_plot = is_plot)
-    if (is_empty(UD$TP)) return(NULL)
-
-    TP  <- UD$TP
-    TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
-
-    r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
-        prefix, is_plot, verbose)
     r$TP %<>% merge_metainfo(metadata)
     r
 }

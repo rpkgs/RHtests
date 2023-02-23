@@ -2,12 +2,25 @@
 #' 
 #' @inheritParams FindU
 #' 
+#' @param InCs A data.frame of detected turning points returned from [FindU],
+#' with the columns of `c("kind", "Idc", "date", "probL", "probU", "plev",
+#' "PFx", "PFx95l", "PFx95h")`.
+#' 
+#' @examples 
+#' f = system.file("extdata/Example1.dat", package = "RHtests")
+#' r1 = FindU(f)
+#' 
+#' r2 = FindUD(InCs = r1$TP, output = "OUTPUT/example1")
+#' print(r2)
+#' 
+#' plot_output(r2$fit)
 #' @export
 FindUD <- function(
     InSeries = NULL, InCs, output, MissingValueCode = "-999.99",
     GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, is_plot = FALSE) {
   
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
+  # all necessary variables have been in global env
   
   Debug <- TRUE
   ErrorMSG <- NA

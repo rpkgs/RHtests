@@ -20,6 +20,9 @@ FindUD(
 \arguments{
 \item{InSeries}{file path of the input data}
 
+\item{InCs}{A data.frame of detected turning points returned from \link{FindU},
+with the columns of \code{c("kind", "Idc", "date", "probL", "probU", "plev", "PFx", "PFx95l", "PFx95h")}.}
+
 \item{output}{prefix of the outputs}
 
 \item{MissingValueCode}{string, missing value code}
@@ -46,4 +49,13 @@ the same segment).}
 }
 \description{
 FindUD
+}
+\examples{
+f = system.file("extdata/Example1.dat", package = "RHtests")
+r1 = FindU(f)
+
+r2 = FindUD(InCs = r1$TP, output = "OUTPUT/example1")
+print(r2)
+
+plot_output(r2$fit)
 }

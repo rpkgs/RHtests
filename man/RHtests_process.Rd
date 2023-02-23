@@ -15,12 +15,15 @@ RHtests_process(
 )
 }
 \arguments{
-\item{data}{A data.frame or data.table, with the columns of c('year', 'month', 'day', 'data')}
+\item{data}{A data.frame or data.table, with the columns of c('year',
+'month', 'day', 'data')}
 
-\item{data.ref}{A data.frame or data.table, with the columns of c('year', 'month', 'day', 'data').
-The reference series of \code{data}, should have the same length as \code{data}.}
+\item{data.ref}{A data.frame or data.table, with the columns of c('year',
+'month', 'day', 'data'). The reference series of \code{data}, should have the same
+length as \code{data}.}
 
-\item{metadata}{A data.frame or data.table, with the columns of \code{TurningPoint} date.}
+\item{metadata}{A data.frame or data.table, with the columns of
+\code{TurningPoint} date.}
 }
 \description{
 process RHtests without reference series
