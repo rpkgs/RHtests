@@ -1,0 +1,28 @@
+The nominal level of confidence (1-alpha)= 0.95 
+Input data filename: N= 633 
+ Ignore changepoints -> trend0 = -0.007288 ( -0.008475 , -0.006101 ) (p= 1 ); cor= 0.4816 ( 0.4192 , 0.5394 )
+Nseg_shortest = 28 ; Mq =  5 ; Ny4a =  0 
+
+ Adjust to segment 4 : from 283 to 633 
+#Fcat: frequency category boundaries
+#DP: Difference in the category means
+# Fcat.Seg1 DP.Seg1 Fcat.Seg2 DP.Seg2 Fcat.Seg3 DP.Seg3 
+1 -0.1 -4.0413 -0.1 -2.2192 -0.1 -0.7089 -0.1 0
+2 0.1 -4.0413 0.1 -2.2192 0.1 -0.7089 0.1 0
+3 0.3 -4.1926 0.3 -2.2083 0.3 -1.2078 0.3 0
+4 0.5 -4.3874 0.5 -2.2873 0.5 -1.2752 0.5 0
+5 0.7 -4.7951 0.7 -2.8224 0.7 -1.4773 0.7 0
+6 0.9 -5.2621 0.9 -3.5617 0.9 -1.019 0.9 0
+7 1.1 -5.2621 1.1 -3.5617 1.1 -1.019 1.1 0
+Seg. 1: mean of QM-adjustments =-4.5384
+Seg. 2: mean of QM-adjustments =-2.6332
+Seg. 3: mean of QM-adjustments =-1.145
+Common trend TPR fit to the de-seasonalized Base series:
+#steps=  3 ; trend= 0.002651 ( 0.001949 , 0.003352 ) (p= 1 ); cor= 0.207 ( 0.131 , 0.2806 ) 1 
+205 19700100 stepsize= -1.8772 
+254 19740200 stepsize= -1.5047 
+282 19760600 stepsize= -1.1248 
+633 20051200 stepsize= NA 
+PMF : c= 205; (Time   19700100); Type= 1; p=    1.0000(1.0000-1.0000); PFmax=   49.2060; CV95=   16.5615(   14.2857-   19.2003); Nseg= 254
+PMF : c= 254; (Time   19740200); Type= 1; p=    1.0000(1.0000-1.0000); PFmax=   23.3712; CV95=   15.3354(   13.2758-   17.7289); Nseg=  77
+PMF : c= 282; (Time   19760600); Type= 1; p=    1.0000(1.0000-1.0000); PFmax=   21.4244; CV95=   16.8241(   14.4950-   19.5295); Nseg= 379
