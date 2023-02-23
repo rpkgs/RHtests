@@ -1,6 +1,6 @@
 #' StepSize
 #'
-#' @example man/examples/run_ex01.R
+#' @example R/examples/run_ex01.R
 #' @export
 StepSize <- function(InSeries = NULL, InCs, output,
   MissingValueCode="-999.99",
@@ -39,12 +39,14 @@ StepSize <- function(InSeries = NULL, InCs, output,
     }
     Ids <- TP$kind
 
-    if(sum(is.na(Ips))>0|!identical(Ips,sort(Ips))){
-      ErrorMSG<<-paste("StepSize: Ips read in from ",InCs,"error:")
-      for(i in 1:Ns)
-        ErrorMSG<<-paste(get("ErrorMSG",env=.GlobalEnv),Ips[i])
-      ErrorMSG<<-paste(get("ErrorMSG",env=.GlobalEnv),"\n\n")
-      if(!GUI) cat(ErrorMSG)
+    if (sum(is.na(Ips)) > 0 || !identical(Ips, sort(Ips))) {
+      ErrorMSG <<- paste("StepSize: Ips read in from ", InCs, "error:")
+      for (i in 1:Ns) {
+        ErrorMSG <<- paste(get("ErrorMSG", env = .GlobalEnv), Ips[i])
+      }
+      ErrorMSG <<- paste(get("ErrorMSG", env = .GlobalEnv), "\n\n")
+      
+      if (!GUI) cat(ErrorMSG)
       return(-1)
     }
   }

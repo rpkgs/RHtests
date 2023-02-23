@@ -1,6 +1,6 @@
 #' StepSize.wRef
 #' 
-#' @example man/examples/run_ex02.R
+#' @example R/examples/run_ex02.R
 #' @export
 StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output, 
   MissingValueCode="-999.99",

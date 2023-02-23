@@ -68,14 +68,15 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
 	GUI=FALSE, plev=0.95,
 	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
 {
-    if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
+  mkdir(output)
+  if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
 
 	ErrorMSG<-NA
-    assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
-    Nmin <- 10
-    if(Ny4a>0&Ny4a<=5) Ny4a<-5
+  assign("ErrorMSG", ErrorMSG, envir = .GlobalEnv)
+  Nmin <- 10
+  if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
-    assign("Nmin",Nmin,envir=.GlobalEnv)
+  assign("Nmin", Nmin, envir = .GlobalEnv)
     # if(is.null(data)){
     #     ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
     #                      get("ErrorMSG",env=.GlobalEnv),"\n")

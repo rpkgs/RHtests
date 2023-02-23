@@ -1,55 +1,34 @@
-is_empty <- function(x) {
-    if (is.data.frame(x)) nrow(x) == 0 else length(x) == 0 
-}
-
-rm_empty <- function(x) {
-    if (is.list(x)) {
-        x[!sapply(x, is_empty)]
-    } else {
-        x[!is.na(x)]
-    }
-}
+#' @importFrom Ipaper is_empty rm_empty mkdir listk 
+#' ok warn
 
 range2 <- function(x, y, na.rm = TRUE) {
-    c(min(x, y, na.rm = na.rm), max(x, y, na.rm = na.rm))
+  c(min(x, y, na.rm = na.rm), max(x, y, na.rm = na.rm))
 }
 
-check_dir <- function(path) {
-    for (path_i in path){
-        if (!dir.exists(path_i)) {
-            dir.create(path_i, recursive = TRUE)
-        }
-    }
-    path
-}
 
-listk <- function (...) 
-{
-    cols <- as.list(substitute(list(...)))[-1]
-    vars <- names(cols)
-    Id_noname <- if (is.null(vars)) 
-        seq_along(cols)
-    else which(vars == "")
-    if (length(Id_noname) > 0) 
-        vars[Id_noname] <- sapply(cols[Id_noname], deparse)
-    x <- setNames(list(...), vars)
-    return(x)
-}
-
-#' @export 
+#' @export
 num2date <- function(x) {
-    if (is(x, "Date")) return(x)
-    # else
-    as.character(x) %>% 
-        gsub("-", "", .) %>% 
-        gsub("0000$", "0101", .) %>% 
-        gsub(  "00$",   "01", .) %>% as.Date("%Y%m%d")
+  if (is(x, "Date")) {
+    return(x)
+  }
+  # else
+  as.character(x) %>%
+    gsub("-", "", .) %>%
+    gsub("0000$", "0101", .) %>%
+    gsub("00$", "01", .) %>%
+    as.Date("%Y%m%d")
 }
 
 #' @export
 date2num <- function(date) {
-    as.character(date) %>% gsub("-", "", .) %>%
-      as.numeric()
+  as.character(date) %>%
+    gsub("-", "", .) %>%
+    as.numeric()
 }
 
 is.Date <- function(x) is(x, "Date")
+
+plot2 <- function(at, labels, ...) {
+  plot(..., xaxt = "n")
+  axis(side = 1, at = at, labels = labels)
+}

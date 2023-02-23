@@ -1,21 +1,26 @@
 Package: RHtests
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Dongdong", "Kong", role = c("aut", "cre"), email = "kongdd.sysu@gmail.com", 
         comment = c(ORCID = "0000-0003-1836-8172")))
 Description: What the package does (one paragraph).
 License: GPL-3
+Depends: 
+    R (>= 3.1)
+Imports: magrittr, 
+    lubridate, 
+    data.table, dplyr, 
+    ggplot2, 
+    foreach,
+    crayon, 
+    Ipaper
+Suggests: 
+    testthat,
+    covr
+Remotes:
+    rpkgs/Ipaper
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Depends: 
-    R (>= 2.10)
-Imports: data.table, magrittr, 
-    ggplot2, 
-    foreach,
-    crayon
-Suggests: 
-    testthat,
-    covr

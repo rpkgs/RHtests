@@ -1,6 +1,5 @@
 #' @keywords internal
 #' @import data.table magrittr
-#' @import plyr
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage
@@ -32,3 +31,17 @@ NULL
 #     adjusting the series to the last segment). Set Iadj = 10000 if you want 
 #     to ensure that the series is adjusted to the last segment
 
+#' @importFrom utils write.table read.table
+#' @importFrom graphics axis lines par text title
+#' @importFrom grDevices dev.off pdf
+#' @importFrom stats .lm.fit lm pf pt qt var
+.onLoad <- function(libname, pkgname) {
+  if (getRversion() >= "2.15.1") {
+    utils::globalVariables(
+      c(
+        ".", ".SD", ".N",
+        "Ti", "Y0", "Nt", "itable", "ori.itable", "IY0"
+      )
+    )
+  }
+}
