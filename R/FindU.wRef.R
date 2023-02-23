@@ -3,7 +3,7 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
   plev=0.95,Iadj=10000,Mq=10,GUI=FALSE,Ny4a=0, 
   is_plot = TRUE)
 {
-  mkdir(output)
+  mkdir(dirname(output))
   Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
 
   back_Ti <- Ti

@@ -27,9 +27,8 @@ Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
 Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
 metadata <- data.table(date = c("19740200", "19751100"))
-prefix <- "OUTPUT/example02/example02"
 
-r <- RHtests_process(Bseries, Rseries, metadata, prefix)
+r <- RHtests_process(Bseries, Rseries, metadata, outdir = "OUTPUT/example02")
 plot_RHtests(r, "RHtests-ref.pdf")
 
 # expect_equal(nrow(r$turningPoint), 11)

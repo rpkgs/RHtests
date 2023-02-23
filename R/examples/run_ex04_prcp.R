@@ -24,7 +24,3 @@ r <- RHtests_stepsize_prcp(data, TP2, prefix)
   # l <- RHtests_process_prcp(data, metadata, prefix)
 # })
 plot_RHtests(r)
-# profvis::profvis({
-# system.time({
-# })
-# })

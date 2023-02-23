@@ -8,7 +8,8 @@ RHtests_process(
   data,
   data.ref = NULL,
   metadata,
-  prefix = "./OUTPUT/example02",
+  prefix = NULL,
+  outdir = "OUTPUT/example01",
   maxgap = 366,
   is_plot = TRUE,
   verbose = TRUE
@@ -32,17 +33,16 @@ process RHtests without reference series
 ## example 01 ------------------------------------------------------------------
 data <- dat_example01
 metadata <- data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
-prefix <- "OUTPUT/example02/example01"
-r <- RHtests_process(data, NULL, metadata, prefix)
+
+r <- RHtests_process(data, NULL, metadata, outdir = "OUTPUT/example01")
 plot_output(r$data)
 ## example 02 ------------------------------------------------------------------
 Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
 Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 
 metadata <- data.table(date = c("19740200", "19751100"))
-prefix <- "OUTPUT/example02/example02"
 
-r <- RHtests_process(Bseries, Rseries, metadata, prefix)
+r <- RHtests_process(Bseries, Rseries, metadata, outdir = "OUTPUT/example02")
 plot_RHtests(r, "RHtests-ref.pdf")
 
 # expect_equal(nrow(r$turningPoint), 11)
