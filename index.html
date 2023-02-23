@@ -63,54 +63,11 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of RHtests is to …</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the released version of RHtests from <a href="https://CRAN.R-project.org" class="external-link">CRAN</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"RHtests"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">RHtests</span><span class="op">)</span></span>
-<span><span class="co">## basic example codecovr::package_coverage()</span></span>
-<span><span class="co"># RHtests Coverage          : 51.71%</span></span>
-<span><span class="co"># R/getfile1.R              : 0.00%</span></span>
-<span><span class="co"># R/OnCalCor.R              : 0.00%</span></span>
-<span><span class="co"># R/OnChangePara.R          : 0.00%</span></span>
-<span><span class="co"># R/OnFind.R                : 0.00%</span></span>
-<span><span class="co"># R/OnQMadjDLY.R            : 0.00%</span></span>
-<span><span class="co"># R/OnQuit.R                : 0.00%</span></span>
-<span><span class="co"># R/OnStepSize.R            : 0.00%</span></span>
-<span><span class="co"># R/QMadj.GaussianDLY.wRef.R: 0.00%</span></span>
-<span><span class="co"># R/QMadjDLY.R              : 0.00%</span></span>
-<span><span class="co"># R/StartGUI.R              : 0.00%</span></span>
-<span><span class="co"># R/Read.R                  : 16.50%</span></span>
-<span><span class="co"># R/plot_FindUD.ref.R       : 55.56%</span></span>
-<span><span class="co"># R/plot_StepSize.ref.R     : 56.73%</span></span>
-<span><span class="co"># R/plot_FindU.ref.R        : 58.72%</span></span>
-<span><span class="co"># R/FindUD.R                : 73.49%</span></span>
-<span><span class="co"># R/FindUD.wRef.R           : 79.35%</span></span>
-<span><span class="co"># R/FindU.R                 : 80.16%</span></span>
-<span><span class="co"># R/splineN.R               : 81.08%</span></span>
-<span><span class="co"># R/readPTtable.R           : 81.25%</span></span>
-<span><span class="co"># R/readPFtable.R           : 81.82%</span></span>
-<span><span class="co"># R/StepSize.wRef.R         : 81.95%</span></span>
-<span><span class="co"># R/StepSize.R              : 82.94%</span></span>
-<span><span class="co"># R/process_RHtests.R       : 84.44%</span></span>
-<span><span class="co"># R/FindU.wRef.R            : 85.31%</span></span>
-<span><span class="co"># R/QMadjGaussian.wRef.R    : 89.29%</span></span>
-<span><span class="co"># R/Read.ref.R              : 91.80%</span></span>
-<span><span class="co"># R/PMFT.r                  : 93.77%</span></span>
-<span><span class="co"># R/tools.R                 : 94.12%</span></span>
-<span><span class="co"># R/adjust_TP.R             : 100.00%</span></span>
-<span><span class="co"># R/LSmultiRed.R            : 100.00%</span></span>
-<span><span class="co"># R/plot_FindU.R            : 100.00%</span></span>
-<span><span class="co"># R/plot2.R                 : 100.00%</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"rpkgs/RHtest"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </div>
@@ -142,7 +99,10 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://codecov.io/gh/kongdd/RHtests?branch=master" class="external-link"><img src="https://codecov.io/gh/kongdd/RHtests/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/rpkgs/RHtests/actions" class="external-link"><img src="https://github.com/rpkgs/RHtests/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://codecov.io/gh/rpkgs/RHtests" class="external-link"><img src="https://codecov.io/gh/rpkgs/RHtests/branch/master/graph/badge.svg" alt="codecov"></a></li>
+<li><a href="http://www.gnu.org/licenses/gpl-3.0.html" class="external-link"><img src="http://img.shields.io/badge/license-GPL%20%28%3E=%203%29-brightgreen.svg?style=flat" alt="License"></a></li>
+<li><a href="https://cran.r-project.org/package=RHtests" class="external-link"><img src="http://www.r-pkg.org/badges/version/RHtests" alt="CRAN"></a></li>
 </ul>
 </div>
 
