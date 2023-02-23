@@ -15,22 +15,26 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
   
   Nmin<-5 # set global parameter of Nmin
   assign("Nmin",Nmin,envir=.GlobalEnv)
+
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
   N <- length(Y0); Nadj<-Ny4a*Nt # Y0 is Base-Ref on common period
   readPTtable(N, plev) # read in PTmax table
 
   Pk0  <- Pk.PMT(N) # calculate penalty vector for target Y0 series
-  oout <- PTK(Y0,Pk0) # find 1st break point, then get 2 more, pick max(prob)
+  oout <- PTK(Y0, Pk0, Nmin) # find 1st break point, then get 2 more, pick max(prob)
   # as official first break point
   I0 <- 0
   I2 <- oout$KPx
   I4 <- N
-  oout1<-PTKI0I2(Y0,I0,I2)
+
+  oout1<-PTKI0I2(Y0,I0,I2, Nmin)
   I1<-oout1$Ic
-  oout2<-PTKI0I2(Y0,I2,I4)
+
+  oout2<-PTKI0I2(Y0,I2,I4, Nmin)
   I3<-oout2$Ic
-  oout3<-PTKI0I2(Y0,I1,I3)
+
+  oout3<-PTKI0I2(Y0,I1,I3, Nmin)
   I02<-oout3$Ic
 
   prob<-PTKIc(Y0,Pk0,I02)$prob
@@ -46,7 +50,7 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
       for(Iseg in 1:(Ns+1)){
         I0<- if(Iseg==1) 0 else Ips[Iseg-1]
         I2<-Ips[Iseg]
-        otmp<-PTKI0I2(Y0,I0,I2)
+        otmp<-PTKI0I2(Y0,I0,I2, Nmin)
         if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
       }
       # finished find new possible changepoints, sorted in Ips0
@@ -140,7 +144,7 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
       for(i in 1:(Ns+1)){ # search for new break points
         I0<- if(i==1) 0 else Ips[i-1]
         I2<-Ips[i]
-        otmp<-PTKI0I2(Y0,I0,I2)
+        otmp<-PTKI0I2(Y0,I0,I2, Nmin)
         if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
       }
       # finished find new possible changepoints, stored in Ips0
@@ -208,7 +212,7 @@ FindU.wRef<-function(Bseries = NULL, Rseries = NULL, output, MissingValueCode="-
             Pk0<-Pk.PMT(Nseg)
             PTx95<-getPTx95(corL,Nseg-1)
             otmp<-PTKIc(Y0[(I1+1):I3],Pk0,Ic-I1)
-            #     otmp<-PTKI0I2(W,I1,I3)
+            #     otmp<-PTKI0I2(W,I1,I3, Nmin)
             if(otmp$PTk/PTx95<PTx.mn/PTx95L.mn){
               PTx.mn<-otmp$PTk
               PTx95L.mn<-PTx95

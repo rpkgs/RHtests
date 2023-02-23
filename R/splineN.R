@@ -1,6 +1,7 @@
 splineN <- function(x, y, yp1, yp2) {
   n <- length(x)
   if (length(y) != n) stop("input vector length differ")
+
   y2 <- rep(NA, 0)
   u <- rep(NA, 0)
   if (yp1 > 1E30) {
@@ -19,6 +20,7 @@ splineN <- function(x, y, yp1, yp2) {
         (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p
     }
   }
+  
   if (yp2 > 1E30) {
     qn <- 0
     un <- 0

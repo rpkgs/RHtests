@@ -287,50 +287,6 @@ PMFxIseg<-function(Y0,Ti,Ips,Iseg){
   return(oout)
 }
 
-PTKI0I2<-function(Y0,I0,I2){
-# search new breakpoint of Y0[(I0+1):I2] using function PTK()
-# output: Ic -- breakpoint, prob and PTx
-  Y<-Y0[(I0+1):I2]
-  N<-length(Y)
-  oout<-list()
-  oout$prob<-(-1)
-  oout$Ic<-I0
-  oout$PTx<-(-9999.9)
-  if(N>=(Nmin*2)){
-    Pk0<-Pk.PMT(N)
-    otmp<-PTK(Y,Pk0)
-    oout$Ic<-I0+otmp$KPx
-    oout$prob<-pt(otmp$Tx,(N-2))
-    oout$PTx<-otmp$PTx
-  }
-  return(oout)
-}
-
-PTK<-function(Y,Pk){
-#  search input vector, return PTx.max and corresponding KPx
-  PTx<-(-9999.9)
-  KPx<-0
-  N<-length(Y)
-  for(k in Nmin:(N-Nmin)){
-    EY1<-mean(Y[1:k])
-    EY2<-mean(Y[(k+1):N])
-    var<-sum(c((Y[1:k]-EY1)^2,(Y[(k+1):N]-EY2)^2))
-    std<-sqrt(var/(N-2))
-    Tk<-sqrt(k*(N-k)/N)*abs(EY1-EY2)/std
-    PTk<-Tk*Pk[k]
-    if(PTk>PTx){
-      PTx<-PTk
-      KPx<-k
-      Tx<-Tk
-    }
-  }
-  oout<-list()
-  oout$PTx<-PTx
-  oout$KPx<-KPx
-  oout$Tx<-Tx
-  return(oout)
-}
-
 Pk.PMT<-function(N){
 # calculate penalty with given series length -- N
 # output P, real vector of length N-1

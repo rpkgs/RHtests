@@ -76,7 +76,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
   mkdir(output)
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
 
-	ErrorMSG<-NA
+  ErrorMSG <- NA
   assign("ErrorMSG", ErrorMSG, envir = .GlobalEnv)
   Nmin <- 10
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
@@ -222,7 +222,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         Ns  <- 1
         Ips <- c(Imx,N)
 
-        # if(Debug) cat(file=flog,c("First Ips:",Ips,"\n"))
+        # if (Debug) cat(file=flog,c("First Ips:",Ips,"\n"))
         tt    <- TRUE
         Niter <- 0
         while(tt){  # condition on is there any more Bps to insert in Ips?

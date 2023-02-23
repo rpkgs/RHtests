@@ -7,8 +7,12 @@ test_that("RHtests_process temp works", {
   R <- l$month[, c(1, 2, 3, 5)]
 
   r <- RHtests_process(B, R, metadata = NULL, prefix)
-  plot_RHtests(r)
+  plot_output(r$data)
 
   expect_equal(nrow(r$data), 744)
   expect_equal(r$TP$date %>% date2num(), c(198812, 200606, 200910) * 100 + 1)
 })
+
+# px <- proffer::pprof({
+#   r <- RHtests_process(B, R, metadata = NULL, prefix, is_plot = FALSE)
+# })

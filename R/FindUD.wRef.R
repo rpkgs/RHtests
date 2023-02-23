@@ -31,13 +31,13 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   file.create(ofileIout)
   if(Ns == 0) { # no input changepoints
     Pk0<-Pk.PMT(N)
-    oout<-PTK(Y0,Pk0)
+    oout<-PTK(Y0,Pk0, Nmin)
     I0<-0
     I2<-oout$KPx
     I4<-N
-    I1<-PTKI0I2(Y0,I0,I2)$Ic
-    I3<-PTKI0I2(Y0,I2,I4)$Ic
-    I02<-PTKI0I2(Y0,I1,I3)$Ic
+    I1<-PTKI0I2(Y0,I0,I2, Nmin)$Ic
+    I3<-PTKI0I2(Y0,I2,I4, Nmin)$Ic
+    I02<-PTKI0I2(Y0,I1,I3, Nmin)$Ic
     prob<-PTKIc(Y0,Pk0,I02)$prob
     if(I02>0&prob>=plev){
       Ns<-1
@@ -88,7 +88,7 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
     for(Iseg in 1:(Ns+1)){
       I0<- if(Iseg==1) 0 else Ips[Iseg-1]
       I2<-Ips[Iseg]
-      otmp<-PTKI0I2(Y0,I0,I2)
+      otmp<-PTKI0I2(Y0,I0,I2, Nmin)
       if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
     }
     # finished find new possible changepoints, sorted in Ips0
@@ -186,7 +186,7 @@ FindUD.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
     for(i in 1:(Ns+1)){ # search for new break points
       I0<- if(i==1) 0 else Ips[i-1]
       I2<-Ips[i]
-      otmp<-PTKI0I2(Y0,I0,I2)
+      otmp<-PTKI0I2(Y0,I0,I2, Nmin)
       if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
     }
     tt1<-TRUE

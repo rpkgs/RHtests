@@ -8,12 +8,13 @@ Description: What the package does (one paragraph).
 License: GPL-3
 Depends: 
     R (>= 3.1)
-Imports: magrittr, 
-    lubridate, 
-    data.table, dplyr, 
-    ggplot2, 
-    foreach,
-    crayon, 
+Imports: 
+    magrittr,
+    lubridate,
+    data.table,
+    dplyr,
+    ggplot2,
+    crayon,
     Ipaper
 Suggests: 
     testthat,
