@@ -28,41 +28,46 @@
 #' @param Ny4a
 #'
 #' @return
+
 #' Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
 #'
-#' - Example1_1Cs.txt
+#' * Example1_1Cs.txt
 #'
-#'   Ns >= 0 is the number of changepoints identified;
-#'   changepoint positions are Ip(1), Ip(2),...,Ip(Ns)
+#'   Ns >= 0 is the number of changepoints identified; changepoint positions are
+#'   Ip(1), Ip(2),...,Ip(Ns)
 #'
 #' * OutFile_U.dat
-#'
-#'   - index
-#'   - date
-#'   - original base series
-#'   - estimated linear trend line of the base series
-#'   - the mean-adjusted base series
-#' #'
-#'   - the 6 th and 7 th columns are similar to the 4 th and 5 th columns but for
-#'     shift-sizes estimated from the de-seasonalized base series
-#'
-#'   - the 8 th and 9 th columns are respectively the de-seasonalized base series
-#'     (i.e., the base series with its the mean annual cycle subtracted) and its
-#'     multi-phase regression model fit;
-#'
-#'   - the 10 th column: the estimated mean annual cycle together with the linear trend
-#'     and mean-shifts;
-#'
-#'   - the 11 th column: the QM-adjusted base series (the QM-adjustments here
-#'     are estimated using the reference series);
-#'
-#'   - the 12 th column: the multi-phase regression model fit to the de-seasonalized base
-#'     series without accounting for any shifts (i.e. ignore all shifts identified).
-#'
+#' 
+#' - `id`   :
+#' 
+#' - `date` : 
+#' 
+#' - `base` : the original input series
+#' 
+#' - `base_trend+meanshift`: `trend` + `abrupt shift` (for base)
+#' 
+#' - `base_mean_adj`: `base` - `abrupt shift`
+#' 
+#' - `base_anomaly`: `base` - `seasonal cycle`
+#' 
+#' - `fit_of_base_anomaly`: `trend` + `abrupt shift` (for anomaly)
+#' 
+#' - `annualC+meanShifts`: `seasonal cycle` + `abrupt shift` (for base)
+#' 
+#' - `QM_adjusted`:
+#'  
+#' - `fit_of_deseason_base`: linear trend of `anomal`. A multi-phase regression
+#'    model fit to the de-seasonalized base series without accounting for any
+#'    shifts (i.e. ignore all shifts identified)
+
 #' @examples
-#' infile = system.file("extdata/Example1.dat", package = "RHtests")
-#' FindU(infile)
-#' @import foreach
+#' f = system.file("extdata/Example1.dat", package = "RHtests")
+#' r = FindU(f)
+#' print(r)
+#' 
+#' plot_output(r$fit)
+#' 
+#' @importFrom Ipaper foreach
 #' @export
 FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, plev=0.95,
@@ -84,14 +89,14 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     #     return(-1)
     # }
 
+    ofilePdf <- paste(output, "_U.pdf", sep = "")
+
     ofileAout <- paste(output,"_U.dat",sep="")
-    ofilePdf  <- paste(output,"_U.pdf",sep="")
     ofileSout <- paste(output,"_Ustat.txt",sep="")
     ofileIout <- paste(output,"_1Cs.txt",sep="")
     ofileMout <- paste(output,"_mCs.txt",sep="")
 
     file.create(ofileAout)
-    file.create(ofilePdf)
     file.create(ofileSout)
     file.create(ofileIout)
 

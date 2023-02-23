@@ -18,19 +18,22 @@ merge_metainfo <- function(TP, metadata) {
 }
 
 #' adjust TP according to station meta info
-#'
+#' 
+#' @param TP A data.frame, with the columns of `c("kind", "diff", "")`
+#' 
 #' @return An adjusted date
 #' 
 #' @export
-adjust_TP <- function(TP, metadata, maxgap = 366) {
+TP_adjustByMeta <- function(TP, metadata, maxgap = 366) {
   if (is.null(TP)) return(NULL)
 
   TP %<>% merge_metainfo(metadata)
-  ## 调整Type-1突变点位置
-  ## Type-0中仅挑选有metedata支持的TP
+  
+  # Type-0突变点，根据meta信息进行调整
+  # (1) 仅挑选有meta支持的TP
+  # (2) TP日期根据meta进行微调
   TP0 <- TP[kind == 0 & abs(diff) <= maxgap, ] %>% mutate(date = date_meta)
-  ## 补充metadata 的TP，stepsize为进一步剔除不显著部分
-
+  
   ## 此举TP1也被干掉，有可能转变为TP0, good option
   TP1 <- TP[kind == 1, ]
   TP1[abs(diff) <= maxgap, `:=`(kind = 0, date = date_meta)]
@@ -43,20 +46,20 @@ adjust_TP <- function(TP, metadata, maxgap = 366) {
   TP_final[, .SD[which.min(abs(diff)), ], .(date)] %>% .[order(date), ]
 }
 
-#' @param r object returned by [StepSize()]
-#' @rdname adjust_TP
+#' @rdname TP_adjustByMeta
 #' @export
-adjust_step_TP <- function(r) {
-  if (is.null(r)) return(NULL)
+TP_remove_least <- function(TP) {
+  # 每次删除掉一个最不显著的突变点
+  if (is.null(TP)) return(NULL)
+  
+  I_del <- TP[, which.min(abs(stepsize))]
+  kind  <- TP$kind[I_del]
 
-  TP2   <- r$TP
-  I_del <- TP2[, which.min(abs(stepsize))]
-  kind  <- TP2$kind[I_del]
   if (kind == 0) {
-    is_keep = TP2[I_del, prob >= probU]
+    is_keep = TP[I_del, prob >= probU]
   } else if (kind == 1) {
-    is_keep = TP2[I_del, PFx >= PFx95h]
+    is_keep = TP[I_del, PFx >= PFx95h]
   }
-  if (!is_keep) TP2 = TP2[-I_del, ]
-  TP2
+  if (!is_keep) TP = TP[-I_del, ]
+  TP
 }

@@ -1,4 +1,3 @@
-
 ReadDLY <- function(InSeries, MissingValueCode = "-999.99", pthr = 0.0){
     itable <- if (is.character(InSeries)) {
         sep = ifelse(is.csv(InSeries), ",", " ")
@@ -38,5 +37,4 @@ ReadDLY <- function(InSeries, MissingValueCode = "-999.99", pthr = 0.0){
     assign("IY0flg",IY0flg,envir=.GlobalEnv) # continuous flag for Base
     d = data.table(IY0, Imd, IY0flg, Ti, Y0)
     d
-    # return(0)
 }

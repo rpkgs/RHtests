@@ -15,7 +15,7 @@ U <- FindU.dlyPrcp(data, prefix)
 UD <- FindUD.dlyPrcp(data, U$TP, prefix)
 
 TP  <- UD$TP
-TP2 <- adjust_TP(TP, metadata, maxgap = 366)
+TP2 <- TP_adjustByMeta(TP, metadata, maxgap = 366)
 
 # StepSize.dlyPrcp(data, TP2, prefix)
 r <- RHtests_stepsize_prcp(data, TP2, prefix)

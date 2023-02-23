@@ -48,30 +48,23 @@ Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
 \itemize{
 \item Example1_1Cs.txt
 
-Ns >= 0 is the number of changepoints identified;
-changepoint positions are Ip(1), Ip(2),...,Ip(Ns)
-}
-\itemize{
+Ns >= 0 is the number of changepoints identified; changepoint positions are
+Ip(1), Ip(2),...,Ip(Ns)
 \item OutFile_U.dat
-\itemize{
-\item index
-\item date
-\item original base series
-\item estimated linear trend line of the base series
-\item the mean-adjusted base series
-#'
-\item the 6 th and 7 th columns are similar to the 4 th and 5 th columns but for
-shift-sizes estimated from the de-seasonalized base series
-\item the 8 th and 9 th columns are respectively the de-seasonalized base series
-(i.e., the base series with its the mean annual cycle subtracted) and its
-multi-phase regression model fit;
-\item the 10 th column: the estimated mean annual cycle together with the linear trend
-and mean-shifts;
-\item the 11 th column: the QM-adjusted base series (the QM-adjustments here
-are estimated using the reference series);
-\item the 12 th column: the multi-phase regression model fit to the de-seasonalized base
-series without accounting for any shifts (i.e. ignore all shifts identified).
 }
+\itemize{
+\item \code{id}   :
+\item \code{date} :
+\item \code{base} : the original input series
+\item \code{base_trend+meanshift}: \code{trend} + \verb{abrupt shift} (for base)
+\item \code{base_mean_adj}: \code{base} - \verb{abrupt shift}
+\item \code{base_anomaly}: \code{base} - \verb{seasonal cycle}
+\item \code{fit_of_base_anomaly}: \code{trend} + \verb{abrupt shift} (for anomaly)
+\item \code{annualC+meanShifts}: \verb{seasonal cycle} + \verb{abrupt shift} (for base)
+\item \code{QM_adjusted}:
+\item \code{fit_of_deseason_base}: linear trend of \code{anomal}. A multi-phase regression
+model fit to the de-seasonalized base series without accounting for any
+shifts (i.e. ignore all shifts identified)
 }
 }
 \description{
@@ -84,6 +77,10 @@ series will be used in any of these functions; the base series is tested in
 this case.
 }
 \examples{
-infile = system.file("extdata/Example1.dat", package = "RHtests")
-FindU(infile)
+f = system.file("extdata/Example1.dat", package = "RHtests")
+r = FindU(f)
+print(r)
+
+plot_output(r$fit)
+
 }

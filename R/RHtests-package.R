@@ -36,6 +36,8 @@ NULL
 #' @importFrom graphics axis lines par text title
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats .lm.fit lm pf pt qt var
+#' @importFrom Ipaper %do% foreach
+#' 
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {
     utils::globalVariables(

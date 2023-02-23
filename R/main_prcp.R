@@ -37,6 +37,5 @@ getMtrendFdly <- function(idata) {
   ind <- which(!is.na(y))
   y <- y[ind]
   # print(y)
-  # browser()
   summary(lm(y ~ ind))$coef[2, 1]
 }

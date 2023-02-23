@@ -28,7 +28,7 @@ RHtests_stepsize <- function(data = NULL, data.ref = NULL, TP2,
     times <- 1
     while (times < nrow(TP2)) {
         if (!is.list(r) || length(r$TP) == 0) return(NULL)
-        TP2 <- adjust_step_TP(r)
+        TP2 <- TP_remove_least(r$TP)
 
         if (nrow(TP2) < nrow(r$TP)) {
             if (verbose) print(TP2)
@@ -70,7 +70,7 @@ RHtests_process <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT/
     if (is_empty(UD$TP)) return(NULL)
 
     TP  <- UD$TP
-    TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)
+    TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
 
     r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
         prefix, is_plot, verbose)
@@ -98,7 +98,7 @@ RHtests_process2 <- function(data, data.ref = NULL, metadata, prefix = "./OUTPUT
     if (is_empty(UD$TP)) return(NULL)
 
     TP  <- UD$TP
-    TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)
+    TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
 
     r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
         prefix, is_plot, verbose)

@@ -11,8 +11,6 @@ test_that("multiplication works", {
 
     # dat_example01 <- ori.itable %>% as.data.table()
     # use_data(dat_example01, overwrite = TRUE)
-
-    ## 2.
     Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
     Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
 

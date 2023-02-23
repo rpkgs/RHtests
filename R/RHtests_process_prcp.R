@@ -13,10 +13,12 @@ RHtests_stepsize_prcp <- function(data = NULL, TP2,
   times <- 1
   while (times < nrow(TP2)) {
     if (length(r$TP) == 0) return(NULL)
-    TP2 <- adjust_step_TP(r)
+    TP2 <- TP_remove_least(r$TP)
 
     if (nrow(TP2) < nrow(r$TP)) {
-      if (verbose) print(TP2)
+      if (verbose) {
+        print(TP2)
+      }
       times <- times + 1
       r = StepSize.dlyPrcp(data, TP2, prefix)
       # r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot)
@@ -46,7 +48,7 @@ RHtests_process_prcp <- function(data, metadata, prefix = "./OUTPUT/example02",
   if (is_empty(UD$TP)) return(NULL)
 
   TP  <- UD$TP
-  TP2 <- adjust_TP(TP, metadata, maxgap = maxgap)
+  TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
 
   # StepSize.dlyPrcp(data, TP2, prefix)
   # r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,

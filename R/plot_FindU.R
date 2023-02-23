@@ -10,7 +10,7 @@ plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
     par(mfrow=c(2,1))
     par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
     on.exit({ par(op); dev.off() })
-
+    
     uyrs   <- unique(floor(ori.itable$year/10))*10 # decades
     ats    <- match(uyrs, ori.itable$year) %>% rm_empty()
     labels <- ori.itable$year[ats]
