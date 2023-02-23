@@ -8,10 +8,11 @@
 ## usethis namespace: end
 NULL
 
-#**** Copyright agreement ****
-#       All users of any code in this package agree to the terms and conditions described in the 
-#file Copyright_RHtests__RClimDex_SoftwarePackages.pdf, which is also included in this package.
-#*****************************
+# **** Copyright agreement ****
+# All users of any code in this package agree to the terms and conditions
+# described in the file Copyright_RHtests__RClimDex_SoftwarePackages.pdf, which
+# is also included in this package.
+# *****************************
 
 # NT=1, 12, and 365 for annual, monthly, and daily series, respectively
 # plev is the nominal level of confidence; (1 - plev) is the nominal level
@@ -40,7 +41,12 @@ NULL
     utils::globalVariables(
       c(
         ".", ".SD", ".N",
-        "Ti", "Y0", "Nt", "itable", "ori.itable", "IY0"
+        "ooflg", "owflg", 
+        "bdata", "ori.bdata", 
+        "itable", "ori.itable", 
+        "ErrorMSG", 
+        "olflg", "Nmin", 
+        "Ti", "Y0", "Nt", "IY0", "IY0flg", "Icy", "Imd", "phi", "PFmax", "PTmax"
       )
     )
   }
