@@ -17,7 +17,7 @@ devtools::install_github("rpkgs/RHtest")
 
 ## 使用步骤
 
-数据均一化一站式处理：
+数据均一化，一站式处理：
 
 ```r
 FUN_FindU  <- if (has_ref) FindU.wRef else FindU
