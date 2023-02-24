@@ -20,14 +20,14 @@ plot_output <- function(data, outfile = NULL, ..., show=FALSE) {
 }
 
 
-plot_RHtests_multi <- function(obj, outfile = "RHtests.pdf", ..., show=FALSE) {
-  dout <- map(obj$result, ~ .$data[, .(date = num2date(date), base, QM_adjusted)]) %>%
-    melt_list("site")
-  n <- length(obj$result)
+# plot_RHtests_multi <- function(obj, outfile = "RHtests.pdf", ..., show=FALSE) {
+#   dout <- map(obj$result, ~ .$data[, .(date = num2date(date), base, QM_adjusted)]) %>%
+#     melt_list("site")
+#   n <- length(obj$result)
 
-  p <- ggplot(dout, aes(date, y = QM_adjusted - base)) +
-    geom_line() +
-    # geom_line(aes(date, QM_adjusted), color = "blue") +
-    facet_wrap(~site, scales = "free", ncol = 2)
-  write_fig(p, outfile, 10, 50 / 70 * n, show=show)
-}
+#   p <- ggplot(dout, aes(date, y = QM_adjusted - base)) +
+#     geom_line() +
+#     # geom_line(aes(date, QM_adjusted), color = "blue") +
+#     facet_wrap(~site, scales = "free", ncol = 2)
+#   write_fig(p, outfile, 10, 50 / 70 * n, show=show)
+# }

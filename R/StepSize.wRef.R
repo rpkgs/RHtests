@@ -433,7 +433,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
 
   odata %<>% as.data.table()
   odata$date %<>% num2date()
-  write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=F, na=MissingValueCode)
+  # write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=F, na=MissingValueCode)
 
   d_TP %<>% do.call(rbind, .)
   d_TP$stepsize <- stepsizes

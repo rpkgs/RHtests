@@ -574,7 +574,7 @@ FindUD <- function(
 
   odata %<>% as.data.table()
   odata$date %<>% num2date()
-  write.table(file = paste0(output, "_UD.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = F)
+  # write.table(file = paste0(output, "_UD.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = F)
 
   if (GUI) {
     return(0)

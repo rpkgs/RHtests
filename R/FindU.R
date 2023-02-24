@@ -548,7 +548,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
 
     odata = as.data.table(odata)
     odata$date %<>% num2date()
-    write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
+    # write.table(file=ofileAout, odata, na=MissingValueCode, col.names=TRUE, row.names=F)
 
     if(GUI)
         return(0)
