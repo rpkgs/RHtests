@@ -71,7 +71,7 @@
 #' @export
 FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, plev=0.95,
-	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE)
+	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE, ..., debug = TRUE)
 {
   mkdir(dirname(output))
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
@@ -88,22 +88,24 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     #     if(!GUI) cat(ErrorMSG)
     #     return(-1)
     # }
-
     ofilePdf <- paste(output, "_U.pdf", sep = "")
 
     ofileAout <- paste(output,"_U.dat",sep="")
     ofileSout <- paste(output,"_Ustat.txt",sep="")
     ofileIout <- paste(output,"_1Cs.txt",sep="")
-    ofileMout <- paste(output,"_mCs.txt",sep="")
+    # ofileMout <- paste(output,"_mCs.txt",sep="")
 
     file.create(ofileAout)
     file.create(ofileSout)
     file.create(ofileIout)
 
     N <- length(Y0); Nadj <- Ny4a*Nt
-    cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),file=ofileSout)
-    cat(paste("Input data filename:", "N=",N, "\n"),file=ofileSout,append=T)
     readPFtable(N, plev)
+    
+    if (debug) {
+      cat(paste("The nominal level of confidence (1-alpha)=", plev, "\n"), file = ofileSout)
+      cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
+    }
 
     Pk0  <- Pk.PMFT(N)
     oout <- rmCycle(itable)
@@ -113,7 +115,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
 
     if(length(EB) != length(Icy)) {
         ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
-                         "\n",get("ErrorMSG",env=.GlobalEnv),"\n")
+                         "\n", get("ErrorMSG",env=.GlobalEnv),"\n")
         if(!GUI) print(ErrorMSG)
         return(-1)
     }
@@ -123,12 +125,17 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     beta0    <- otmp$trend
     meanhat0 <- otmp$meanhat
     Ehat0    <- mean(meanhat0)
-    cat(file=ofileSout,paste(" Ignore changepoints -> trend0 =",
-        round(beta0,6),"(",round(otmp$betaL,6),",",round(otmp$betaU,6),")",
-        "(p=",round(otmp$p.tr,4),"); cor=",
-        round(otmp$cor,4),"(", round(otmp$corl,4),",",
-        round(otmp$corh,4),")\n"),append=T)
-
+    
+    if (debug) {
+      cat(file = ofileSout, paste(
+        " Ignore changepoints -> trend0 =",
+        round(beta0, 6), "(", round(otmp$betaL, 6), ",", round(otmp$betaU, 6), ")",
+        "(p=", round(otmp$p.tr, 4), "); cor=",
+        round(otmp$cor, 4), "(", round(otmp$corl, 4), ",",
+        round(otmp$corh, 4), ")\n"
+      ), append = T)
+    }
+    
     oout<-PMFT(Y1,Ti,Pk0)
     I0<-0
     I2<-oout$KPx
@@ -332,26 +339,38 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         Rb    <- Y1-oout$trend*Ti+EBfull
         QMout <- QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
         B     <- QMout$PA
-        cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
-            file=ofileSout,append=T)
-        cat(paste("\n Adjust to segment", Iseg.adj,": from",
-                  if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-                  "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
-        #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-        #       append=T)
-        if(Mq>1){
-            oline<-paste('#Fcat: frequency category boundaries\n',
-                         '#DP: Difference in the category means\n#',sep='')
-            for(i in 1:Ns) oline<-paste(oline,paste('Fcat.Seg',i,sep=''),paste('DP.Seg',i,sep=''))
-            oline<-paste(oline,'\n')
-            cat(oline,file=ofileSout,append=T)
 
-            write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                        row.names=F,col.names=F)
+        if (debug) {
+          cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
+            file = ofileSout, append = T
+          )
+          cat(paste(
+            "\n Adjust to segment", Iseg.adj, ": from",
+            if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
+            "to", Ips[Iseg.adj], "\n"
+          ), file = ofileSout, append = T)
+          #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
+          #       append=T)
+        }
+
+        if(Mq>1){
+            if (debug) {
+              oline <- paste("#Fcat: frequency category boundaries\n",
+                "#DP: Difference in the category means\n#", sep = "")
+              for (i in 1:Ns) oline <- paste(oline, paste("Fcat.Seg", i, sep = ""), paste("DP.Seg", i, sep = ""))
+              oline <- paste(oline, "\n")
+              cat(oline, file = ofileSout, append = T)
+
+              write.table(round(QMout$osmean, 4),
+                file = ofileSout, append = T,
+                row.names = F, col.names = F
+              )
+            }
+
             for(i in 1:(Ns+1)){
                 I1<-if(i==1) 1 else Ips[i-1]+1
                 I2<-Ips[i]
-                if(i!=Iseg.adj)
+                if(i!=Iseg.adj && debug)
                     cat(paste("Seg. ",i,": mean of QM-adjustments =",round(mean(QMout$W[I1:I2]),4),
                               "\n",sep=""),file=ofileSout,append=T)
             }
@@ -368,21 +387,26 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     adj      <- oout$Y0+EBfull
     # B      <- B+EBfull+oout$trend*Ti
     B        <- B+oout$trend*Ti
-    cat("Common trend TPR fit to the de-seasonalized Base series:\n",
-        file=ofileSout,append=T)
-    cat(paste("#steps= ",Ns,"; trend=",round(oout$trend,6),"(",
-              round(oout$betaL,6),",",round(oout$betaU,6),") (p=",
-              round(oout$p.tr,4),"); cor=",
-              round(cor,4),"(",round(corl,4),",",round(corh,4),")",
-              round(pcor,4),"\n"),
-        file=ofileSout,append=T)
+    if (debug) {
+      cat("Common trend TPR fit to the de-seasonalized Base series:\n",
+        file = ofileSout, append = T
+      )
+      cat(paste(
+          "#steps= ", Ns, "; trend=", round(oout$trend, 6), "(",
+          round(oout$betaL, 6), ",", round(oout$betaU, 6), ") (p=",
+          round(oout$p.tr, 4), "); cor=",
+          round(cor, 4), "(", round(corl, 4), ",", round(corh, 4), ")",
+          round(pcor, 4), "\n"
+        ), file = ofileSout, append = T)
+    }
     if(Ns>0) for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
         Delta<-oout$mu[Iseg.adj]-oout$mu[i]
         adj[I1:I2]<-adj[I1:I2]+Delta
         stepsize<-oout$mu[i+1]-oout$mu[i]
-        cat(paste(Ips[i],IY0[Ips[i]],"stepsize=",round(stepsize,4),"\n"),
+        if (debug)
+          cat(paste(Ips[i],IY0[Ips[i]],"stepsize=",round(stepsize,4),"\n"),
             file=ofileSout,append=T)
     }
 
@@ -509,8 +533,8 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             else if(PFx>=PFx95l&PFx<PFx95h) Idc<-"?   "
             else if(PFx>=PFx95h) Idc<-"Yes "
             #     }
-
-            cat(paste("PMF : c=", sprintf("%4.0f",Ic),
+            if (debug)
+              cat(paste("PMF : c=", sprintf("%4.0f",Ic),
                       "; (Time ", sprintf("%10.0f",IY0[Ic]),
                       "); Type= 1; p=",sprintf("%10.4f",prob),"(",
                       sprintf("%6.4f",probL),"-",
@@ -553,7 +577,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     if(GUI)
         return(0)
     else {
-        file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
+        # file.copy(from=ofileIout, to=ofileMout, overwrite=TRUE)
         # cat("FindU finished successfully...\n")
         list(fit = odata, TP = d_TP)
     }

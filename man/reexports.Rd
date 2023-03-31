@@ -14,10 +14,10 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{Ipaper}{\code{\link[Ipaper]{write_fig}}}
-
   \item{data.table}{\code{\link[data.table]{data.table}}}
 
   \item{dplyr}{\code{\link[dplyr]{arrange}}, \code{\link[dplyr]{mutate}}}
+
+  \item{Ipaper}{\code{\link[Ipaper]{write_fig}}}
 }}
 

@@ -579,7 +579,7 @@ FindUD <- function(
   if (GUI) {
     return(0)
   } else {
-    file.copy(from = ofileIout, to = ofileMout, overwrite = TRUE)
+    # file.copy(from = ofileIout, to = ofileMout, overwrite = TRUE)
     # cat("FindUD finished successfully...\n")
     list(fit = odata, TP = d_TP) # fit = odata,
   }

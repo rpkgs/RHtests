@@ -49,7 +49,7 @@ RHtests_stepsize <- function(
       break
     }
   }
-  r
+  r %>% set_class("stepsize")
 }
 
 #' process RHtests without reference series
@@ -72,7 +72,7 @@ RHtests_process <- function(data, data.ref = NULL, metadata,
     prefix = NULL, outdir = "OUTPUT/example01", 
     maxgap = 366, 
     ..., 
-    debug = TRUE, 
+    debug = FALSE, 
     is_plot = TRUE, verbose = TRUE)
 {
   mkdir(outdir)
@@ -85,7 +85,7 @@ RHtests_process <- function(data, data.ref = NULL, metadata,
   FUN_FindUD <- if (has_ref) FindUD.wRef else FindUD
   
   RHtests_read(data, data.ref)
-  U  <- FUN_FindU(output = prefix, is_plot = is_plot)
+  U <- FUN_FindU(output = prefix, is_plot = is_plot, debug = debug)
   if (is_empty(U$TP)) return(NULL)
 
   UD <- FUN_FindUD(InCs = U$TP, output = prefix, is_plot = is_plot)

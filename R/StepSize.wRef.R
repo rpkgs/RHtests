@@ -485,7 +485,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
 
   if(GUI) return(0)
   else {
-    file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
+    # file.copy(from=ofileIout,to=ofileMout,overwrite=TRUE)
     # cat("StepSize.wRef finished successfully...\n")
     list(data = odata, TP = d_TP)
   }

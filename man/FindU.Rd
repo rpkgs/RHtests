@@ -13,7 +13,9 @@ FindU(
   Iadj = 10000,
   Mq = 10,
   Ny4a = 0,
-  is_plot = FALSE
+  is_plot = FALSE,
+  ...,
+  debug = TRUE
 )
 }
 \arguments{

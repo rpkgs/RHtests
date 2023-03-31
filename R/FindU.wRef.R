@@ -2,7 +2,7 @@
 FindU.wRef <- function(
     Bseries = NULL, Rseries = NULL, output, MissingValueCode = "-999.99",
     plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
-    is_plot = TRUE) {
+    is_plot = TRUE, ...) {
   mkdir(dirname(output))
   Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
 
@@ -122,7 +122,8 @@ FindU.wRef <- function(
   otmp <- PTKIc(Y0, Pk0, I02)
   ofileIout <- paste(output, "_1Cs.txt", sep = "")
   file.create(ofileIout)
-  ofileMout <- paste(output, "_mCs.txt", sep = "")
+  
+  # ofileMout <- paste(output, "_mCs.txt", sep = "")
   # ofileRout<-paste(output,"_Base_Ref.fitU",sep="")
   if (otmp$PTk < PTx95L) { # search for more changepoints
     cat(paste(
@@ -663,7 +664,7 @@ FindU.wRef <- function(
   if (GUI) {
     return(0)
   } else {
-    file.copy(from = ofileIout, to = ofileMout, overwrite = TRUE)
+    # file.copy(from = ofileIout, to = ofileMout, overwrite = TRUE)
     # cat("FindU.wRef finished successfully...\n")
     list(fit = odata, TP = d_TP)
   }
