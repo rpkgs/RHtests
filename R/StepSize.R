@@ -1,12 +1,18 @@
 #' StepSize
 #'
+#' @param debug 
+#' - `true`  : `_Fstat.txt` will be shown
+#' - `false` : no `_Fstat.txt`
+#' 
 #' @example R/examples/run_ex01.R
 #' @export
 StepSize <- function(
     InSeries = NULL, InCs, output,
     MissingValueCode = "-999.99",
-    GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0,
-    is_plot = TRUE) {
+    GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, 
+    is_plot = TRUE, 
+    ..., 
+    debug = TRUE) {
   if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
 
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
@@ -131,66 +137,69 @@ StepSize <- function(
   file.create(ofileSout)
   file.create(ofileIout)
   file.create(ofilePdf)
-  cat(paste("The nominal level of confidence (1-alpha)=", plev, "\n"), file = ofileSout)
-  cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
-  cat(file = ofileSout, paste(
-    " Ignore changepoints -> trend0 =",
-    round(beta0, 6), "(", round(betaL0, 6), ",", round(betaU0, 6),
-    ") (p=", round(p.tr0, 4), "); cor=", round(corD, 4), "(", round(corDL, 4),
-    ",", round(corDU, 4), ")\n"
-  ), append = T)
-  cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
-    file = ofileSout, append = T
-  )
-  if (Ns > 0) {
-    cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
+
+  # print(ofileSout)
+  if (debug) {
+    cat(paste("The nominal level of confidence (1-alpha)=", plev, "\n"), file = ofileSout)
+    cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
+    cat(file = ofileSout, paste(
+      " Ignore changepoints -> trend0 =",
+      round(beta0, 6), "(", round(betaL0, 6), ",", round(betaU0, 6),
+      ") (p=", round(p.tr0, 4), "); cor=", round(corD, 4), "(", round(corDL, 4),
+      ",", round(corDU, 4), ")\n"
+    ), append = T)
+    cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
       file = ofileSout, append = T
     )
-  }
-  if (Ns > 0) {
-    cat(paste(
-      "\n Adjust to segment", Iseg.adj, ": from",
-      if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
-      "to", Ips[Iseg.adj], "\n"
-    ), file = ofileSout, append = T)
-    #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-    #       append=T)
-    if (QMout$Mq > 1) {
-      oline <- paste("#Fcat: frequency category boundaries\n",
-        "#DP: Difference in the category means\n#",
-        sep = ""
-      )
-      for (i in 1:Ns) oline <- paste(oline, paste("Fcat.Seg", i, sep = ""), paste("DP.Seg", i, sep = ""))
-      oline <- paste(oline, "\n")
-      cat(oline, file = ofileSout, append = T)
 
-      write.table(round(QMout$osmean, 4),
-        file = ofileSout, append = T,
-        row.names = F, col.names = F
-      )
-      for (i in 1:(Ns + 1)) {
-        I1 <- if (i == 1) 1 else Ips[i - 1] + 1
-        I2 <- Ips[i]
-        if (i != Iseg.adj) {
-          cat(paste("Seg. ", i, ": mean of QM-adjustments =", round(mean(QMout$W[I1:I2]), 4),
-            "\n",
-            sep = ""
-          ), file = ofileSout, append = T)
-        }
-      }
-    }
-  }
-  cat(
-    paste(
-      "#steps= ", Ns, "; trend=", round(otmp$trend, 6), "(",
-      round(otmp$betaL, 6), ",", round(otmp$betaU, 6), ") (p=",
-      round(otmp$p.tr, 4), "); cor=",
-      round(cor, 4), "(", round(corl, 4), ",", round(corh, 4), ")",
-      round(pcor, 4), "\n"
-    ),
-    file = ofileSout, append = T
-  )
+     if (Ns > 0) {
+       cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
+         file = ofileSout, append = T
+       )
+     }
+     
+     if (Ns > 0) {
+       cat(paste(
+         "\n Adjust to segment", Iseg.adj, ": from",
+         if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
+         "to", Ips[Iseg.adj], "\n"
+       ), file = ofileSout, append = T)
+       #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
+       #       append=T)
+       if (QMout$Mq > 1) {
+         oline <- paste("#Fcat: frequency category boundaries\n",
+           "#DP: Difference in the category means\n#",
+           sep = ""
+         )
+         for (i in 1:Ns) oline <- paste(oline, paste("Fcat.Seg", i, sep = ""), paste("DP.Seg", i, sep = ""))
+         oline <- paste(oline, "\n")
+         cat(oline, file = ofileSout, append = T)
 
+         write.table(round(QMout$osmean, 4),
+           file = ofileSout, append = T,
+           row.names = F, col.names = F
+         )
+         for (i in 1:(Ns + 1)) {
+           I1 <- if (i == 1) 1 else Ips[i - 1] + 1
+           I2 <- Ips[i]
+           if (i != Iseg.adj) {
+             cat(paste("Seg. ", i, ": mean of QM-adjustments =", 
+                round(mean(QMout$W[I1:I2]), 4), "\n", sep = ""), 
+              file = ofileSout, append = T)
+           }
+         }
+       }
+     }
+
+     cat(paste(
+       "#steps= ", Ns, "; trend=", round(otmp$trend, 6), "(",
+       round(otmp$betaL, 6), ",", round(otmp$betaU, 6), ") (p=",
+       round(otmp$p.tr, 4), "); cor=",
+       round(cor, 4), "(", round(corl, 4), ",", round(corh, 4), ")",
+       round(pcor, 4), "\n"
+     ), file = ofileSout, append = T)
+  }
+  
   stepsizes <- NULL
   if (Ns > 0) {
     for (i in 1:(Ns + 1)) {
@@ -199,12 +208,11 @@ StepSize <- function(
       Delta <- otmp$mu[Iseg.adj] - otmp$mu[i]
       adj[I1:I2] <- adj[I1:I2] + Delta
       stepsize <- otmp$mu[i + 1] - otmp$mu[i]
-      cat(paste(Ips[i], IY0[Ips[i]], "stepsize=", round(stepsize, 4), "\n"),
-        file = ofileSout, append = T
-      )
+      if (debug) 
+        cat(paste(Ips[i], IY0[Ips[i]], "stepsize=", round(stepsize, 4), "\n"),
+          file = ofileSout, append = T)
     }
-    stepsizes <- otmp$mu %>%
-      {
+    stepsizes <- otmp$mu %>% {
         .[-1] - .[-(Ns + 1)]
       }
   }
@@ -350,20 +358,23 @@ StepSize <- function(
       }
 
       # PMF: Regression
-      cat(paste("PMF : c=", sprintf("%4.0f", Ic),
-        "; (Time ", sprintf("%10.0f", IY0[Ic]),
-        "); Type= ", sprintf("%4.0f", Id),
-        "; p=", sprintf("%10.4f", prob),
-        "(", sprintf("%10.4f", probL),
-        "-", sprintf("%10.4f", probU),
-        "); PFmax=", sprintf("%10.4f", PFx),
-        "; CV95=", sprintf("%10.4f", PFx95),
-        "(", sprintf("%10.4f", PFx95l),
-        "-", sprintf("%10.4f", PFx95h),
-        "); Nseg=", sprintf("%4.0f", Nseg),
-        "\n",
-        sep = ""
-      ), file = ofileSout, append = T)
+      if (debug) {
+        cat(paste("PMF : c=", sprintf("%4.0f", Ic),
+          "; (Time ", sprintf("%10.0f", IY0[Ic]),
+          "); Type= ", sprintf("%4.0f", Id),
+          "; p=", sprintf("%10.4f", prob),
+          "(", sprintf("%10.4f", probL),
+          "-", sprintf("%10.4f", probU),
+          "); PFmax=", sprintf("%10.4f", PFx),
+          "; CV95=", sprintf("%10.4f", PFx95),
+          "(", sprintf("%10.4f", PFx95l),
+          "-", sprintf("%10.4f", PFx95h),
+          "); Nseg=", sprintf("%4.0f", Nseg),
+          "\n",
+          sep = ""
+        ), file = ofileSout, append = T)
+      }
+
       d_TP[[i]] <- data.table(
         kind = Id, Idc,
         date = IY0[Ic], Ic, Nseg, stepsize = stepsizes[i],
@@ -379,7 +390,7 @@ StepSize <- function(
     fwrite(d_TP, ofileIout, sep = "\t", append = TRUE, col.names = TRUE)
     # fwrite(d_TP, ofileSout, sep = "\t", append = TRUE, col.names = TRUE)
   }
-  
+
   odata %<>% as.data.table()
   odata$date %<>% num2date()
   # write.table(file = paste0(output, "_F.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = F)

@@ -5,7 +5,9 @@
 StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output, 
   MissingValueCode="-999.99",
   plev=0.95,Iadj=10000,Mq=10,GUI=F,Ny4a=0, 
-  is_plot = TRUE)
+  is_plot = TRUE, 
+  ..., 
+  debug = TRUE)
 {
   Read.wRef(Bseries, Rseries, MissingValueCode)
 
@@ -80,11 +82,16 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   file.create(ofileIout)
   # file.create(ofilePdf)
   # file.create(ofileRout)
-  cat(paste("Input Base Series:",Bseries,"\n"),file=ofileSout)
-  cat(paste("Input Ref Series:",Rseries,"\n"),file=ofileSout,append=T)
-  cat(paste("The adj-diff. autocor is:",round(cor,4),"(",round(corl,4),
-            ",",round(corh,4),"p=",round(p.cor,4),")\n"), file=ofileSout,append=T)
 
+  if (debug) {
+    cat(paste("Input Base Series:", Bseries, "\n"), file = ofileSout)
+    cat(paste("Input Ref Series:", Rseries, "\n"), file = ofileSout, append = T)
+    cat(paste(
+      "The adj-diff. autocor is:", round(cor, 4), "(", round(corl, 4),
+      ",", round(corh, 4), "p=", round(p.cor, 4), ")\n"
+    ), file = ofileSout, append = T)
+  }
+  
   cat(paste(Ns,"changepoints in Series", Bseries,"\n"),
       file=ofileIout)
 
@@ -124,18 +131,22 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
         else if(PTx0>=PTx95U) Idc<-"Yes "
       }
 
-      cat(paste("PMT : c=", sprintf("%4.0f",Ic),
-                "; (Time ", sprintf("%10.0f",IY0[Ic]),
-                "); Type= ",sprintf("%4.0f",Id),
-                "; p=", sprintf("%10.4f",prob),
-                "(", sprintf("%10.4f",probL),
-                "-", sprintf("%10.4f",probU),
-                "); PTmax=", sprintf("%10.4f",PTx0),
-                "; CV95=", sprintf("%10.4f",PTx95),
-                "(", sprintf("%10.4f",PTx95L),
-                "-", sprintf("%10.4f",PTx95U),
-                "); Nseg=", sprintf("%4.0f",Nseg),
-                "\n",sep=""), file=ofileSout, append=T)
+      if (debug) {
+        cat(paste("PMT : c=", sprintf("%4.0f", Ic),
+          "; (Time ", sprintf("%10.0f", IY0[Ic]),
+          "); Type= ", sprintf("%4.0f", Id),
+          "; p=", sprintf("%10.4f", prob),
+          "(", sprintf("%10.4f", probL),
+          "-", sprintf("%10.4f", probU),
+          "); PTmax=", sprintf("%10.4f", PTx0),
+          "; CV95=", sprintf("%10.4f", PTx95),
+          "(", sprintf("%10.4f", PTx95L),
+          "-", sprintf("%10.4f", PTx95U),
+          "); Nseg=", sprintf("%4.0f", Nseg),
+          "\n",
+          sep = ""
+        ), file = ofileSout, append = T)
+      }
       d_TP[[i]] <- data.table(kind = Id, Idc,
                               date = IY0[Ic], Ic, Nseg, stepsize = NA,
                               probL, probU, plev, PFx = PTx0, PFx95l = PTx95L, PFx95h = PTx95U, prob, PFx95 = PTx95)
@@ -229,21 +240,31 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   corL     <- dtmp$corl
   corU     <- dtmp$corh
 
-  cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
-            "(",round(dtmp$betaL,6),",",round(dtmp$betaU,6),
-            ") (p=",round(dtmp$p.tr,4),
-            "); cor=", round(cor,4),"(",round(corL,4),",",
-            round(corU,4),")\n\n"),
-      file=ofileSout,append=TRUE)
-  cat("Step-sizes estimated from difference series:\n",
-      file=ofileSout,append=TRUE)
-  if(Ns>0) cat(round(muDif[2:(Ns+1)]-muDif[1:Ns],4),
-               file=ofileSout,append=TRUE,fill=80)
-  cat(paste("\n after such adjustments, the base series trend=",
-            round(betaD,6),"(",round(betaDL,6),",",round(betaDU,6),
-            ") (p=",round(p.trD,4),"); cor=",round(corD,3),"(",round(corDL,3),
-            ",",round(corDU,3),")\n\n"),file=ofileSout,append=TRUE)
+  if (debug) {
+    cat(paste(
+      "Ignore changepoints -> trend0 =", round(beta0, 6),
+      "(", round(dtmp$betaL, 6), ",", round(dtmp$betaU, 6),
+      ") (p=", round(dtmp$p.tr, 4),
+      "); cor=", round(cor, 4), "(", round(corL, 4), ",",
+      round(corU, 4), ")\n\n"
+    ), file = ofileSout, append = TRUE)
+    cat("Step-sizes estimated from difference series:\n",
+      file = ofileSout, append = TRUE
+    )
 
+    if (Ns > 0) {
+      cat(round(muDif[2:(Ns + 1)] - muDif[1:Ns], 4),
+        file = ofileSout, append = TRUE, fill = 80
+      )
+    }
+    cat(paste(
+      "\n after such adjustments, the base series trend=",
+      round(betaD, 6), "(", round(betaDL, 6), ",", round(betaDU, 6),
+      ") (p=", round(p.trD, 4), "); cor=", round(corD, 3), "(", round(corDL, 3),
+      ",", round(corDU, 3), ")\n\n"
+    ), file = ofileSout, append = TRUE)
+  }
+  
   otmp<-rmCycle(bdata)
   EB<-rep(0,length(IY1))
   for(i in 1:length(IY1))
@@ -304,28 +325,42 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
     #   QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
     QMout <- QMadjGaussian.wRef(bdata[,4], bdata[,4]-bdata[,5], Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
     B <- QMout$PA
-    cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
-        file=ofileSout,append=T)
-    cat(paste("\n Adjust to segment", Iseg.adj,": from",
-              if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-              "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
-    #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-    #       append=T)
+
+    if (debug) {
+      cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
+        file = ofileSout, append = T
+      )
+      cat(paste(
+        "\n Adjust to segment", Iseg.adj, ": from",
+        if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
+        "to", Ips[Iseg.adj], "\n"
+      ), file = ofileSout, append = T)
+      #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
+      #       append=T)
+    }
+
     if(QMout$Mq>1){
       oline<-paste('#Fcat: frequency category boundaries\n',
                    '#DP: Difference in the category means\n#',sep='')
       for(i in 1:Ns) oline<-paste(oline,paste('Fcat.Seg',i,sep=''),paste('DP.Seg',i,sep=''))
       oline<-paste(oline,'\n')
-      cat(oline,file=ofileSout,append=T)
+      if (debug) {
+        cat(oline, file = ofileSout, append = T)
+        write.table(round(QMout$osmean, 4),
+          file = ofileSout, append = T,
+          row.names = F, col.names = F
+        )
+      }
 
-      write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                  row.names=F,col.names=F)
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
-        if(i!=Iseg.adj)
-          cat(paste("Seg. ",i,": mean of QM-adjustments =",round(QMout$AdjM[i],4),
-                    "\n",sep=""),file=ofileSout,append=T)
+        if (i != Iseg.adj && debug) {
+          cat(paste("Seg. ", i, ": mean of QM-adjustments =", round(QMout$AdjM[i], 4),
+            "\n",
+            sep = ""
+          ), file = ofileSout, append = T)
+        }
       }
     }
   }
@@ -357,20 +392,28 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
       QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
     )
 
-  cat("Common trend TPR fit to the de-seasonalized Base series:\n",
-      file=ofileSout,append=TRUE)
-  cat(paste("#steps= ",Ns,"; trend=",round(otrend,6),"(p=",
-            round(p.tro,4),"); cor=",
-            round(corout[1],4),"(",round(corout[2],4),",",round(corout[3],4),
-            ")  p=",round(corout[4],4), "\n"),
-      file=ofileSout,append=TRUE)
+  if (debug) {
+    cat("Common trend TPR fit to the de-seasonalized Base series:\n",
+      file = ofileSout, append = TRUE
+    )
+    cat(
+      paste(
+        "#steps= ", Ns, "; trend=", round(otrend, 6), "(p=",
+        round(p.tro, 4), "); cor=",
+        round(corout[1], 4), "(", round(corout[2], 4), ",", round(corout[3], 4),
+        ")  p=", round(corout[4], 4), "\n"
+      ),
+      file = ofileSout, append = TRUE
+    )
+  }
+
   if(Ns>0){
     stepsizes <- c()
     for(i in 1:Ns){
       stepsizes[i] <-if(i==1) sig[i+2] else sig[i+2]-sig[i+1]
     }
     # stepsizes = c(sig[3], diff(sig)[-(1:2)])
-    cat(round(stepsizes, 4), file = ofileSout, append = TRUE, fill = 80)
+    if (debug) cat(round(stepsizes, 4), file = ofileSout, append = TRUE, fill = 80)
   }
 
   odata <- matrix(NA,dim(ori.bdata)[1],12) %>% set_colnames(fitdata_varnames_ref)

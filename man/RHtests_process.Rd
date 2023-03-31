@@ -11,6 +11,8 @@ RHtests_process(
   prefix = NULL,
   outdir = "OUTPUT/example01",
   maxgap = 366,
+  ...,
+  debug = TRUE,
   is_plot = TRUE,
   verbose = TRUE
 )

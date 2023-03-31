@@ -15,7 +15,9 @@ StepSize.wRef(
   Mq = 10,
   GUI = F,
   Ny4a = 0,
-  is_plot = TRUE
+  is_plot = TRUE,
+  ...,
+  debug = TRUE
 )
 }
 \description{

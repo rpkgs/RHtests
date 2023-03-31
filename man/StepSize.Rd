@@ -14,8 +14,16 @@ StepSize(
   Iadj = 10000,
   Mq = 10,
   Ny4a = 0,
-  is_plot = TRUE
+  is_plot = TRUE,
+  ...,
+  debug = TRUE
 )
+}
+\arguments{
+\item{debug}{\itemize{
+\item \code{true}  : \verb{_Fstat.txt} will be shown
+\item \code{false} : no \verb{_Fstat.txt}
+}}
 }
 \description{
 StepSize

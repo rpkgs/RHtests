@@ -16,7 +16,10 @@ RHtests_read <- function(data, data.ref = NULL, plev = 0.95) {
 RHtests_stepsize <- function(
     data = NULL, data.ref = NULL, TP2,
     has_ref = !is.null(data.ref),
-    prefix = "./OUTPUT/example03", is_plot = FALSE, verbose = TRUE) {
+    prefix = "./OUTPUT/example03", 
+    is_plot = FALSE, verbose = TRUE, ..., 
+    debug = TRUE) 
+{
   mkdir(dirname(prefix))
 
   RHtests_read(data, data.ref)
@@ -41,7 +44,7 @@ RHtests_stepsize <- function(
       }
 
       times <- times + 1
-      r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot)
+      r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot, debug = debug)
     } else {
       break
     }
@@ -68,6 +71,8 @@ RHtests_stepsize <- function(
 RHtests_process <- function(data, data.ref = NULL, metadata, 
     prefix = NULL, outdir = "OUTPUT/example01", 
     maxgap = 366, 
+    ..., 
+    debug = TRUE, 
     is_plot = TRUE, verbose = TRUE)
 {
   mkdir(outdir)
@@ -88,9 +93,9 @@ RHtests_process <- function(data, data.ref = NULL, metadata,
 
   TP  <- UD$TP
   TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
-
+  
   r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
-      prefix, is_plot, verbose)
+      prefix, is_plot, verbose, debug = debug)
   # if null returned,
   if (is.null(r$TP) || nrow(r$TP) == 0) return(NULL)
   r$TP %<>% merge_metainfo(metadata)

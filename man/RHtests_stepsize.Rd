@@ -11,7 +11,9 @@ RHtests_stepsize(
   has_ref = !is.null(data.ref),
   prefix = "./OUTPUT/example03",
   is_plot = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...,
+  debug = TRUE
 )
 }
 \description{

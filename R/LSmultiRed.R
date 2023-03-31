@@ -77,6 +77,7 @@ LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj) {
   Niter <- 0
   tt <- TRUE
   EB1 <- EB
+  # global variables: Imd, Icy
   while (tt) {
     tt <- FALSE
     Niter <- Niter + 1
@@ -154,7 +155,6 @@ LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj) {
     meanhat = as.vector(meanhat),
     p.tr    = p.tr
   )
-  
 }
 
 rmCycle <- function(idata) {
