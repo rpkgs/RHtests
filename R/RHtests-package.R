@@ -35,7 +35,7 @@ NULL
 #' @importFrom utils write.table read.table
 #' @importFrom graphics axis lines par text title
 #' @importFrom grDevices dev.off pdf
-#' @importFrom stats .lm.fit lm pf pt qt var
+#' @importFrom stats .lm.fit ave lm pf pt qt splinefun var
 #' @importFrom Ipaper %do% foreach
 #' 
 .onLoad <- function(libname, pkgname) {

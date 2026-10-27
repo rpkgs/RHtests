@@ -24,6 +24,7 @@ export(mutate)
 export(num2date)
 export(plot_RHtests)
 export(plot_output)
+export(quantile_mapping)
 export(write_fig)
 import(data.table)
 import(ggplot2)
@@ -58,12 +59,18 @@ importFrom(graphics,
   title
 )
 importFrom(lubridate,day)
+importFrom(magrittr,
+  "%<>%",
+  "%>%"
+)
 importFrom(stats,
   .lm.fit,
+  ave,
   lm,
   pf,
   pt,
   qt,
+  splinefun,
   var
 )
 importFrom(utils,
