@@ -8,6 +8,11 @@
 [![CRAN](http://www.r-pkg.org/badges/version/RHtests)](https://cran.r-project.org/package=RHtests)
 <!-- badges: end -->
 
+> 欢迎提交PR
+
+主要贡献：
+- 在官方版本的基础上，<https://github.com/ECCC-CDAS/RHtests>，改成了R包格式，便于管理函数。
+- 一体化处理流程
 
 ## Installation
 
@@ -39,17 +44,14 @@ r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
 
 see details in `RHtests_process`.
 
-## 版权
-
-Please do not fork！
-
-若愿共同维护，可私信获取授权。
 
 
 ## References
 
-1. Xu, W., Li, Q., Wang, X. L., Yang, S., Cao, L., & Feng, Y. (2013). Homogenization of Chinese daily surface air temperatures and analysis of trends in the extreme temperature indices: HOMOGENIZE CHINESE DAILY TEMPERATURES. Journal of Geophysical Research: Atmospheres, 118(17), 9708–9720. <https://doi.org/10.1002/jgrd.50791>
+1. <https://github.com/ECCC-CDAS/RHtests>
 
-2. 朱亚妮, 曹丽娟, 唐国利, & 周自江. (2015). 中国地面相对湿度非均一性检验及订正. **气候变化研究进展**, 11(6), 379–386.
+2. Xu, W., Li, Q., Wang, X. L., Yang, S., Cao, L., & Feng, Y. (2013). Homogenization of Chinese daily surface air temperatures and analysis of trends in the extreme temperature indices: HOMOGENIZE CHINESE DAILY TEMPERATURES. Journal of Geophysical Research: Atmospheres, 118(17), 9708–9720. <https://doi.org/10.1002/jgrd.50791>
 
-3. Li, Z., Yan, Z., Zhu, Y., Freychet, N., & Tett, S. (2020). Homogenized Daily Relative Humidity Series in China during 1960–2017. Advances in Atmospheric Sciences, 37(4), 318–327. <https://doi.org/10.1007/s00376-020-9180-0>
+3. 朱亚妮, 曹丽娟, 唐国利, & 周自江. (2015). 中国地面相对湿度非均一性检验及订正. **气候变化研究进展**, 11(6), 379–386.
+
+4. Li, Z., Yan, Z., Zhu, Y., Freychet, N., & Tett, S. (2020). Homogenized Daily Relative Humidity Series in China during 1960–2017. Advances in Atmospheric Sciences, 37(4), 318–327. <https://doi.org/10.1007/s00376-020-9180-0>

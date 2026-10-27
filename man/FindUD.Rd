@@ -45,7 +45,7 @@ If Mq=0, the actual Mq is determined by the length of the shortest segment
 Mq=1 corresponds to mean adjustments (one adjustment for all data in
 the same segment).}
 
-\item{Ny4a}{}
+\item{Ny4a}{--}
 }
 \description{
 FindUD

@@ -5,6 +5,8 @@
 ^LICENSE\.md$
 ^codecov\.yml$
 ^OUTPUT$
+^\.git$
 ^\.github$
 ^clean\.sh$
 ^README\.rst$
+^docs$

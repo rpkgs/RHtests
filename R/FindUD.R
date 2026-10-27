@@ -587,18 +587,23 @@ FindUD <- function(
 
 guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
   if (Id == 0) { # type-0 changepoints
-    if (probU < plev) {
+    if (plev > probU) {
       Idc <- "No  "
-    } else if (probL < plev & probU >= plev) {
+    } else if (plev > probL & plev <= probU) {
       Idc <- "?   "
-    } else if (probL >= plev) Idc <- "YifD"
+    } else if (plev <= probL) {
+      Idc <- "YifD"
+    }
     if (PFx >= PFx95h) Idc <- "Yes "
+
   } else if (Id == 1) { # type-1 changepoints
     if (PFx < PFx95l) {
       Idc <- "No  "
     } else if (PFx >= PFx95l & PFx < PFx95h) {
       Idc <- "?   "
-    } else if (PFx >= PFx95h) Idc <- "Yes "
+    } else if (PFx >= PFx95h) {
+      Idc <- "Yes "
+    }
   }
   Idc
 }

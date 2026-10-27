@@ -28,33 +28,45 @@ export(write_fig)
 import(data.table)
 import(ggplot2)
 import(magrittr)
-importFrom(Ipaper,"%do%")
-importFrom(Ipaper,foreach)
-importFrom(Ipaper,is_empty)
-importFrom(Ipaper,listk)
-importFrom(Ipaper,melt_list)
-importFrom(Ipaper,mkdir)
-importFrom(Ipaper,ok)
-importFrom(Ipaper,reorder_name)
-importFrom(Ipaper,rm_empty)
-importFrom(Ipaper,warn)
-importFrom(Ipaper,write_fig)
+importFrom(Ipaper,
+  "%do%",
+  foreach,
+  is_empty,
+  listk,
+  melt_list,
+  mkdir,
+  ok,
+  reorder_name,
+  rm_empty,
+  warn,
+  write_fig
+)
 importFrom(data.table,data.table)
-importFrom(dplyr,arrange)
-importFrom(dplyr,mutate)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,pdf)
-importFrom(graphics,axis)
-importFrom(graphics,lines)
-importFrom(graphics,par)
-importFrom(graphics,text)
-importFrom(graphics,title)
+importFrom(dplyr,
+  arrange,
+  mutate
+)
+importFrom(grDevices,
+  dev.off,
+  pdf
+)
+importFrom(graphics,
+  axis,
+  lines,
+  par,
+  text,
+  title
+)
 importFrom(lubridate,day)
-importFrom(stats,.lm.fit)
-importFrom(stats,lm)
-importFrom(stats,pf)
-importFrom(stats,pt)
-importFrom(stats,qt)
-importFrom(stats,var)
-importFrom(utils,read.table)
-importFrom(utils,write.table)
+importFrom(stats,
+  .lm.fit,
+  lm,
+  pf,
+  pt,
+  qt,
+  var
+)
+importFrom(utils,
+  read.table,
+  write.table
+)
