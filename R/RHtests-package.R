@@ -37,6 +37,7 @@ NULL
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats .lm.fit ave lm pf pt qt splinefun var
 #' @importFrom Ipaper %do% foreach
+#' @importFrom magrittr %>% %<>%
 #' 
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {

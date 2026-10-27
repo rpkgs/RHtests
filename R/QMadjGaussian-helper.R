@@ -1,71 +1,45 @@
-
-
-# 按目标值分组，计算差值均值；保留原来的减组次序和边界容差
-# y_diff = y - y_ref
-#' @importFrom magrittr %>% %<>%
-.qm_ref_means <- function(y, y_diff, n_quantiles, breaks, min_count = 5, keep_short = FALSE) {
-  # 保留原来的同值排序规则
+# 按目标值排序，计算各分位组的差值均值和有效样本数
+.qm_ref_means <- function(y, y_diff, Mq) {
   sorted <- rev(sort(y, index.return = TRUE, decreasing = TRUE)$ix)
-  group_means <- numeric(length(breaks))
-  retry <- FALSE
-
-  for (k in 2:(n_quantiles + 1)) {
-    # 分位边界转换为排序位置，修正浮点数误差
-    bounds <- floor(length(y)) * breaks[c(k - 1, k)]
-    # 接近整数时先取整，避免浮点误差导致 floor 少取一个
-    bounds <- ifelse(abs(bounds - round(bounds)) < 1E-9, round(bounds), floor(bounds))
-    inds <- (bounds[1] + 1):bounds[2]
-    yi_diff <- y_diff[sorted[inds]]
-    enough <- sum(!is.na(yi_diff)) >= min_count
-    if (!enough) {
-      if (n_quantiles > 1) {
-        retry <- TRUE
-        n_quantiles <- n_quantiles - 1
-      } else {
-        warning("参考序列有效数据不足，无法继续减少分位数组数。", call. = FALSE)
-      }
-    }
-    # 突变后侧即使样本不足也计算均值，沿用原逻辑
-    if (enough || keep_short) group_means[k] <- mean(yi_diff, na.rm = TRUE)
-  }
-
-  # 两端复制相邻组，用于插值延拓
-  group_means[1] <- group_means[2]
-  group_means[n_quantiles + 2] <- group_means[n_quantiles + 1]
-  list(bins = group_means, mean = mean(y_diff, na.rm = TRUE),
-    Mq = n_quantiles, retry = retry)
+  group <- ceiling(seq_along(y) * Mq / length(y))
+  values <- split(y_diff[sorted], factor(group, levels = seq_len(Mq)))
+  list(means = vapply(values, mean, numeric(1), na.rm = TRUE),
+    counts = vapply(values, function(x) sum(!is.na(x)), integer(1)))
 }
 
-# 估计各突变点两侧的分位组均值；有效样本不足时重新分组
+# 逐次减少组数，直到各窗口、各分位组均满足最小有效样本数
 .qm_ref_groups <- function(y, y_diff, Ips, Mq, Nadj, min_count, local_window) {
-  Ns <- length(Ips) - 1
   starts <- c(0, head(Ips, -1))
+  Ns <- length(Ips) - 1
+  windows <- unlist(lapply(seq_len(Ns), function(i) {
+    left <- if (local_window) max(starts[i], Ips[i] - Nadj) else starts[i]
+    right <- if (local_window) min(Ips[i + 1], Ips[i] + Nadj) else Ips[i + 1]
+    list((left + 1):Ips[i], (Ips[i] + 1):right)
+  }), recursive = FALSE)
   repeat {
-    retry <- FALSE
-    offset <- .5 / floor(Mq)
-    breaks <- seq(0, by = 1 / Mq, length.out = Mq + 2)
-    after <- before <- matrix(0, Ns + 1, Mq + 2)
-    mean_shift <- numeric(Ns)
-    for (i in seq_len(Ns)) {
-      left <- if (local_window) max(starts[i], Ips[i] - Nadj) else starts[i]
-      idx <- (left + 1):Ips[i]
-      b <- .qm_ref_means(y[idx], y_diff[idx], Mq, breaks, min_count, keep_short = FALSE)
-      before[i, ] <- b$bins
-      Mq <- b$Mq
-      retry <- retry || b$retry
-
-      right <- if (local_window) min(Ips[i + 1], Ips[i] + Nadj) else Ips[i + 1]
-      idx <- (Ips[i] + 1):right
-      a <- .qm_ref_means(y[idx], y_diff[idx], Mq, breaks, min_count, keep_short = TRUE)
-      after[i, ] <- a$bins
-      Mq <- a$Mq
-      retry <- retry || a$retry
-      mean_shift[i] <- a$mean - b$mean
-    }
-    if (!retry) break
+    groups <- lapply(windows, function(idx) .qm_ref_means(y[idx], y_diff[idx], Mq))
+    enough <- all(vapply(groups, function(x) all(x$counts >= min_count), logical(1)))
+    if (enough || Mq == 1) break
+    Mq <- Mq - 1
   }
-  list(before = before, after = after, mean_shift = mean_shift,
-    Mq = Mq, breaks = breaks, offset = offset)
+  if (!enough) {
+    counts <- unlist(lapply(groups, `[[`, "counts"))
+    if (any(counts == 0)) stop("参考序列在部分窗口中没有有效数据。", call. = FALSE)
+    warning("参考序列有效数据不足，无法继续减少分位数组数。", call. = FALSE)
+  }
+
+  before <- after <- matrix(0, Ns + 1, Mq + 2)
+  mean_shift <- numeric(Ns)
+  for (i in seq_len(Ns)) {
+    b <- 2 * i - 1
+    a <- 2 * i
+    before[i, ] <- groups[[b]]$means[c(1, seq_len(Mq), Mq)]
+    after[i, ] <- groups[[a]]$means[c(1, seq_len(Mq), Mq)]
+    mean_shift[i] <- mean(y_diff[windows[[a]]], na.rm = TRUE) -
+      mean(y_diff[windows[[b]]], na.rm = TRUE)
+  }
+  list(before = before, after = after, mean_shift = mean_shift, Mq = Mq,
+    breaks = seq(0, by = 1 / Mq, length.out = Mq + 2), offset = .5 / Mq)
 }
 
 #' 累加相邻突变的订正量
@@ -74,26 +48,10 @@
 #' @return 各段的分位组订正量矩阵。
 #' @example R/examples/ex_qm_adjustments.R
 .qm_adjustments <- function(before, after, ref_segment) {
-  n_changes <- nrow(before) - 1
-  adjustments <- matrix(0, nrow(before), ncol(before))
-
-  for (k in seq_len(ncol(before))) {
-    # 基准段之前：累加从当前段到基准段的跳变
-    if (ref_segment > 1) {
-      for (i in seq_len(ref_segment - 1)) {
-        changes <- i:(ref_segment - 1)
-        adjustments[i, k] <- sum(after[changes, k]) - sum(before[changes, k])
-      }
-    }
-    # 基准段之后：反向累加跳变
-    if (ref_segment <= n_changes) {
-      for (i in (ref_segment + 1):(n_changes + 1)) {
-        changes <- ref_segment:(i - 1)
-        adjustments[i, k] <- sum(before[changes, k]) - sum(after[changes, k])
-      }
-    }
-  }
-  adjustments
+  idx <- seq_len(nrow(before) - 1)
+  jumps <- rbind(0, after[idx, , drop = FALSE] - before[idx, , drop = FALSE])
+  cumulative <- apply(jumps, 2, cumsum)
+  -sweep(cumulative, 2, cumulative[ref_segment, ])
 }
 
 # 调整逐点订正量，使其均值与均值跳变订正一致
@@ -139,10 +97,14 @@
 #' @return 各概率位置对应的订正量。
 .qm_interpolate <- function(knots, values, prob, n_quantiles = length(knots) - 2) {
   if (n_quantiles == 1) values[1] <- values[2]
-  derivatives <- splineN(knots, values, 2E30, 2E30)
-  adjustment <- numeric(length(prob))
-  for (i in seq_along(prob)) {
-    adjustment[i] <- splintN(knots, values, derivatives, prob[i])
+  adjustment <- splinefun(knots, values, "natural")(prob)
+  # 样条节点之外保留旧版三次外推规则
+  outside <- which(prob < min(knots) | prob > max(knots))
+  if (length(outside)) {
+    derivatives <- splineN(knots, values, 2E30, 2E30)
+    adjustment[outside] <- vapply(prob[outside], function(p) {
+      splintN(knots, values, derivatives, p)
+    }, numeric(1))
   }
   adjustment
 }

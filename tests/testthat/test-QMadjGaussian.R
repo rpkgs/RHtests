@@ -56,6 +56,23 @@ test_that("QM does not depend on global variables", {
     ifnotfound = list(NULL), inherits = FALSE), globals)
 })
 
+test_that("QMadjGaussian.wRef chooses the largest feasible group count", {
+  y <- rep(seq_len(60), 2)
+  dif <- rep(0, 120)
+  dif[setdiff(1:60, c(1:4, 16:30, 31:34, 46:60))] <- NA
+
+  r <- QMadjGaussian.wRef(y, dif, c(60, 120), 4, 2, 0, 12, 0)
+  expect_equal(r$Mq, 3)
+  expect_equal(r$PA, y)
+})
+
+test_that("QMadjGaussian.wRef reports an empty reference window", {
+  y <- rep(seq_len(30), 2)
+  dif <- c(rep(NA_real_, 30), rep(0, 30))
+  expect_error(QMadjGaussian.wRef(y, dif, c(30, 60), 3, 2, 0, 12, 0),
+    "没有有效数据")
+})
+
 test_that("QMadjGaussian.wRef reduces categories for missing references", {
   ref <- rep(seq_len(60), 2)
   y <- ref + rep(c(2, 0), each = 60)

@@ -35,8 +35,7 @@ quantile_mapping <- function(y, breaks, ref = length(breaks) + 1, Mq = 10, min_n
     means(y[(breaks[j] + 1):min(stops[j + 1], breaks[j] + w)])))
 
   # 累加跳变，使各段订正到基准段 [Nseg, Mq]
-  jump <- apply(rbind(0, after - before), 2, cumsum)
-  adj <- -sweep(jump, 2, jump[ref, ])
+  adj <- .qm_adjustments(rbind(before, 0), rbind(after, 0), ref)
   adj <- adj[, c(1, 1:Mq, Mq), drop = FALSE] # 两端复制相邻组
 
   knots <- (0:(Mq + 1) - .5) / Mq            # 组中心，两端各延拓一个节点
