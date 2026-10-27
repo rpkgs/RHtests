@@ -81,7 +81,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
   if(Ns>0){
     Rb<-Y1-otmp$trend*Ti+EBfull
 #   QMout<-QMadjDLY(Rb,Ips,Mq,Iseg.adj)
-    QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
+    QMout<-QMadjGaussian(Rb, Ips, Mq, Iseg.adj, Nadj, Nt)
     B<-QMout$PA
   }
   else B<-Y1-otmp$trend*Ti+EBfull

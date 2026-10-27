@@ -8,7 +8,7 @@
 #' @param Iseg.adj 基准段序号，该段不作订正。
 #' @param Nadj 突变点两侧用于估计订正量的最大观测数；0 表示整段。
 #'   有参考序列时，由 `Ny4a * Nt` 覆盖。
-#' @param Nt 每年观测次数；无参考版本从全局环境读取。
+#' @param Nt 每年观测次数。
 #' @param Ny4a 有参考序列时，突变点两侧用于估计订正量的年数；0 表示整段。
 #'
 #' @return 列表：`PA` 为订正序列，`Mq` 为实际分组数，`Nseg.mn` 为最短段
@@ -17,7 +17,7 @@
 #'
 #' @example R/examples/ex_QMadjGaussian.R
 #' @export
-QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj) {
+QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj, Nt) {
   Ns <- length(Ips) - 1
   N <- length(y)
   starts <- c(0, head(Ips, -1))
@@ -31,10 +31,10 @@ QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj) {
   # 估计突变前后各分位组的均值
   for (i in seq_len(Ns)) {
     left <- if (Nadj > 0) max(starts[i], Ips[i] - Nadj) else starts[i]
-    EPb[i, ] <- .qm_means(y[(left + 1):Ips[i]], Mq, breaks)
+    EPb[i, ] <- .qm_means(y[(left + 1):Ips[i]], breaks)
     right <- if (Nadj > 0) min(Ips[i + 1], Ips[i] + Nadj) else Ips[i + 1]
     if (Nadj > 0 || i == Ns) {
-      EPa[i, ] <- .qm_means(y[(Ips[i] + 1):right], Mq, breaks)
+      EPa[i, ] <- .qm_means(y[(Ips[i] + 1):right], breaks)
     }
   }
   if (Nadj == 0 && Ns > 1) EPa[seq_len(Ns - 1), ] <- EPb[2:Ns, ]

@@ -705,7 +705,7 @@ FindUD.wRef <- function(
         Ti1[Ids.leap[i]] <- Ti1[Ids.leap[i] - 1]
       }
       if (QMout$Mq > 1) {
-        B1 <- QMadjGaussian(Rb1, Ips.1, Mq, Iseg.adj, Nadj)$PA
+        B1 <- QMadjGaussian(Rb1, Ips.1, Mq, Iseg.adj, Nadj, Nt)$PA
         B1 <- B1 + otmp$trend * Ti1
         B1.leap <- B1[Ids.leap]
         odata[is.na(odata[, 3]) == F & Imd1 == 229, 11] <- round(B1.leap, 4)

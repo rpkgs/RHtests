@@ -5,7 +5,7 @@
 \alias{QMadjGaussian.wRef}
 \title{分位数匹配订正}
 \usage{
-QMadjGaussian(y, Ips, Mq, Iseg.adj, Nadj)
+QMadjGaussian(y, Ips, Mq, Iseg.adj, Nadj, Nt)
 
 QMadjGaussian.wRef(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
 }
@@ -22,9 +22,9 @@ QMadjGaussian.wRef(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
 \item{Nadj}{突变点两侧用于估计订正量的最大观测数；0 表示整段。
 有参考序列时，由 \code{Ny4a * Nt} 覆盖。}
 
-\item{Dif}{目标与参考序列的差值，与 \code{y} 对齐；缺失值可为 \code{NA}。}
+\item{Nt}{每年观测次数。}
 
-\item{Nt}{每年观测次数；无参考版本从全局环境读取。}
+\item{Dif}{目标与参考序列的差值，与 \code{y} 对齐；缺失值可为 \code{NA}。}
 
 \item{Ny4a}{有参考序列时，突变点两侧用于估计订正量的年数；0 表示整段。}
 }
@@ -42,12 +42,12 @@ ref <- rnorm(120)
 base <- ref + rep(c(2, 0), each = 60) + rnorm(120, sd = 0.2)
 
 # \%\% 无参考序列
-r <- QMadjGaussian(base, Ips = c(60, 120), Mq = 3, Iseg.adj = 2, Nadj = 0)
+r <- QMadjGaussian(base, Ips = c(60, 120), Mq = 3, Iseg.adj = 2, Nadj = 0, Nt = 12)
 tapply(r$PA, rep(1:2, each = 60), mean)
 
 # \%\% 参考序列
 r <- QMadjGaussian.wRef(
-    base, Dif = base - ref, 
+    base, Dif = base - ref,
     Ips = c(60, 120), Mq = 3, Iseg.adj = 2, Nadj = 0, Nt = 12, Ny4a = 0
 )
 tapply(r$PA - ref, rep(1:2, each = 60), mean)

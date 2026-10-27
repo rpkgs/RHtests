@@ -1,75 +1,86 @@
 
 # 计算各分位组均值，并延拓两端
-.qm_means <- function(y, Mq, breaks) {
+.qm_means <- function(y, breaks) {
+  n_quantiles <- length(breaks) - 2
   sorted <- sort(y, index.return = TRUE)$ix
   bounds <- floor(length(y) * breaks)
-  values <- numeric(Mq + 2)
-  for (k in 2:(Mq + 1)) {
-    values[k] <- mean(y[sorted[(bounds[k - 1] + 1):bounds[k]]])
+  values <- numeric(n_quantiles + 2)
+
+  for (k in 2:(n_quantiles + 1)) {
+    inds <- (bounds[k - 1] + 1):bounds[k]
+    values[k] <- mean(y[sorted[inds]])
   }
   values[1] <- values[2]
-  values[Mq + 2] <- values[Mq + 1]
+  values[n_quantiles + 2] <- values[n_quantiles + 1]
   values
 }
 
 # 按目标值分组，计算差值均值；保留原来的减组次序和边界容差
-.qm_ref_means <- function(y, Dif, Mq, breaks, min_count, keep_short) {
-  iindx <- rev(sort(y, index.return = TRUE, decreasing = TRUE)$ix)
-  bins <- numeric(length(breaks))
+.qm_ref_means <- function(y, difference, n_quantiles, breaks, min_count, keep_short) {
+  # 保留原来的同值排序规则
+  sorted <- rev(sort(y, index.return = TRUE, decreasing = TRUE)$ix)
+  group_means <- numeric(length(breaks))
   retry <- FALSE
-  for (k in 2:(Mq + 1)) {
+
+  for (k in 2:(n_quantiles + 1)) {
+    # 分位边界转换为排序位置，修正浮点数误差
     bounds <- floor(length(y)) * breaks[c(k - 1, k)]
-    near <- abs(bounds - round(bounds)) < 1E-9
-    bounds[near] <- round(bounds[near])
+    near_integer <- abs(bounds - round(bounds)) < 1E-9
+    bounds[near_integer] <- round(bounds[near_integer])
     bounds <- floor(bounds)
-    values <- Dif[iindx[(bounds[1] + 1):bounds[2]]]
+    inds <- (bounds[1] + 1):bounds[2]
+    values <- difference[sorted[inds]]
     enough <- sum(!is.na(values)) >= min_count
     if (!enough) {
-      if (Mq > 1) {
+      if (n_quantiles > 1) {
         retry <- TRUE
-        Mq <- Mq - 1
+        n_quantiles <- n_quantiles - 1
       } else {
-        ErrorMSG <<- paste(
-          "!!!! Warning - The Ref series has too many missing values to do QM-adjustments.\n",
-          "Only mean-adjustments were done. You may want to use a better Ref series if possible!\n",
-          get("ErrorMSG", envir = .GlobalEnv), "\n"
-        )
+        warning("参考序列有效数据不足，无法继续减少分位数组数。", call. = FALSE)
       }
     }
     # 突变后侧即使样本不足也计算均值，沿用原逻辑
-    if (enough || keep_short) bins[k] <- mean(values, na.rm = TRUE)
+    if (enough || keep_short) group_means[k] <- mean(values, na.rm = TRUE)
   }
-  bins[1] <- bins[2]
-  bins[Mq + 2] <- bins[Mq + 1]
-  list(bins = bins, mean = mean(Dif, na.rm = TRUE), Mq = Mq, retry = retry)
+
+  # 两端复制相邻组，用于插值延拓
+  group_means[1] <- group_means[2]
+  group_means[n_quantiles + 2] <- group_means[n_quantiles + 1]
+  list(bins = group_means, mean = mean(difference, na.rm = TRUE),
+    Mq = n_quantiles, retry = retry)
 }
 
 # 累加相邻突变的订正量，保持原有求和顺序
-.qm_adjustments <- function(before, after, ref) {
-  Ns <- nrow(before) - 1
-  Adj <- matrix(0, nrow(before), ncol(before))
+.qm_adjustments <- function(before, after, ref_segment) {
+  n_changes <- nrow(before) - 1
+  adjustments <- matrix(0, nrow(before), ncol(before))
+
   for (k in seq_len(ncol(before))) {
-    if (ref > 1) {
-      for (i in seq_len(ref - 1)) {
-        Adj[i, k] <- sum(after[i:(ref - 1), k]) - sum(before[i:(ref - 1), k])
+    # 基准段之前：累加从当前段到基准段的跳变
+    if (ref_segment > 1) {
+      for (i in seq_len(ref_segment - 1)) {
+        changes <- i:(ref_segment - 1)
+        adjustments[i, k] <- sum(after[changes, k]) - sum(before[changes, k])
       }
     }
-    if (ref <= Ns) {
-      for (i in (ref + 1):(Ns + 1)) {
-        Adj[i, k] <- sum(before[ref:(i - 1), k]) - sum(after[ref:(i - 1), k])
+    # 基准段之后：反向累加跳变
+    if (ref_segment <= n_changes) {
+      for (i in (ref_segment + 1):(n_changes + 1)) {
+        changes <- ref_segment:(i - 1)
+        adjustments[i, k] <- sum(before[changes, k]) - sum(after[changes, k])
       }
     }
   }
-  Adj
+  adjustments
 }
 
 # 将分位组订正量插值到各观测值
-.qm_interpolate <- function(dx, fdx, prob, Mq) {
-  if (Mq == 1) fdx[1] <- fdx[2]
-  fdx2 <- splineN(dx, fdx, 2E30, 2E30)
+.qm_interpolate <- function(knots, values, prob, n_quantiles) {
+  if (n_quantiles == 1) values[1] <- values[2]
+  derivatives <- splineN(knots, values, 2E30, 2E30)
   adjustment <- numeric(length(prob))
   for (i in seq_along(prob)) {
-    adjustment[i] <- splintN(dx, fdx, fdx2, prob[i])
+    adjustment[i] <- splintN(knots, values, derivatives, prob[i])
   }
   adjustment
 }
