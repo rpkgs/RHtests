@@ -38,9 +38,14 @@ metadata <- data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
 
 r <- RHtests_process(data, NULL, metadata, outdir = "OUTPUT/example01")
 plot_output(r$data)
-## example 02 ------------------------------------------------------------------
-Bseries <- system.file("extdata/Example2.dat", package = "RHtests")
-Rseries <- system.file("extdata/Example2_Ref.dat", package = "RHtests")
+# \%\% example 02
+read_data <- \(f) {
+    fread(f, na.strings = c("-999.99")) \%>\% 
+    setNames(c("year", "month", "day", "data"))
+}
+
+base <- system.file("extdata/Example2.dat", package = "RHtests") |> read_data()
+ref <- system.file("extdata/Example2_Ref.dat", package = "RHtests") |> read_data()
 
 metadata <- data.table(date = c("19740200", "19751100"))
 
@@ -48,7 +53,6 @@ r <- RHtests_process(Bseries, Rseries, metadata, outdir = "OUTPUT/example02")
 plot_RHtests(r, "RHtests-ref.pdf")
 
 # expect_equal(nrow(r$turningPoint), 11)
-# expect_equal(as.character(r$turningPoint[kind == 0]$date),
-#               metadata$date)
+# expect_equal(as.character(r$turningPoint[kind == 0]$date), metadata$date)
 # expect_equal(nrow(r$data), 612)
 }

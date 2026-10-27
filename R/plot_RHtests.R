@@ -12,10 +12,11 @@ plot_output <- function(data, outfile = NULL, ..., show=FALSE) {
   # d2[value < -100, value := NA]
   p <- ggplot(d2, aes(date, value)) +
     geom_line(data = data, aes(y = base, color = NULL), color = alpha("black", 0.6)) +
-    geom_line(aes(color = variable))
+    geom_line(aes(color = variable)) + 
+    facet_wrap(~variable, scales = "free_y")
   
   if (!is.null(outfile)) {
-    write_fig(p, outfile, 10, 6, show = show)
+    write_fig(p, outfile, 10, 10, show = show)
   } else p
 }
 

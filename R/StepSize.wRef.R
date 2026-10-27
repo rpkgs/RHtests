@@ -323,7 +323,7 @@ StepSize.wRef<-function(Bseries = NULL, Rseries = NULL, InCs, output,
   if (Ns>0) {
     #   Rb<-Base-otmp$trend*Ti+EB
     #   QMout<-QMadjGaussian(Rb,Ips,Mq,Iseg.adj,Nadj)
-    QMout <- QMadjGaussian.wRef(bdata[,4], bdata[,4]-bdata[,5], Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
+    QMout <- QMadjGaussian.wRef(bdata[,4], bdata[,4] -bdata[,5], Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
     B <- QMout$PA
 
     if (debug) {
