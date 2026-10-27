@@ -9,6 +9,27 @@ test_that("quantile_mapping matches QMadjGaussian", {
   }
 })
 
+test_that("shared core uses reference differences and preserves tie ranks", {
+  y <- rep(rep(1:10, each = 2), 2) + rep(c(2, 0), each = 20)
+  dif <- rep(c(2, 0), each = 20)
+  r <- RHtests:::.quantile_mapping(y, 20, 2, 2, 5, 0, dif)
+  expect_equal(r$y, rep(rep(1:10, each = 2), 2))
+  expect_equal(r$AdjM, c(-2, 0))
+  expect_equal(r$p[1:2], c(2, 1) / 20)
+  expect_true(all(is.na(r$W[21:40])))
+})
+
+test_that("quantile_mapping handles no breaks and short windows", {
+  y <- c(seq_len(30) + 2, seq_len(30))
+  expect_identical(quantile_mapping(y, numeric()), y)
+  expect_identical(QMadjGaussian(y, length(y), 10, 1, 0, 12)$PA, y)
+
+  r <- RHtests:::.quantile_mapping(y, 30, 2, 10, 5, 2)
+  expect_equal(r$Mq, 1)
+  expect_true(all(is.finite(r$y)))
+  expect_equal(r$y[31:60], y[31:60])
+})
+
 test_that("quantile_mapping keeps the reference segment and aligns means", {
   y <- rep(seq_len(30), 2) + rep(c(2, 0), each = 30)
   r <- quantile_mapping(y, 30, ref = 2, Mq = 1)

@@ -40,60 +40,33 @@ QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj, Nt) {
 #' @rdname QMadjGaussian
 #' @export
 QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
-  Ns <- length(Ips) - 1
-  N <- length(y)
-  starts <- c(0, head(Ips, -1))
+  segs <- split(seq_along(y), rep(seq_along(Ips), diff(c(0, Ips))))
   Nmin.Mq <- if (Nt <= 12) 5 else 20
-  Nseg.mn <- min(N, vapply(seq_along(Ips), function(i) {
-    sum(!is.na(Dif[(starts[i] + 1):Ips[i]]))
-  }, integer(1)))
-  Mq <- min(floor(Nseg.mn / Nmin.Mq), if (Mq < 0) 100 else Mq, 100)
-  if (Mq == 0) Mq <- 1
-  Nadj <- Ny4a * Nt
+  Nseg.mn <- min(length(y), vapply(segs, function(idx) sum(!is.na(Dif[idx])), integer(1)))
+  Mq <- max(1, min(Nseg.mn %/% Nmin.Mq, if (Mq < 0) 100 else Mq, 100))
 
-  # 估计突变前后的分位组均值，样本不足时减少组数
-  groups <- .qm_ref_groups(y, Dif, Ips, Mq, Nadj, Nmin.Mq, Ny4a > 0)
-  Mq <- groups$Mq
-  breaks <- groups$breaks
-  Fd <- groups$offset
-  EBb <- groups$before
-  EBa <- groups$after
-  EYd <- groups$mean_shift
+  r <- .quantile_mapping(y, head(Ips, -1), Iseg.adj, Mq, Nmin.Mq, Ny4a * Nt, Dif)
+  Mq <- r$Mq
+  breaks <- seq(0, by = 1 / Mq, length.out = Mq + 2)
+  osmean <- .qm_plot_means(breaks, r$adj, .5 / Mq)
 
-  AdjM <- rep(0, Ns + 1)
-  if (Iseg.adj > 1) AdjM[seq_len(Iseg.adj - 1)] <- rev(cumsum(EYd[(Iseg.adj - 1):1]))
-  if (Iseg.adj <= Ns) AdjM[(Iseg.adj + 1):(Ns + 1)] <- -cumsum(EYd[Iseg.adj:Ns])
-  if (Ny4a == 0 && Ns > 1) EBa[seq_len(Ns - 1), ] <- EBb[2:Ns, ]
-  Adj <- .qm_adjustments(EBb, EBa, Iseg.adj)
-
-  osmean <- .qm_plot_means(breaks, Adj, Fd)
-
-  BA <- y
+  # 兼容旧版绘图数据
   osp <- NULL
-  for (i in seq_len(Ns + 1)) {
-    idx <- (starts[i] + 1):Ips[i]
-    Nseg <- length(idx)
-    DB <- rep(NA, Nseg)
+  for (i in seq_along(segs)) {
+    idx <- segs[[i]]
     if (i == Iseg.adj) {
       osp <- rbind(osp, cbind(idx, 0, 0))
       next
     }
-
-    # 同值排序沿用原规则，避免改变分位位置
-    iindx <- rev(sort(y[idx], index.return = TRUE, decreasing = TRUE)$ix)
-    irank <- sort(iindx, index.return = TRUE)$ix
-    Rs <- irank / Nseg
-    DB <- .qm_interpolate(breaks - Fd, Adj[i, ], Rs, Mq)
-
-    # 使分位数订正量的均值与均值跳变订正一致
-    DB <- .qm_match_mean(DB, AdjM[i])
-    BA[idx] <- y[idx] + DB
-
-    ors <- sort(Rs, index.return = TRUE)$ix
-    osp <- rbind(osp, cbind(idx, Rs[ors], DB[ors]))
-    osmean <- .qm_plot_ref(osmean, i, Rs[ors], DB[ors], Mq)
+    p <- r$p[idx]
+    DB <- r$W[idx]
+    osp <- rbind(osp, cbind(idx, p[order(p)], DB[order(p)]))
+    bin_means <- vapply(seq_len(Mq), function(k) {
+      mean(DB[p >= (k - 1) / Mq & p <= k / Mq])
+    }, numeric(1))
+    osmean[, i * 2 + 1] <- bin_means[c(1, seq_len(Mq), Mq)]
   }
   dimnames(osp) <- NULL
-  list(PA = BA, DB = DB, Mq = Mq, Nseg.mn = Nseg.mn,
-    osmean = osmean, osp = osp, AdjM = AdjM)
+  list(PA = r$y, DB = r$W[segs[[length(segs)]]], Mq = Mq, Nseg.mn = Nseg.mn,
+    osmean = osmean, osp = osp, AdjM = r$AdjM)
 }

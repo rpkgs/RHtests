@@ -1,43 +1,47 @@
-# 按目标值排序，计算各分位组的差值均值和有效样本数
-.qm_ref_means <- function(y, y_diff, Mq) {
-  sorted <- rev(sort(y, index.return = TRUE, decreasing = TRUE)$ix)
-  group <- ceiling(seq_along(y) * Mq / length(y))
-  values <- split(y_diff[sorted], factor(group, levels = seq_len(Mq)))
-  list(means = vapply(values, mean, numeric(1), na.rm = TRUE),
-    counts = vapply(values, function(x) sum(!is.na(x)), integer(1)))
-}
-
 # 逐次减少组数，直到各窗口、各分位组均满足最小有效样本数
 .qm_ref_groups <- function(y, y_diff, Ips, Mq, Nadj, min_count, local_window) {
   starts <- c(0, head(Ips, -1))
   Ns <- length(Ips) - 1
-  windows <- unlist(lapply(seq_len(Ns), function(i) {
+  # 先取各突变点前、后的窗口；Nadj 为窗口长度
+  before_windows <- after_windows <- vector("list", Ns)
+  for (i in seq_len(Ns)) {
     left <- if (local_window) max(starts[i], Ips[i] - Nadj) else starts[i]
     right <- if (local_window) min(Ips[i + 1], Ips[i] + Nadj) else Ips[i + 1]
-    list((left + 1):Ips[i], (Ips[i] + 1):right)
-  }), recursive = FALSE)
+    before_windows[[i]] <- (left + 1):Ips[i]
+    after_windows[[i]] <- (Ips[i] + 1):right
+  }
+  windows <- c(before_windows, after_windows)
+
+  # 按目标值排序差值，逐次减少组数直至有效样本足够
+  sorted_diffs <- lapply(windows, function(idx) {
+    order_y <- rev(sort(y[idx], index.return = TRUE, decreasing = TRUE)$ix)
+    y_diff[idx][order_y]
+  })
   repeat {
-    groups <- lapply(windows, function(idx) .qm_ref_means(y[idx], y_diff[idx], Mq))
-    enough <- all(vapply(groups, function(x) all(x$counts >= min_count), logical(1)))
-    if (enough || Mq == 1) break
+    groups <- lapply(sorted_diffs, function(dif) {
+      group_id <- ceiling(seq_along(dif) * Mq / length(dif))
+      split(dif, factor(group_id, levels = seq_len(Mq)))
+    })
+    counts <- unlist(lapply(groups, function(window) {
+      vapply(window, function(group) sum(!is.na(group)), integer(1))
+    }))
+    if (all(counts >= min_count) || Mq == 1) break
     Mq <- Mq - 1
   }
-  if (!enough) {
-    counts <- unlist(lapply(groups, `[[`, "counts"))
+  if (any(counts < min_count)) {
     if (any(counts == 0)) stop("参考序列在部分窗口中没有有效数据。", call. = FALSE)
     warning("参考序列有效数据不足，无法继续减少分位数组数。", call. = FALSE)
   }
 
-  before <- after <- matrix(0, Ns + 1, Mq + 2)
-  mean_shift <- numeric(Ns)
-  for (i in seq_len(Ns)) {
-    b <- 2 * i - 1
-    a <- 2 * i
-    before[i, ] <- groups[[b]]$means[c(1, seq_len(Mq), Mq)]
-    after[i, ] <- groups[[a]]$means[c(1, seq_len(Mq), Mq)]
-    mean_shift[i] <- mean(y_diff[windows[[a]]], na.rm = TRUE) -
-      mean(y_diff[windows[[b]]], na.rm = TRUE)
-  }
+  # 计算各窗口的分位组均值；两端延拓，末行留给最后一段
+  group_means <- do.call(rbind, lapply(groups, function(window) {
+    vapply(window, mean, numeric(1), na.rm = TRUE)
+  }))
+  group_means <- unname(group_means[, c(1, seq_len(Mq), Mq), drop = FALSE])
+  before <- rbind(group_means[seq_len(Ns), , drop = FALSE], 0)
+  after <- rbind(group_means[Ns + seq_len(Ns), , drop = FALSE], 0)
+  window_means <- vapply(windows, function(idx) mean(y_diff[idx], na.rm = TRUE), numeric(1))
+  mean_shift <- window_means[Ns + seq_len(Ns)] - window_means[seq_len(Ns)]
   list(before = before, after = after, mean_shift = mean_shift, Mq = Mq,
     breaks = seq(0, by = 1 / Mq, length.out = Mq + 2), offset = .5 / Mq)
 }
@@ -54,36 +58,12 @@
   -sweep(cumulative, 2, cumulative[ref_segment, ])
 }
 
-# 调整逐点订正量，使其均值与均值跳变订正一致
-.qm_match_mean <- function(adjustment, target) {
-  n <- length(adjustment)
-  remain <- target - sum(adjustment) / n
-  selected <- if (remain < 0) adjustment < 0 else adjustment > 0
-  adjustment[selected] <- adjustment[selected] +
-    remain * n * adjustment[selected] / sum(adjustment[selected])
-  adjustment
-}
-
 # 整理分位组订正量，保留原有绘图数据列顺序
 .qm_plot_means <- function(breaks, Adj, offset) {
   osmean <- seq_len(length(breaks))
   for (i in seq_len(nrow(Adj))) {
     osmean <- cbind(osmean, breaks - offset, Adj[i, ])
   }
-  osmean
-}
-
-# 有参考序列时，用逐点订正量更新绘图用的分位组均值
-.qm_plot_ref <- function(osmean, segment, prob, adjustment, Mq) {
-  ttmp <- cbind(prob, adjustment)
-  col <- segment * 2 + 1
-  for (k in seq_len(Mq)) {
-    osmean[k + 1, col] <- mean(
-      ttmp[ttmp[, 1] >= (k - 1) / Mq & ttmp[, 1] <= k / Mq, 2]
-    )
-  }
-  osmean[1, col] <- osmean[2, col]
-  osmean[Mq + 2, col] <- osmean[Mq + 1, col]
   osmean
 }
 
