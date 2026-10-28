@@ -9,3 +9,4 @@ OUTPUT/example*/
 *.pdf
 *.html
 .vscode
+site/

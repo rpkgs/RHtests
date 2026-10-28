@@ -10,3 +10,4 @@
 ^clean\.sh$
 ^README\.rst$
 ^docs$
+^site$
