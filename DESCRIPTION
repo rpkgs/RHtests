@@ -7,12 +7,13 @@ Authors@R: c(
 Description: What the package does (one paragraph).
 License: GPL-3
 Depends: 
-    R (>= 3.1)
+    R (>= 4.1)
 Imports: 
     magrittr,
     lubridate,
     data.table,
     dplyr,
+    purrr,
     ggplot2,
     crayon,
     Ipaper

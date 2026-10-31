@@ -31,9 +31,17 @@ QMadjGaussian.wRef(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
 \item{Ny4a}{有参考序列时，突变点两侧用于估计订正量的年数；0 表示整段。}
 }
 \value{
-列表：\code{PA} 为订正序列，\code{Mq} 为实际分组数，\code{Nseg.mn} 为最短段
-样本数，\code{osmean}、\code{osp} 用于绘图。无参考版本的 \code{W} 为逐点订正量；
-有参考版本另含 \code{DB}（最后一段的订正量）和 \code{AdjM}（各段均值订正量）。
+列表，\code{Nseg} 为段数：
+\itemize{
+\item \code{PA}：订正后序列。
+\item \code{Mq}：实际分位组数。
+\item \code{Nseg.mn}：最短段样本数；有参考序列时为各段有效差值的最小数量。
+\item \code{osmean}：绘图矩阵 \verb{[Mq + 2, 1 + 2 * Nseg]}，首列为行号，其后每段依次为分位位置和订正量。
+\item \code{osp}：绘图矩阵 \verb{[length(y), 3]}，依次为原始位置、排序后的分位位置和对应订正量；首列不随排序变化。
+\item \code{W}：逐点订正量（无参考序列）。
+\item \code{DB}：最后一段的订正量（有参考序列）。
+\item \code{AdjM}：各段均值订正量（有参考序列）。
+}
 }
 \description{
 分位数匹配订正

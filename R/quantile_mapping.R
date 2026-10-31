@@ -16,17 +16,29 @@ quantile_mapping <- function(y, breaks, ref = length(breaks) + 1, Mq = 10, min_n
   .quantile_mapping(y, breaks, ref, Mq, min_n, window)$y
 }
 
-# Dif 为 NULL 时使用目标值，否则使用目标与参考序列的差值
+#' 分位数匹配订正的内部计算
+#'
+#' @inheritParams quantile_mapping
+#' @param Dif 目标与参考序列的差值；`NULL` 表示不使用参考序列。
+#' @return 列表，`Nseg` 为段数：
+#'   - `y`：订正后序列。
+#'   - `adjustment`：逐点订正量，基准段为 `NA`。
+#'   - `quantile_pos`：段内分位位置。
+#'   - `adj`：分位组订正量矩阵 `[Nseg, Mq + 2]`，含两端延拓值。
+#'   - `Mq`：实际分位组数。
+#'   - `AdjM`：各段均值订正量，长度为 `Nseg`；无参考序列时为零。
+#'
+#'   `y`、`adjustment` 和 `quantile_pos` 的长度均为 `length(y)`。
 .quantile_mapping <- function(y, breaks, ref, Mq, min_n, window, Dif = NULL) {
   n <- diff(c(0, breaks, length(y)))
   seg <- rep(seq_along(n), n)
   with_ref <- !is.null(Dif)
   w <- if (window > 0) window else Inf
   if (!with_ref) Mq <- max(1, min(Mq, 100, min(n, w) %/% min_n))
-  p <- ave(y, seg, FUN = \(x) rank(x, ties.method = if (with_ref) "last" else "first") / length(x))
+  quantile_pos <- ave(y, seg, FUN = \(x) rank(x, ties.method = if (with_ref) "last" else "first") / length(x))
   AdjM <- rep(0, length(n))
   if (!length(breaks)) {
-    return(list(y = y, W = rep(NA_real_, length(y)), p = p,
+    return(list(y = y, adjustment = rep(NA_real_, length(y)), quantile_pos = quantile_pos,
       adj = matrix(0, 1, Mq + 2), Mq = Mq, AdjM = AdjM))
   }
 
@@ -56,17 +68,17 @@ quantile_mapping <- function(y, breaks, ref = length(breaks) + 1, Mq = 10, min_n
   # 累加跳变并插值到各观测；有参考序列时增加均值约束
   adj <- .qm_adjustments(before, after, ref)
   if (!with_ref) adj <- adj[, c(1, 1:Mq, Mq), drop = FALSE]
-  W <- rep(NA_real_, length(y))
+  adjustment <- rep(NA_real_, length(y))
   adjusted <- y
   for (i in setdiff(seq_along(n), ref)) {
     j <- seg == i
-    W[j] <- .qm_interpolate(knots, adj[i, ], p[j], Mq)
+    adjustment[j] <- .qm_interpolate(knots, adj[i, ], quantile_pos[j], Mq)
     if (with_ref) {
-      remain <- AdjM[i] - sum(W[j]) / n[i]
-      selected <- j & if (remain < 0) W < 0 else W > 0
-      W[selected] <- W[selected] + remain * n[i] * W[selected] / sum(W[selected])
+      remain <- AdjM[i] - sum(adjustment[j]) / n[i]
+      selected <- j & if (remain < 0) adjustment < 0 else adjustment > 0
+      adjustment[selected] <- adjustment[selected] + remain * n[i] * adjustment[selected] / sum(adjustment[selected])
     }
-    adjusted[j] <- y[j] + W[j]
+    adjusted[j] <- y[j] + adjustment[j]
   }
-  list(y = adjusted, W = W, p = p, adj = adj, Mq = Mq, AdjM = AdjM)
+  list(y = adjusted, adjustment = adjustment, quantile_pos = quantile_pos, adj = adj, Mq = Mq, AdjM = AdjM)
 }

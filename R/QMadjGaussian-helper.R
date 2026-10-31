@@ -13,17 +13,17 @@
   windows <- c(before_windows, after_windows)
 
   # 按目标值排序差值，逐次减少组数直至有效样本足够
-  sorted_diffs <- lapply(windows, function(idx) {
+  sorted_diffs <- lapply(windows, \(idx) {
     order_y <- rev(sort(y[idx], index.return = TRUE, decreasing = TRUE)$ix)
     y_diff[idx][order_y]
   })
   repeat {
-    groups <- lapply(sorted_diffs, function(dif) {
+    groups <- lapply(sorted_diffs, \(dif) {
       group_id <- ceiling(seq_along(dif) * Mq / length(dif))
       split(dif, factor(group_id, levels = seq_len(Mq)))
     })
-    counts <- unlist(lapply(groups, function(window) {
-      vapply(window, function(group) sum(!is.na(group)), integer(1))
+    counts <- unlist(lapply(groups, \(window) {
+      map_int(window, \(group) sum(!is.na(group)))
     }))
     if (all(counts >= min_count) || Mq == 1) break
     Mq <- Mq - 1
@@ -34,22 +34,30 @@
   }
 
   # 计算各窗口的分位组均值；两端延拓，末行留给最后一段
-  group_means <- do.call(rbind, lapply(groups, function(window) {
-    vapply(window, mean, numeric(1), na.rm = TRUE)
-  }))
-  group_means <- unname(group_means[, c(1, seq_len(Mq), Mq), drop = FALSE])
-  before <- rbind(group_means[seq_len(Ns), , drop = FALSE], 0)
-  after <- rbind(group_means[Ns + seq_len(Ns), , drop = FALSE], 0)
-  window_means <- vapply(windows, function(idx) mean(y_diff[idx], na.rm = TRUE), numeric(1))
-  mean_shift <- window_means[Ns + seq_len(Ns)] - window_means[seq_len(Ns)]
-  list(before = before, after = after, mean_shift = mean_shift, Mq = Mq,
-    breaks = seq(0, by = 1 / Mq, length.out = Mq + 2), offset = .5 / Mq)
+  group_means <- lapply(groups, \(dif) map_dbl(dif, mean, na.rm = TRUE)) %>%
+    do.call(rbind, .) %>% # [Nseg, Nq + 2]
+    {
+      unname(.[, c(1, seq_len(Mq), Mq)])
+    }
+
+  inds_before <- 1:Ns
+  inds_after <- Ns + (1:Ns)
+  before <- rbind(group_means[inds_before, , drop = FALSE], 0)
+  after <- rbind(group_means[inds_after, , drop = FALSE], 0)
+
+  window_means <- map_dbl(windows, \(idx) mean(y_diff[idx], na.rm = TRUE))
+  mean_shift <- window_means[inds_after] - window_means[inds_before]
+  list(
+    before = before, after = after, mean_shift = mean_shift, Mq = Mq,
+    breaks = seq(0, by = 1 / Mq, length.out = Mq + 2), offset = .5 / Mq
+  )
 }
 
 #' 累加相邻突变的订正量
 #' @param before,after 突变前、后的分位组均值矩阵。
 #' @param ref_segment 基准段序号。
-#' @return 各段的分位组订正量矩阵。
+#' @return 各段的分位组订正量矩阵，维度与 `before` 相同：
+#'   `[Nseg, Mq]`；含两端延拓值时为 `[Nseg, Mq + 2]`。
 #' @example R/examples/ex_qm_adjustments.R
 .qm_adjustments <- function(before, after, ref_segment) {
   idx <- seq_len(nrow(before) - 1)
@@ -58,7 +66,12 @@
   -sweep(cumulative, 2, cumulative[ref_segment, ])
 }
 
-# 整理分位组订正量，保留原有绘图数据列顺序
+#' 整理分位组订正量，保留原有绘图数据列顺序
+#'
+#' @param breaks 分位组边界，长度为 `Mq + 2`。
+#' @param Adj 订正量矩阵 `[Nseg, Mq + 2]`，行对应各段，列对应分位组及两端延拓值。
+#' @param offset 分位组中心相对于边界的偏移量。
+#' @return 绘图数据矩阵，维度为 `[Mq + 2, 1 + 2 * Nseg]`。
 .qm_plot_means <- function(breaks, Adj, offset) {
   osmean <- seq_len(length(breaks))
   for (i in seq_len(nrow(Adj))) {
@@ -74,7 +87,7 @@
 #' @param prob 待插值的概率位置。
 #' @param n_quantiles 分位数组数。
 #'
-#' @return 各概率位置对应的订正量。
+#' @return 各概率位置对应的订正量向量，长度为 `length(prob)`。
 .qm_interpolate <- function(knots, values, prob, n_quantiles = length(knots) - 2) {
   if (n_quantiles == 1) values[1] <- values[2]
   adjustment <- splinefun(knots, values, "natural")(prob)
@@ -82,9 +95,9 @@
   outside <- which(prob < min(knots) | prob > max(knots))
   if (length(outside)) {
     derivatives <- splineN(knots, values, 2E30, 2E30)
-    adjustment[outside] <- vapply(prob[outside], function(p) {
+    adjustment[outside] <- map_dbl(prob[outside], \(p) {
       splintN(knots, values, derivatives, p)
-    }, numeric(1))
+    })
   }
   adjustment
 }

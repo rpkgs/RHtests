@@ -14,7 +14,7 @@ test_that("natural interpolation preserves legacy boundary and extrapolation", {
     values[c(1, Mq + 2)] <- values[c(2, Mq + 1)]
     prob <- c(knots[1] - 1, knots, 0, .5, 1, knots[Mq + 2] + 1)
     derivatives <- RHtests:::splineN(knots, values, 2E30, 2E30)
-    expected <- vapply(prob, function(p) RHtests:::splintN(knots, values, derivatives, p), numeric(1))
+    expected <- sapply(prob, \(p) RHtests:::splintN(knots, values, derivatives, p))
     expect_equal(RHtests:::.qm_interpolate(knots, values, prob), expected, tolerance = 1e-12)
   }
 })

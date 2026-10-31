@@ -1,4 +1,4 @@
-#' @importFrom Ipaper is_empty rm_empty mkdir listk ok warn
+#' @importFrom Ipaper is_empty rm_empty mkdir ok warn
 
 range2 <- function(x, y, na.rm = TRUE) {
   c(min(x, y, na.rm = na.rm), max(x, y, na.rm = na.rm))

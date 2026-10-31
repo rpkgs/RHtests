@@ -15,8 +15,8 @@ test_that("shared core uses reference differences and preserves tie ranks", {
   r <- RHtests:::.quantile_mapping(y, 20, 2, 2, 5, 0, dif)
   expect_equal(r$y, rep(rep(1:10, each = 2), 2))
   expect_equal(r$AdjM, c(-2, 0))
-  expect_equal(r$p[1:2], c(2, 1) / 20)
-  expect_true(all(is.na(r$W[21:40])))
+  expect_equal(r$quantile_pos[1:2], c(2, 1) / 20)
+  expect_true(all(is.na(r$adjustment[21:40])))
 })
 
 test_that("quantile_mapping handles no breaks and short windows", {

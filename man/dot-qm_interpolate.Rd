@@ -16,7 +16,7 @@
 \item{n_quantiles}{分位数组数。}
 }
 \value{
-各概率位置对应的订正量。
+各概率位置对应的订正量向量，长度为 \code{length(prob)}。
 }
 \description{
 将分位组订正量插值到各观测值

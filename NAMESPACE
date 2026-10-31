@@ -33,7 +33,6 @@ importFrom(Ipaper,
   "%do%",
   foreach,
   is_empty,
-  listk,
   melt_list,
   mkdir,
   ok,
@@ -63,6 +62,10 @@ importFrom(magrittr,
   "%<>%",
   "%>%"
 )
+importFrom(purrr,
+  map_dbl,
+  map_int
+)
 importFrom(stats,
   .lm.fit,
   ave,
@@ -70,6 +73,7 @@ importFrom(stats,
   pf,
   pt,
   qt,
+  setNames,
   splinefun,
   var
 )

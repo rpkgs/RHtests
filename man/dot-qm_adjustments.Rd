@@ -12,7 +12,8 @@
 \item{ref_segment}{基准段序号。}
 }
 \value{
-各段的分位组订正量矩阵。
+各段的分位组订正量矩阵，维度与 \code{before} 相同：
+\verb{[Nseg, Mq]}；含两端延拓值时为 \verb{[Nseg, Mq + 2]}。
 }
 \description{
 累加相邻突变的订正量

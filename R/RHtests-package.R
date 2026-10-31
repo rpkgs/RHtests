@@ -8,6 +8,16 @@
 ## usethis namespace: end
 NULL
 
+listk <- function(...) {
+  cols <- as.list(substitute(list(...)))[-1]
+  vars <- names(cols)
+  Id_noname <- if (is.null(vars)) seq_along(cols) else which(vars == "")
+  if (length(Id_noname) > 0) {
+    vars[Id_noname] <- sapply(cols[Id_noname], deparse)
+  }
+  setNames(list(...), vars)
+}
+
 # **** Copyright agreement ****
 # All users of any code in this package agree to the terms and conditions
 # described in the file Copyright_RHtests__RClimDex_SoftwarePackages.pdf, which
@@ -35,9 +45,10 @@ NULL
 #' @importFrom utils write.table read.table
 #' @importFrom graphics axis lines par text title
 #' @importFrom grDevices dev.off pdf
-#' @importFrom stats .lm.fit ave lm pf pt qt splinefun var
+#' @importFrom stats .lm.fit ave lm pf pt qt setNames splinefun var
 #' @importFrom Ipaper %do% foreach
 #' @importFrom magrittr %>% %<>%
+#' @importFrom purrr map_dbl map_int
 #' 
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {
