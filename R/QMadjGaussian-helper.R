@@ -66,20 +66,6 @@
   -sweep(cumulative, 2, cumulative[ref_segment, ])
 }
 
-#' 整理分位组订正量，保留原有绘图数据列顺序
-#'
-#' @param breaks 分位组边界，长度为 `Mq + 2`。
-#' @param Adj 订正量矩阵 `[Nseg, Mq + 2]`，行对应各段，列对应分位组及两端延拓值。
-#' @param offset 分位组中心相对于边界的偏移量。
-#' @return 绘图数据矩阵，维度为 `[Mq + 2, 1 + 2 * Nseg]`。
-.qm_plot_means <- function(breaks, Adj, offset) {
-  osmean <- seq_len(length(breaks))
-  for (i in seq_len(nrow(Adj))) {
-    osmean <- cbind(osmean, breaks - offset, Adj[i, ])
-  }
-  osmean
-}
-
 #' 将分位组订正量插值到各观测值
 #'
 #' @param knots 分位组中心及两端延拓的插值节点。

@@ -36,7 +36,8 @@ QMadjGaussian.wRef(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a)
 \item \code{PA}：订正后序列。
 \item \code{Mq}：实际分位组数。
 \item \code{Nseg.mn}：最短段样本数；有参考序列时为各段有效差值的最小数量。
-\item \code{osmean}：绘图矩阵 \verb{[Mq + 2, 1 + 2 * Nseg]}，首列为行号，其后每段依次为分位位置和订正量。
+\item \code{osmean}：绘图数据框 \verb{[Mq + 2, 1 + 2 * Nseg]}，首列为行号，其后每段依次为
+分位位置和订正量。
 \item \code{osp}：绘图矩阵 \verb{[length(y), 3]}，依次为原始位置、排序后的分位位置和对应订正量；首列不随排序变化。
 \item \code{W}：逐点订正量（无参考序列）。
 \item \code{DB}：最后一段的订正量（有参考序列）。

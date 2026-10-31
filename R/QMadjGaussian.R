@@ -17,7 +17,8 @@
 #'   - `PA`：订正后序列。
 #'   - `Mq`：实际分位组数。
 #'   - `Nseg.mn`：最短段样本数；有参考序列时为各段有效差值的最小数量。
-#'   - `osmean`：绘图矩阵 `[Mq + 2, 1 + 2 * Nseg]`，首列为行号，其后每段依次为分位位置和订正量。
+#'   - `osmean`：绘图数据框 `[Mq + 2, 1 + 2 * Nseg]`，首列为行号，其后每段依次为
+#'     分位位置和订正量。
 #'   - `osp`：绘图矩阵 `[length(y), 3]`，依次为原始位置、排序后的分位位置和对应订正量；首列不随排序变化。
 #'   - `W`：逐点订正量（无参考序列）。
 #'   - `DB`：最后一段的订正量（有参考序列）。
@@ -31,18 +32,16 @@ QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj, Nt) {
   r <- .quantile_mapping(y, breaks = head(Ips, -1), ref = Iseg.adj,
     Mq = Mq, min_n = min_n, window = Nadj)
 
-  # 保留绘图数据的原有格式
   probs <- seq(0, by = 1 / r$Mq, length.out = r$Mq + 2)
-  group_plot <- .qm_plot_means(probs, r$adj, .5 / r$Mq)
+  group_plot <- .qm_plot_means(probs - .5 / r$Mq, r$adj)
   segs <- .qm_segments(y, Ips)
-  # point_plot[length(y), 3]：原始位置、段内排序后的分位位置及对应订正量；首列不随排序变化
-  point_plot <- do.call(rbind, lapply(segs, \(idx) {
+  # [Ny, 3]：原始位置、段内排序后的分位位置、对应订正量；
+  point_plot <- lapply(segs, \(idx) {
     pos <- r$quantile_pos[idx]
     adjustment <- r$adjustment[idx]
     order_p <- order(pos)
     cbind(idx, pos[order_p], adjustment[order_p])
-  }))
-  dimnames(point_plot) <- NULL
+  }) %>% do.call(rbind, .) %>% set_dimnames(NULL)
   listk(PA = r$y, W = r$adjustment, Mq = r$Mq, Nseg.mn = min(diff(c(0, Ips))),
     osmean = group_plot, osp = point_plot)
 }
@@ -59,7 +58,7 @@ QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
     min_n = min_n, window = Ny4a * Nt, Dif = Dif)
   Mq <- r$Mq
   probs <- seq(0, by = 1 / Mq, length.out = Mq + 2)
-  group_plot <- .qm_plot_means(probs, r$adj, .5 / Mq)
+  group_plot <- .qm_plot_means(probs - .5 / Mq, r$adj)
 
   # point_plot[length(y), 3] 同上；基准段的分位位置和订正量按旧版格式置零
   point_plot <- NULL
@@ -72,7 +71,7 @@ QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
     quantile_pos <- r$quantile_pos[idx]
     adjustment <- r$adjustment[idx]
     order_p <- order(quantile_pos)
-    point_plot <- rbind(point_plot, cbind(idx, quantile_pos[order_p], adjustment[order_p]))
+    point_plot %<>% rbind(cbind(idx, quantile_pos[order_p], adjustment[order_p]))
     # 沿用两端闭区间，边界上的观测计入相邻两组
     bin_means <- map_dbl(seq_len(Mq), \(k) {
       mean(adjustment[quantile_pos >= (k - 1) / Mq & quantile_pos <= k / Mq])
@@ -88,4 +87,20 @@ QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
 # 按突变点将观测位置分段
 .qm_segments <- function(y, Ips) {
   split(seq_along(y), rep(seq_along(Ips), diff(c(0, Ips))))
+}
+
+#' 整理分位组订正量，保留原有绘图数据列顺序
+#'
+#' @param probs 分位组中心及两端延拓位置，长度为 `Mq + 2`。
+#' @param Adj 订正量矩阵 `[Nseg, Mq + 2]`，行对应各段，列对应分位组及两端延拓值。
+#' @return 绘图数据框 `[Mq + 2, 1 + 2 * Nseg]`：行对应分位组及两端延拓值；
+#'   第 1 列为行号，其后每段占两列，分别为分位位置和订正量。
+#'   即 `Adj` 的每一行转为一列订正量，并配一列分位位置。
+.qm_plot_means <- function(probs, Adj) {
+  osmean <- tibble(group = seq_along(probs))
+  for (i in seq_len(nrow(Adj))) {
+    osmean[[paste0("quantile_pos_", i)]] <- probs
+    osmean[[paste0("adjustment_", i)]] <- Adj[i, ]
+  }
+  osmean
 }

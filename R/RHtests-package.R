@@ -46,7 +46,7 @@ listk <- function(...) {
 #' @importFrom graphics axis lines par text title
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats .lm.fit ave lm pf pt qt setNames splinefun var
-#' @importFrom Ipaper %do% foreach
+#' @importFrom Ipaper %do% foreach set_dimnames
 #' @importFrom magrittr %>% %<>%
 #' @importFrom purrr map_dbl map_int
 #' 

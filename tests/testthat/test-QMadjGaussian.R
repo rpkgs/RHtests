@@ -2,11 +2,18 @@ test_that("QM results match the saved legacy results", {
   # 旧版固定基准：三段序列、中间基准段、局部窗口、同值及参考缺测
   expected <- readRDS(test_path("fixtures", "QMadjGaussian.rds"))
   actual <- QMadjGaussian(expected$y, expected$Ips, 3, 2, 24, Nt = 12)
+  expect_s3_class(actual$osmean, "data.frame")
+  expect_named(actual$osmean, c("group", paste0(rep(c("quantile_pos_", "adjustment_"), 3), rep(1:3, each = 2))))
+  actual$osmean <- unname(as.matrix(actual$osmean))
+  expected$noref$osmean <- unname(expected$noref$osmean)
   expect_equal(actual, expected$noref, tolerance = 1e-12)
 
   actual <- QMadjGaussian.wRef(
     expected$y, expected$Dif, expected$Ips, 3, 2, 0, 12, 2
   )
+  expect_s3_class(actual$osmean, "data.frame")
+  actual$osmean <- unname(as.matrix(actual$osmean))
+  expected$ref$osmean <- unname(expected$ref$osmean)
   expect_equal(actual, expected$ref, tolerance = 1e-12)
 })
 

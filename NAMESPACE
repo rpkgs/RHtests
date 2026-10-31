@@ -38,13 +38,15 @@ importFrom(Ipaper,
   ok,
   reorder_name,
   rm_empty,
+  set_dimnames,
   warn,
   write_fig
 )
 importFrom(data.table,data.table)
 importFrom(dplyr,
   arrange,
-  mutate
+  mutate,
+  tibble
 )
 importFrom(grDevices,
   dev.off,
