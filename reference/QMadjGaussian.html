@@ -97,7 +97,8 @@
     <p>列表，<code>Nseg</code> 为段数：</p><ul><li><p><code>PA</code>：订正后序列。</p></li>
 <li><p><code>Mq</code>：实际分位组数。</p></li>
 <li><p><code>Nseg.mn</code>：最短段样本数；有参考序列时为各段有效差值的最小数量。</p></li>
-<li><p><code>osmean</code>：绘图矩阵 <code>[Mq + 2, 1 + 2 * Nseg]</code>，首列为行号，其后每段依次为分位位置和订正量。</p></li>
+<li><p><code>osmean</code>：绘图数据框 <code>[Mq + 2, 1 + 2 * Nseg]</code>，首列为行号，其后每段依次为
+分位位置和订正量。</p></li>
 <li><p><code>osp</code>：绘图矩阵 <code>[length(y), 3]</code>，依次为原始位置、排序后的分位位置和对应订正量；首列不随排序变化。</p></li>
 <li><p><code>W</code>：逐点订正量（无参考序列）。</p></li>
 <li><p><code>DB</code>：最后一段的订正量（有参考序列）。</p></li>
