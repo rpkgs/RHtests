@@ -25,6 +25,10 @@ date2num <- function(date) {
     as.numeric()
 }
 
+fprintf <- function(fmt, ..., file = "", append = FALSE) {
+  cat(sprintf(fmt, ...), file = file, append = append)
+}
+
 is.Date <- function(x) is(x, "Date")
 
 plot2 <- function(at, labels, ...) {

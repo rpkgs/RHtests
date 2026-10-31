@@ -45,8 +45,7 @@ importFrom(Ipaper,
 importFrom(data.table,data.table)
 importFrom(dplyr,
   arrange,
-  mutate,
-  tibble
+  mutate
 )
 importFrom(grDevices,
   dev.off,
@@ -78,6 +77,10 @@ importFrom(stats,
   setNames,
   splinefun,
   var
+)
+importFrom(tibble,
+  as_tibble,
+  tibble
 )
 importFrom(utils,
   read.table,

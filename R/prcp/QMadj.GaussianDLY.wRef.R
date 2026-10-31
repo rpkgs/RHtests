@@ -59,7 +59,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
     return(-1)
   }
 
-  otmp<-LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj)
+  otmp<-LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj, IY0flg)
   Y1<-otmp$Y0
   cor<-otmp$cor
   corl<-otmp$corl
@@ -351,7 +351,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
     EB[i]<-dtmp$EB[inds==IYM[i]]
   Aadj<-dtmp$Base  # de-seasonalize Badj
   Ipd<-c(N)
-  dtmp<-LSmultipleRed(Aadj,Ti,Ipd)
+  dtmp<-LSmultipleRed(Aadj,Ti,Ipd, IY0flg)
 # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD<-dtmp$mu[1]
   betaD<-dtmp$trend
@@ -367,7 +367,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   while(tt){
     Niter<-Niter+1
     EB00<-EB
-    otmp<-LSmultipleRed(Base,Ti,Ips)
+    otmp<-LSmultipleRed(Base,Ti,Ips, IY0flg)
     meanhat<-otmp$meanhat
     df<-(N-2-Nt-Ns)
     p.cor<-pt(abs(otmp$cor)*sqrt(df/(1-otmp$cor^2)),df)

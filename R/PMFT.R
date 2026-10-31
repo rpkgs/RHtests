@@ -222,7 +222,7 @@ PMFxIseg<-function(Y0,Ti,Ips,Iseg){
   Nseg <- I3-I0
   Ip0  <- Ips[-Iseg]
 
-  otmp   <- LSmultipleRed(Y0,Ti,Ips)
+  otmp   <- LSmultipleRed(Y0,Ti,Ips, IY0flg)
   cor    <- otmp$cor
   corl   <- otmp$corl
   corh   <- otmp$corh

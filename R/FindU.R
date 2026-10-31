@@ -121,7 +121,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     }
 
     Ip0      <- N
-    otmp     <- LSmultiRedCycle(Y1,Ti,Ip0,1)
+    otmp     <- LSmultiRedCycle(Y1,Ti,Ip0,1, IY0flg)
     beta0    <- otmp$trend
     meanhat0 <- otmp$meanhat
     Ehat0    <- mean(meanhat0)
@@ -316,7 +316,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     else if(Iadj==0)Iseg.adj<-Iseg.longest
     else Iseg.adj<-Iadj
 
-    oout            <- LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj)
+    oout            <- LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj, IY0flg)
 
     Y1              <- oout$Y0
     cor             <- oout$cor

@@ -1,4 +1,4 @@
-LSmultipleRed <- function(Y0, Ti, Ips) {
+LSmultipleRed <- function(Y0, Ti, Ips, IY0flg) {
   Ns <- length(Ips) - 1
   N <- length(Y0)
   otmp <- LSmultiple(Y0, Ti, Ips)
@@ -48,22 +48,8 @@ LSmultipleRed <- function(Y0, Ti, Ips) {
     WU[I0:I2] <- WU[I0:I2] + mean(itmp[I0:I2]) + beta * Ti[I0:I2]
   }
 
-  list(
-    W       = W,
-    WL      = WL,
-    WU      = WU,
-    sig     = sig,
-    cor     = cor,
-    corl    = corl,
-    corh    = corh,
-    resi    = resi,
-    mu      = mu,
-    meanhat = meanhat,
-    trend   = beta,
-    betaL   = betaL,
-    betaU   = betaU,
-    p.tr    = p.tr
-  )
+  listk(W, WL, WU, sig, cor, corl, corh, resi, mu, meanhat,
+        trend = beta, betaL, betaU, p.tr)
 }
 
 #' LSmultiRedCycle
@@ -71,7 +57,10 @@ LSmultipleRed <- function(Y0, Ti, Ips) {
 #' @return
 #' - `resi`: residual
 #' - `meanhat`: linear trend
-LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj) {
+LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj,
+                            IY0flg,
+                            EB = get("EB", envir = .GlobalEnv),
+                            Imd = get("Imd", envir = .GlobalEnv)) {
   N <- length(Y0)
   Ns <- length(Ips) - 1
   Niter <- 0
@@ -83,7 +72,7 @@ LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj) {
     Niter <- Niter + 1
     EB0 <- EB1
 
-    otmp <- LSmultipleRed(Y0, Ti, Ips)
+    otmp <- LSmultipleRed(Y0, Ti, Ips, IY0flg)
     trend <- otmp$trend
     betaL <- otmp$betaL
     betaU <- otmp$betaU
@@ -138,23 +127,8 @@ LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj) {
     }
   }
   
-  list(
-    trend   = trend,
-    betaL   = betaL,
-    betaU   = betaU,
-    EB      = EB1,
-    mu      = mu,
-    cor     = cor,
-    corl    = corl,
-    corh    = corh,
-    W       = W,
-    WL      = WL,
-    WU      = WU,
-    resi    = resi,
-    Y0      = as.vector(Y0),
-    meanhat = as.vector(meanhat),
-    p.tr    = p.tr
-  )
+  listk(trend, betaL, betaU, EB = EB1, mu, cor, corl, corh, W, WL, WU, resi,
+        Y0 = as.vector(Y0), meanhat = as.vector(meanhat), p.tr)
 }
 
 rmCycle <- function(idata) {

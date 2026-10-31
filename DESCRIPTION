@@ -12,6 +12,7 @@ Imports:
     magrittr,
     lubridate,
     data.table,
+    tibble,
     dplyr,
     purrr,
     ggplot2,

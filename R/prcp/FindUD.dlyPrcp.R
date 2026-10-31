@@ -297,7 +297,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
       # all changepoints are significant, calculate stats and output
       if(length(Ips)==1) if(is.na(Ips)) Ips<-N
 
-      otmp<-LSmultipleRed(Y1,Ti,Ips)
+      otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
       SSEf<-sum(otmp$resi**2)
       LH<--log(SSEf/(N-2-Ns))*N/2+(lambda-1)*sumLogPi
       LHs[ind]<-LH
@@ -353,14 +353,14 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   else Iseg.adj<-Iadj
 
   Ipd<-c(N)
-  dtmp<-LSmultipleRed(Y1,Ti,Ipd)
+  dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg)
   beta0<-dtmp$trend
   cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
             "(p=", round(dtmp$p.tr,4), "); cor=", round(dtmp$cor,4),
             "(",round(dtmp$corl,4),",",round(dtmp$corh,4),")\n\n"),
       file=ofileSout,append=TRUE)
 
-  otmp<-LSmultipleRed(Y1,Ti,Ips)
+  otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
   cor<-otmp$cor
   corL<-otmp$corl
   corU<-otmp$corh

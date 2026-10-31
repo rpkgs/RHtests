@@ -65,7 +65,7 @@ FindUD <- function(
   cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
 
   Ip0 <- N
-  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1)
+  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg)
   beta0 <- oout$trend
   betaL0 <- oout$betaL
   betaU0 <- oout$betaU
@@ -298,7 +298,7 @@ FindUD <- function(
     Iseg.adj <- Iadj
   }
 
-  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj)
+  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg)
   Y1 <- otmp$Y0
   cor <- otmp$cor
   corl <- otmp$corl

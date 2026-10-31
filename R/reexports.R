@@ -1,4 +1,5 @@
-#' @importFrom dplyr mutate arrange tibble
+#' @importFrom dplyr mutate arrange
+#' @importFrom tibble tibble as_tibble
 #' @importFrom data.table data.table
 #' @importFrom Ipaper write_fig reorder_name melt_list
 

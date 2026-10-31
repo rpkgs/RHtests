@@ -482,7 +482,7 @@ FindUD.wRef <- function(
   }
   Aadj <- dtmp$Base # de-seasonalize Badj
   Ipd <- c(N)
-  dtmp <- LSmultipleRed(Aadj, Ti, Ipd)
+  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg)
   # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD <- dtmp$mu[1]
   betaD <- dtmp$trend
@@ -496,7 +496,7 @@ FindUD.wRef <- function(
   dtmp <- rmCycle(bdata) # de-seasonalized Base series
   tbase <- dtmp$Base
   Ipd <- length(tbase)
-  dtmp <- LSmultipleRed(tbase, Ti, Ipd)
+  dtmp <- LSmultipleRed(tbase, Ti, Ipd, IY0flg)
   beta0 <- dtmp$trend
   cor <- dtmp$cor
   corL <- dtmp$corl
@@ -537,7 +537,7 @@ FindUD.wRef <- function(
   while (tt) {
     Niter <- Niter + 1
     EB00 <- EB
-    otmp <- LSmultipleRed(Base, Ti, Ips)
+    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg)
     p.cor <- pt(abs(otmp$cor) * sqrt((N - 2) / (1 - otmp$cor^2)), N - 2)
     meanhat <- otmp$meanhat
     corout <- c(otmp$cor, otmp$corl, otmp$corh, p.cor)
