@@ -50,6 +50,8 @@ listk <- function(...) {
 #' @importFrom magrittr %>% %<>%
 #' @importFrom purrr map_dbl map_int
 #' @importFrom zeallot %<-%
+#' @importFrom utils head
+#' @importFrom methods is
 #' 
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {
@@ -57,11 +59,16 @@ listk <- function(...) {
       c(
         ".", ".SD", ".N",
         "ooflg", "owflg", 
-        "bdata", "ori.bdata", 
+        "bdata", "ori.bdata",
+        "TiB", "IYBflg",
         "itable", "ori.itable", 
         "ErrorMSG", 
         "olflg", "Nmin", 
-        "Ti", "Y0", "Nt", "IY0", "IY0flg", "Icy", "Imd", "phi", "PFmax", "PTmax"
+        "Ti", "Y0", "Nt", "IY0", "IY0flg", "Icy", "Imd", "phi", "PFmax", "PTmax",
+        # 数据集的列名与内置临界值表（data.table 非标准求值中使用）
+        "data", "kind", "date_meta", "stepsize", "prob", "probU",
+        "PFx", "PFx95h", "i", "value", "base", "variable",
+        "PFtable", "PTtable"
       )
     )
   }

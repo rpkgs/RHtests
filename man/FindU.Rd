@@ -46,6 +46,12 @@ the same segment).}
 
 \item{Ny4a}{--}
 
+\item{is_plot}{是否绘图。}
+
+\item{...}{保留参数。}
+
+\item{debug}{是否写出检验过程统计量。}
+
 \item{.state}{An \code{RHState} object returned by \link{Read}, used instead of \code{InSeries}.}
 }
 \value{
@@ -65,14 +71,57 @@ while accounting for all the identified mean-shifts (Wang 2008a). No reference
 series will be used in any of these functions; the base series is tested in
 this case.
 }
+\section{数据流与参数来源}{
+
+输入数据只读取一次，其余参数均由 \link{RHState} 携带：
+\itemize{
+\item \code{InSeries}、\code{MissingValueCode}、\code{plev} → \code{Read()}
+\item \code{N <- length(Y0)} ← \code{state@series$Y0}
+\item \code{Y0}、\code{Ti}、\code{IY0}、\code{IY0flg}、\code{Imd}、\code{itable}、\code{ori.itable}、\code{ooflg}
+← \code{state@series}
+\item \code{Icy}、\code{Nt} ← \code{state@season}
+\item \code{phi}、\code{PFmax} ← \code{state@critical_values}，其中 \code{PFmax} 由
+\code{readPFtable(N, plev)} 按序列长度与置信水平生成
+}
+
+传入 \code{.state} 时跳过读取，而 \code{plev} 必须与建表时一致，由
+\code{check_rh_state()} 校验。
+}
+
+\section{输出文件}{
+
+Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
+\itemize{
+\item Example1_1Cs.txt
+
+Ns >= 0 is the number of changepoints identified; changepoint positions are
+Ip(1), Ip(2),...,Ip(Ns)
+\item OutFile_U.dat
+}
+\itemize{
+\item \code{id}   :
+\item \code{date} :
+\item \code{base} : the original input series
+\item \code{base_trend+meanshift}: \code{trend} + \verb{abrupt shift} (for base)
+\item \code{base_mean_adj}: \code{base} - \verb{abrupt shift}
+\item \code{base_anomaly}: \code{base} - \verb{seasonal cycle}
+\item \code{fit_of_base_anomaly}: \code{trend} + \verb{abrupt shift} (for anomaly)
+\item \code{annualC+meanShifts}: \verb{seasonal cycle} + \verb{abrupt shift} (for base)
+\item \code{QM_adjusted}:
+\item \code{fit_of_deseason_base}: linear trend of \code{anomal}. A multi-phase regression
+model fit to the de-seasonalized base series without accounting for any
+shifts (i.e. ignore all shifts identified)
+}
+}
+
 \examples{
 f = system.file("extdata/Example1.dat", package = "RHtests")
-r = FindU(f)
+r = FindU(f, output = file.path(tempdir(), "example01"))
 print(r)
 
 plot_output(r$fit)
 
 }
 \seealso{
-\code{\link[=Read]{Read()}}、\code{\link[=FindUD]{FindUD()}}、\code{\link[=readPFtable]{readPFtable()}}
+\code{\link[=Read]{Read()}}、\code{\link[=FindUD]{FindUD()}}
 }

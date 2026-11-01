@@ -1,6 +1,13 @@
 #' StepSize.wRef
 #'
-#' @param .state 内部计算状态；未提供时根据输入数据创建。
+#' @param Bseries base series，文件路径或数据框。
+#' @param Rseries reference series，文件路径或数据框。
+#' @inheritParams FindU.wRef
+#' @inheritParams FindU
+#' @param InCs 待检验的突变点，data.frame 或文件路径，含列 `date` 与 `kind`。
+#' @param debug
+#' - `true`  : `_Fstat.txt` will be shown
+#' - `false` : no `_Fstat.txt`
 #' @example R/examples/run_ex02.R
 #' @export
 StepSize.wRef <- function(
@@ -14,16 +21,16 @@ StepSize.wRef <- function(
     Read.wRef(Bseries, Rseries, MissingValueCode, plev)
   } else .state
   check_rh_state(state, reference = TRUE, plev = plev)
-  c(Y0 =, IY0 =, IY0flg =, TiB =, IYBflg =,
-    bdata =, ori.bdata =, owflg =) %<-% state@series
-  c(Icy =, Nt =) %<-% state@season
-  c(phi =, PTmax =) %<-% state@critical_values
+  c(Y0, IY0, IY0flg, TiB, IYBflg, bdata, ori.bdata, owflg) %<-%
+    state@series[c("Y0", "IY0", "IY0flg", "TiB", "IYBflg", "bdata", "ori.bdata", "owflg")]
+  c(Icy, Nt) %<-% state@season[c("Icy", "Nt")]
+  c(phi, PTmax) %<-% state@critical_values[c("phi", "PTmax")]
 
   # 定位候选突变点。
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
   N <- length(Y0)
   Nadj <- Nt * Ny4a
-  c(Ips =, Ids =, Ns =) %<-% locate_changepoints(InCs, IY0)
+  c(Ips, Ids, Ns) %<-% locate_changepoints(InCs, IY0)[c("Ips", "Ids", "Ns")]
   if (anyNA(Ips) || !identical(Ips, sort(Ips))) {
     message <- paste("StepSize.wRef: invalid changepoint indices:", paste(Ips, collapse = " "), "\n")
     stop(message, call. = FALSE)

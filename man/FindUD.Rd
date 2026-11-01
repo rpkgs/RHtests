@@ -48,6 +48,8 @@ the same segment).}
 
 \item{Ny4a}{--}
 
+\item{is_plot}{是否绘图。}
+
 \item{.state}{An \code{RHState} object returned by \link{Read}, used instead of \code{InSeries}.}
 }
 \description{
@@ -55,9 +57,10 @@ FindUD
 }
 \examples{
 f = system.file("extdata/Example1.dat", package = "RHtests")
-r1 = FindU(f)
+r1 = FindU(f, output = file.path(tempdir(), "example01"))
 
-r2 = FindUD(InSeries = f, InCs = r1$TP, output = "OUTPUT/example1")
+r2 = FindUD(InSeries = f, InCs = r1$TP,
+  output = file.path(tempdir(), "example01"))
 print(r2)
 
 plot_output(r2$fit)

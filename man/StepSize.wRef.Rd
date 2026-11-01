@@ -22,7 +22,36 @@ StepSize.wRef(
 )
 }
 \arguments{
-\item{.state}{内部计算状态；未提供时根据输入数据创建。}
+\item{Bseries}{base series，文件路径或数据框。}
+
+\item{Rseries}{reference series，文件路径或数据框。}
+
+\item{InCs}{待检验的突变点，data.frame 或文件路径，含列 \code{date} 与 \code{kind}。}
+
+\item{output}{输出文件前缀。}
+
+\item{MissingValueCode}{缺测值标记。}
+
+\item{plev}{置信水平，取 0.75、0.80、0.90、0.95、0.99、0.9999 之一。}
+
+\item{Iadj}{订正到哪一段：\code{0} 为最长段，\verb{> Ns + 1} 视为最后一段。}
+
+\item{Mq}{分位数匹配的类别数；\code{0} 按最短段长度自动定，\code{1} 为均值订正。}
+
+\item{GUI}{为 \code{TRUE} 时只返回 \code{0}，不返回结果列表。}
+
+\item{Ny4a}{用于输出的年数参数。}
+
+\item{is_plot}{是否画图。}
+
+\item{...}{保留参数。}
+
+\item{debug}{\itemize{
+\item \code{true}  : \verb{_Fstat.txt} will be shown
+\item \code{false} : no \verb{_Fstat.txt}
+}}
+
+\item{.state}{由 \link{Read.wRef} 生成的 \code{RHState}；提供后不再读取数据。}
 }
 \description{
 StepSize.wRef
@@ -39,8 +68,8 @@ ref <- system.file("extdata/Example2_Ref.dat", package = "RHtests") |> read_data
 
 metadata <- data.table::data.table(date = c("1974-02-01", "1975-11-01"))
 
-r <- RHtests_process(base, ref, metadata, outdir = "OUTPUT/example02")
-plot_RHtests(r, "RHtests-ref.pdf")
+r <- RHtests_process(base, ref, metadata, outdir = file.path(tempdir(), "example02"))
+plot_RHtests(r, file.path(tempdir(), "RHtests-ref.pdf"))
 
 # expect_equal(nrow(r$turningPoint), 11)
 # expect_equal(as.character(r$turningPoint[kind == 0]$date), metadata$date)

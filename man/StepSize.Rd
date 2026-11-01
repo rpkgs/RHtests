@@ -21,12 +21,44 @@ StepSize(
 )
 }
 \arguments{
+\item{InSeries}{file path or data frame of the input series}
+
+\item{InCs}{待检验的突变点，data.frame 或文件路径，含列 \code{date} 与 \code{kind}。}
+
+\item{output}{prefix of the outputs}
+
+\item{MissingValueCode}{string, missing value code}
+
+\item{GUI}{boolean}
+
+\item{plev}{plev is the nominal level of confidence; (1 - plev) is the
+nominal level of significance, choose one of the following 6 plev values:
+0.75, 0.80, 0.90, 0.95, 0.99, 0.9999}
+
+\item{Iadj}{If Iadj = 0, the data series is adjusted to the longest segment;
+otherwise the data series is adjusted to the chosen segment Iadj (if the
+given integer Iadj > Ns+1, we re-set Iadj=Ns+1, which corresponds to
+adjusting the series to the last segment). Set Iadj = 10000 if you want
+to ensure that the series is adjusted to the last segment}
+
+\item{Mq}{Mq (=0, 1, 2, ..., 20) is the number of points (categories) on which
+the empirical cumulative distribution function are estimated.
+If Mq=0, the actual Mq is determined by the length of the shortest segment
+Mq=1 corresponds to mean adjustments (one adjustment for all data in
+the same segment).}
+
+\item{Ny4a}{--}
+
+\item{is_plot}{是否绘图。}
+
+\item{...}{保留参数。}
+
 \item{debug}{\itemize{
 \item \code{true}  : \verb{_Fstat.txt} will be shown
 \item \code{false} : no \verb{_Fstat.txt}
 }}
 
-\item{.state}{内部计算状态；未提供时根据输入数据创建。}
+\item{.state}{An \code{RHState} object returned by \link{Read}, used instead of \code{InSeries}.}
 }
 \description{
 StepSize
@@ -36,6 +68,6 @@ StepSize
 data <- dat_example01
 metadata <- data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
 
-r <- RHtests_process(data, NULL, metadata, outdir = "OUTPUT/example01")
+r <- RHtests_process(data, NULL, metadata, outdir = file.path(tempdir(), "example01"))
 plot_output(r$data)
 }

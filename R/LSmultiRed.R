@@ -54,6 +54,19 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
 
 #' LSmultiRedCycle
 #'
+#' 估计含季节周期与多个均值突变的趋势项，序列长度、季节周期长度与突变点数
+#' 都需显式传入，以避开全局变量。
+#'
+#' @param Y0 去季节后的序列。
+#' @param Ti 时间序号（长度同 `Y0`）。
+#' @param Ips 突变点位置，末位为序列长度。
+#' @param Iseg.adj 订正目标段的序号。
+#' @param IY0flg 相邻观测是否连续（0/1）。
+#' @param EB 季节周期，长度 `Nt`。
+#' @param Imd 观测的月日（mmdd）。
+#' @param Icy 季节周期内的月日序列，长度 `Nt`。
+#' @param Nt 季节周期长度（年 1、月 12、日 365/366）。
+#'
 #' @return
 #' - `resi`: residual
 #' - `meanhat`: linear trend
@@ -147,7 +160,10 @@ rmCycle <- function(idata) {
 
 #' Multiple breakpoints piecewise Regression (same slope, different interception)
 #'
+#' @param Y The response vector
+#' @param T The predictor vector
 #' @param Ips breakpoints
+#' @param ... 传给 `lm_solve()`。
 #'
 #' @return
 #' - `sig`   : coefficients
@@ -172,12 +188,13 @@ LSmultiple <- function(Y, T, Ips, ...) {
 #' single-breakpoint piecewise regression (same slope, different interception)
 #'
 #' @param Y The response vector
-#' @param T The predictor vector
+#' @param T_anorm The predictor vector
 #'
 #' @param Ic the position of change point, `[1, Ic]` and `[Ic + 1, end]` are
 #' corresponding to the perid
+#' @param ... 传给 `lm_solve()`。
 #'
-#' #' @return
+#' @return
 #' - `sig`   : coefficients
 #' - `fitted`: fitted value
 #' - `resi`  : residual of fitted value

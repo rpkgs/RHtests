@@ -368,7 +368,7 @@ getPTx95 <- function(cor, N, phi, PTmax) {
 str40<-function(vari.name,vari.value){
   olen<-40
   b20<-"                    "
-  if(!exists(vari.name,env=sys.parent()))
+  if(!exists(vari.name, envir = sys.parent()))
     otmp<-paste(b20,"                  NA",sep="")
   else{
     if(nchar(vari.value)>olen) otmp<-paste("...",substr(vari.value,

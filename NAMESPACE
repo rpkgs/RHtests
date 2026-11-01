@@ -63,6 +63,7 @@ importFrom(magrittr,
   "%<>%",
   "%>%"
 )
+importFrom(methods,is)
 importFrom(purrr,
   map_dbl,
   map_int
@@ -83,6 +84,7 @@ importFrom(tibble,
   tibble
 )
 importFrom(utils,
+  head,
   read.table,
   write.table
 )

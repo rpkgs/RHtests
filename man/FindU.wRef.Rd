@@ -56,6 +56,23 @@ A list with:
 与 \code{\link[=FindU]{FindU()}} 的区别是：检验对象为 \code{Y0 = base - reference}，且临界值表
 由 \code{readPTtable()} 生成。
 }
+\section{数据流与参数来源}{
+
+输入数据只读取一次，其余参数均由 \link{RHState} 携带：
+\itemize{
+\item \code{Bseries}、\code{Rseries}、\code{MissingValueCode}、\code{plev} → \code{Read.wRef()}
+\item \code{N <- length(Y0)} ← \code{state@series$Y0}（两序列共同时段长度）
+\item \code{Y0}、\code{Ti}、\code{IY0}、\code{IY0flg}、\code{TiB}、\code{IYBflg}、\code{bdata}、\code{ori.bdata}、
+\code{owflg} ← \code{state@series}
+\item \code{Nt} ← \code{state@season}
+\item \code{phi}、\code{PTmax} ← \code{state@critical_values}，由
+\code{readPTtable(N, plev)} 按序列长度与置信水平生成
+}
+
+传入 \code{.state} 时跳过读取，而 \code{plev} 必须与建表时一致，由
+\code{check_rh_state()} 校验。
+}
+
 \seealso{
 \code{\link[=Read.wRef]{Read.wRef()}}、\code{\link[=FindUD.wRef]{FindUD.wRef()}}、\code{\link[=StepSize.wRef]{StepSize.wRef()}}
 }

@@ -1,6 +1,7 @@
 #' StepSize
 #'
-#' @param .state 内部计算状态；未提供时根据输入数据创建。
+#' @inheritParams FindU
+#' @param InCs 待检验的突变点，data.frame 或文件路径，含列 `date` 与 `kind`。
 #' @param debug
 #' - `true`  : `_Fstat.txt` will be shown
 #' - `false` : no `_Fstat.txt`
@@ -18,17 +19,17 @@ StepSize <- function(
     Read(InSeries, MissingValueCode, plev)
   } else .state
   check_rh_state(state, reference = FALSE, plev = plev)
-  c(Y0 =, Ti =, IY0 =, IY0flg =, Imd =,
-    itable =, ori.itable =, ooflg =) %<-% state@series
-  c(Icy =, Nt =) %<-% state@season
-  c(phi =, PFmax =) %<-% state@critical_values
+  c(Y0, Ti, IY0, IY0flg, Imd, itable, ori.itable, ooflg) %<-%
+    state@series[c("Y0", "Ti", "IY0", "IY0flg", "Imd", "itable", "ori.itable", "ooflg")]
+  c(Icy, Nt) %<-% state@season[c("Icy", "Nt")]
+  c(phi, PFmax) %<-% state@critical_values[c("phi", "PFmax")]
 
   # 将候选突变日期映射到观测位置。
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
   N <- length(Y0)
   Nadj <- Ny4a * Nt
 
-  c(Ips =, Ids =, Ns =) %<-% locate_changepoints(InCs, IY0)
+  c(Ips, Ids, Ns) %<-% locate_changepoints(InCs, IY0)[c("Ips", "Ids", "Ns")]
   if (anyNA(Ips) || !identical(Ips, sort(Ips))) {
     message <- paste("StepSize: invalid changepoint indices:", paste(Ips, collapse = " "), "\n")
     stop(message, call. = FALSE)

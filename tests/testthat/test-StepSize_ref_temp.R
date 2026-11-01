@@ -6,7 +6,7 @@ test_that("RHtests_process temp works", {
   B <- l$month[, c(1, 2, 3, 4)]
   R <- l$month[, c(1, 2, 3, 5)]
 
-  r <- RHtests_process(B, R, metadata = NULL, outdir = "OUTPUT/example02")
+  r <- RHtests_process(B, R, metadata = NULL, outdir = file.path(tempdir(), "example02"))
   plot_output(r$data)
 
   expect_equal(nrow(r$data), 744)

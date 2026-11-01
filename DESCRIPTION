@@ -18,11 +18,10 @@ Imports:
     S7,
     zeallot,
     ggplot2,
-    crayon,
+    methods,
     Ipaper
 Suggests: 
-    testthat,
-    covr
+    testthat
 Remotes:
     rpkgs/Ipaper
 Encoding: UTF-8

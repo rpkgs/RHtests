@@ -29,8 +29,8 @@
     Mq <- Mq - 1
   }
   if (any(counts < min_count)) {
-    if (any(counts == 0)) stop("参考序列在部分窗口中没有有效数据。", call. = FALSE)
-    warning("参考序列有效数据不足，无法继续减少分位数组数。", call. = FALSE)
+    if (any(counts == 0)) stop("The reference series has no valid data in some windows.", call. = FALSE)
+    warning("Too few valid values in the reference series to reduce the number of quantile groups.", call. = FALSE)
   }
 
   # 计算各窗口的分位组均值；两端延拓，末行留给最后一段

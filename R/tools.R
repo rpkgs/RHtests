@@ -5,6 +5,12 @@ range2 <- function(x, y, na.rm = TRUE) {
 }
 
 
+#' 日期与 YYYYMMDD 数值互转
+#'
+#' 序列日期在内部统一为 YYYYMMDD 数值（月序列日为 `00`）。
+#'
+#' @param x,date 日期向量，`Date` 或可被 `as.Date()` 解析的字符串。
+#' @return `Date` 或 YYYYMMDD 数值向量。
 #' @export
 num2date <- function(x) {
   if (is(x, "Date")) {
@@ -18,6 +24,7 @@ num2date <- function(x) {
     as.Date("%Y%m%d")
 }
 
+#' @rdname num2date
 #' @export
 date2num <- function(date) {
   as.character(date) %>%

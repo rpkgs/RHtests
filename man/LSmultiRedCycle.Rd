@@ -6,6 +6,25 @@
 \usage{
 LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 }
+\arguments{
+\item{Y0}{去季节后的序列。}
+
+\item{Ti}{时间序号（长度同 \code{Y0}）。}
+
+\item{Ips}{突变点位置，末位为序列长度。}
+
+\item{Iseg.adj}{订正目标段的序号。}
+
+\item{IY0flg}{相邻观测是否连续（0/1）。}
+
+\item{EB}{季节周期，长度 \code{Nt}。}
+
+\item{Imd}{观测的月日（mmdd）。}
+
+\item{Icy}{季节周期内的月日序列，长度 \code{Nt}。}
+
+\item{Nt}{季节周期长度（年 1、月 12、日 365/366）。}
+}
 \value{
 \itemize{
 \item \code{resi}: residual
@@ -13,5 +32,6 @@ LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 }
 }
 \description{
-LSmultiRedCycle
+估计含季节周期与多个均值突变的趋势项，序列长度、季节周期长度与突变点数
+都需显式传入，以避开全局变量。
 }

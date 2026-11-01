@@ -1,3 +1,8 @@
+#' 合并突变点与元数据
+#'
+#' @param TP 突变点表，含列 `date`。
+#' @param metadata 元数据表，含列 `date`。
+#' @return 突变点表，额外含 `date_meta` 与 `diff`（相差天数；无元数据时为 `9999`）
 #' @export
 merge_metainfo <- function(TP, metadata) {
   if (is.null(TP)) return(NULL)
@@ -20,7 +25,9 @@ merge_metainfo <- function(TP, metadata) {
 #' adjust TP according to station meta info
 #' 
 #' @param TP A data.frame, with the columns of `c("kind", "diff", "")`
-#' 
+#' @param metadata 元数据表，含列 `date`（`Date` 或 YYYYMMDD）。
+#' @param maxgap 突变点与元数据日期的最大容差（天），超出则不订正。
+#'
 #' @return An adjusted date
 #' 
 #' @export

@@ -1,13 +1,21 @@
+# Rbuildignore
+
 ^RHtests\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 ^V4_files$
-^LICENSE\.md$
 ^codecov\.yml$
 ^OUTPUT$
-^\.git$
+^\.git
 ^\.github$
+^\.vscode
+^AGENTS\.md$
+^_pkgdown\.yml$
+^RHtests-ref\.pdf$
+^LICENSE$
+^LICENSE\.md$
 ^clean\.sh$
 ^README\.rst$
 ^docs$
 ^site$
+^check$

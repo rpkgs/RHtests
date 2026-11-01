@@ -27,6 +27,20 @@ length as \code{data}.}
 
 \item{metadata}{A data.frame or data.table, with the columns of
 \code{TurningPoint} date.}
+
+\item{prefix}{输出文件名前缀；为 \code{NULL} 时用 \code{outdir}。}
+
+\item{outdir}{输出目录。}
+
+\item{maxgap}{突变点与元数据日期的最大容差（天）。}
+
+\item{...}{保留参数。}
+
+\item{debug}{是否写出检验过程统计量。}
+
+\item{is_plot}{是否绘图。}
+
+\item{verbose}{是否输出进度信息。}
 }
 \description{
 process RHtests without reference series
@@ -36,7 +50,7 @@ process RHtests without reference series
 data <- dat_example01
 metadata <- data.table(date = c("1966-11-01", "1976-07-01", "1980-03-01"))
 
-r <- RHtests_process(data, NULL, metadata, outdir = "OUTPUT/example01")
+r <- RHtests_process(data, NULL, metadata, outdir = file.path(tempdir(), "example01"))
 plot_output(r$data)
 # \%\% example 02
 read_data <- \(f) {
@@ -49,8 +63,8 @@ ref <- system.file("extdata/Example2_Ref.dat", package = "RHtests") |> read_data
 
 metadata <- data.table::data.table(date = c("1974-02-01", "1975-11-01"))
 
-r <- RHtests_process(base, ref, metadata, outdir = "OUTPUT/example02")
-plot_RHtests(r, "RHtests-ref.pdf")
+r <- RHtests_process(base, ref, metadata, outdir = file.path(tempdir(), "example02"))
+plot_RHtests(r, file.path(tempdir(), "RHtests-ref.pdf"))
 
 # expect_equal(nrow(r$turningPoint), 11)
 # expect_equal(as.character(r$turningPoint[kind == 0]$date), metadata$date)

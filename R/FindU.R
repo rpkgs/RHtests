@@ -26,9 +26,12 @@
 #' Mq=1 corresponds to mean adjustments (one adjustment for all data in
 #' the same segment).
 #' @param Ny4a --
+#' @param is_plot 是否绘图。
+#' @param ... 保留参数。
+#' @param debug 是否写出检验过程统计量。
 #' @param .state An `RHState` object returned by [Read], used instead of `InSeries`.
 #'
-#' @section 数据流与参数来源：
+#' @section 数据流与参数来源:
 #' 输入数据只读取一次，其余参数均由 [RHState] 携带：
 #'
 #' - `InSeries`、`MissingValueCode`、`plev` → `Read()`
@@ -49,9 +52,9 @@
 #' - `TP`  : `data.table`，突变点检验结果，列 `kind`、`Idc`、`date`、`Ic`、
 #'   `Nseg`、`stepsize`、`probL`、`probU`、`plev`、`PFx`、`PFx95l`、`PFx95h`
 #'
-#' @seealso [Read()]、[FindUD()]、[readPFtable()]
+#' @seealso [Read()]、[FindUD()]
 #'
-#' @section 输出文件：
+#' @section 输出文件:
 #' Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
 #'
 #' * Example1_1Cs.txt
@@ -85,7 +88,7 @@
 
 #' @examples
 #' f = system.file("extdata/Example1.dat", package = "RHtests")
-#' r = FindU(f)
+#' r = FindU(f, output = file.path(tempdir(), "example01"))
 #' print(r)
 #' 
 #' plot_output(r$fit)
@@ -101,10 +104,10 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     Read(InSeries, MissingValueCode, plev)
   } else .state
   check_rh_state(state, reference = FALSE, plev = plev)
-  c(Y0 =, Ti =, IY0 =, IY0flg =, Imd =,
-    itable =, ori.itable =, ooflg =) %<-% state@series
-  c(Icy =, Nt =) %<-% state@season
-  c(phi =, PFmax =) %<-% state@critical_values
+  c(Y0, Ti, IY0, IY0flg, Imd, itable, ori.itable, ooflg) %<-%
+    state@series[c("Y0", "Ti", "IY0", "IY0flg", "Imd", "itable", "ori.itable", "ooflg")]
+  c(Icy, Nt) %<-% state@season[c("Icy", "Nt")]
+  c(phi, PFmax) %<-% state@critical_values[c("phi", "PFmax")]
 
   Nmin <- 10
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5

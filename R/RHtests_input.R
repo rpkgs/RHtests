@@ -1,3 +1,9 @@
+#' 整理为 RHtests 输入格式
+#'
+#' @param d 数据框，含 `date` 或 `year`、`month`、`day`。
+#' @param varnames 保留的数值列；默认取除日期列外的全部列。
+#' @return `data.table`，含 `year`、`month`、`day` 与各数据列。
+#'
 #' @importFrom lubridate day
 #' @import data.table
 #' @export

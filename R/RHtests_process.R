@@ -7,6 +7,15 @@ RHtests_read <- function(data, data.ref = NULL, plev = 0.95) {
 #' 
 #' stepsize will not alter TP2, only delte non-significant record.
 #'
+#' @param data 基准序列；仅当 `.state` 为 `NULL` 时使用。
+#' @param data.ref 参考序列，可为 `NULL`。
+#' @param TP2 待检验的突变点表。
+#' @param has_ref 是否使用参考序列流程；默认依据 `data.ref` 是否为空。
+#' @param prefix 输出文件名前缀。
+#' @param is_plot 是否绘图。
+#' @param verbose 是否输出迭代信息。
+#' @param ... 保留参数。
+#' @param debug 是否写出检验过程统计量。
 #' @param .state 上游传入的 `RHState` 对象；提供后不再读取输入数据。
 #' @export
 RHtests_stepsize <- function(
@@ -61,7 +70,14 @@ RHtests_stepsize <- function(
 #' 
 #' @param metadata A data.frame or data.table, with the columns of
 #' `TurningPoint` date.
-#' 
+#' @param prefix 输出文件名前缀；为 `NULL` 时用 `outdir`。
+#' @param outdir 输出目录。
+#' @param maxgap 突变点与元数据日期的最大容差（天）。
+#' @param ... 保留参数。
+#' @param debug 是否写出检验过程统计量。
+#' @param is_plot 是否绘图。
+#' @param verbose 是否输出进度信息。
+#'
 #' @example R/examples/run_ex01.R
 #' @example R/examples/run_ex02.R
 #' 

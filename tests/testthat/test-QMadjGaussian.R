@@ -57,7 +57,7 @@ test_that("QM does not depend on global variables", {
   expect_equal(r$Mq, 3)
   expect_warning(
     QMadjGaussian.wRef(y, difference, c(20, 40), 1, 2, 0, 12, 0),
-    "参考序列有效数据不足"
+    "Too few valid values"
   )
   expect_identical(mget(c("Nt", "ErrorMSG"), envir = .GlobalEnv,
     ifnotfound = list(NULL), inherits = FALSE), globals)
@@ -77,7 +77,7 @@ test_that("QMadjGaussian.wRef reports an empty reference window", {
   y <- rep(seq_len(30), 2)
   dif <- c(rep(NA_real_, 30), rep(0, 30))
   expect_error(QMadjGaussian.wRef(y, dif, c(30, 60), 3, 2, 0, 12, 0),
-    "没有有效数据")
+    "has no valid data")
 })
 
 test_that("QMadjGaussian.wRef reduces categories for missing references", {

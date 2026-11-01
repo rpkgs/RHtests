@@ -18,6 +18,24 @@ RHtests_stepsize(
 )
 }
 \arguments{
+\item{data}{基准序列；仅当 \code{.state} 为 \code{NULL} 时使用。}
+
+\item{data.ref}{参考序列，可为 \code{NULL}。}
+
+\item{TP2}{待检验的突变点表。}
+
+\item{has_ref}{是否使用参考序列流程；默认依据 \code{data.ref} 是否为空。}
+
+\item{prefix}{输出文件名前缀。}
+
+\item{is_plot}{是否绘图。}
+
+\item{verbose}{是否输出迭代信息。}
+
+\item{...}{保留参数。}
+
+\item{debug}{是否写出检验过程统计量。}
+
 \item{.state}{上游传入的 \code{RHState} 对象；提供后不再读取输入数据。}
 }
 \description{

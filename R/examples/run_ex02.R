@@ -9,8 +9,8 @@ ref <- system.file("extdata/Example2_Ref.dat", package = "RHtests") |> read_data
 
 metadata <- data.table::data.table(date = c("1974-02-01", "1975-11-01"))
 
-r <- RHtests_process(base, ref, metadata, outdir = "OUTPUT/example02")
-plot_RHtests(r, "RHtests-ref.pdf")
+r <- RHtests_process(base, ref, metadata, outdir = file.path(tempdir(), "example02"))
+plot_RHtests(r, file.path(tempdir(), "RHtests-ref.pdf"))
 
 # expect_equal(nrow(r$turningPoint), 11)
 # expect_equal(as.character(r$turningPoint[kind == 0]$date), metadata$date)

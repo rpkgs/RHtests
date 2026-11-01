@@ -13,8 +13,8 @@ test_that("StepSize.wRef works", {
   R = read.table(Rseries, na.strings = "-999.99") %>% data.table()
   R[V1 >= 2002, V4:=NA]
 
-  r <- RHtests_process(B, R, metadata, outdir = "OUTPUT/example02")
-  plot_RHtests(r)
+  r <- RHtests_process(B, R, metadata, outdir = file.path(tempdir(), "example02"))
+  plot_RHtests(r, file.path(tempdir(), "ref.pdf"))
   
   # expect_equal(nrow(r$TP), 11)
   expect_equal(as.character(r$TP[kind == 0]$date), metadata$date)

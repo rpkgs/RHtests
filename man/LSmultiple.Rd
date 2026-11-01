@@ -7,7 +7,13 @@
 LSmultiple(Y, T, Ips, ...)
 }
 \arguments{
+\item{Y}{The response vector}
+
+\item{T}{The predictor vector}
+
 \item{Ips}{breakpoints}
+
+\item{...}{传给 \code{lm_solve()}。}
 }
 \value{
 \itemize{

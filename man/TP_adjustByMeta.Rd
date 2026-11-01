@@ -11,6 +11,10 @@ TP_remove_least(TP)
 }
 \arguments{
 \item{TP}{A data.frame, with the columns of \code{c("kind", "diff", "")}}
+
+\item{metadata}{元数据表，含列 \code{date}（\code{Date} 或 YYYYMMDD）。}
+
+\item{maxgap}{突变点与元数据日期的最大容差（天），超出则不订正。}
 }
 \value{
 An adjusted date

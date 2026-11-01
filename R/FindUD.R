@@ -8,9 +8,10 @@
 #' 
 #' @examples 
 #' f = system.file("extdata/Example1.dat", package = "RHtests")
-#' r1 = FindU(f)
+#' r1 = FindU(f, output = file.path(tempdir(), "example01"))
 #' 
-#' r2 = FindUD(InSeries = f, InCs = r1$TP, output = "OUTPUT/example1")
+#' r2 = FindUD(InSeries = f, InCs = r1$TP,
+#'   output = file.path(tempdir(), "example01"))
 #' print(r2)
 #' 
 #' plot_output(r2$fit)
@@ -22,10 +23,10 @@ FindUD <- function(
     Read(InSeries, MissingValueCode, plev)
   } else .state
   check_rh_state(state, reference = FALSE, plev = plev)
-  c(Y0 =, Ti =, IY0 =, IY0flg =, Imd =,
-    itable =, ori.itable =, ooflg =) %<-% state@series
-  c(Icy =, Nt =) %<-% state@season
-  c(phi =, PFmax =) %<-% state@critical_values
+  c(Y0, Ti, IY0, IY0flg, Imd, itable, ori.itable, ooflg) %<-%
+    state@series[c("Y0", "Ti", "IY0", "IY0flg", "Imd", "itable", "ori.itable", "ooflg")]
+  c(Icy, Nt) %<-% state@season[c("Icy", "Nt")]
+  c(phi, PFmax) %<-% state@critical_values[c("phi", "PFmax")]
 
   Debug <- TRUE
   flog <- paste(output, ".log", sep = "")

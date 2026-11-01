@@ -1,3 +1,11 @@
+#' 绘制整套检验结果
+#'
+#' @param r [RHtests_process()] 的返回值。
+#' @param outfile 输出 PDF 文件名。
+#' @param ... 传给 [plot_output()]。
+#' @param show 是否立即显示。
+#' @return 不可见地返回 `ggplot` 对象。
+#'
 #' @import ggplot2
 #' @export
 plot_RHtests <- function(r, outfile = "RHtests-noref.pdf", ..., show=FALSE) {
@@ -6,6 +14,13 @@ plot_RHtests <- function(r, outfile = "RHtests-noref.pdf", ..., show=FALSE) {
   # if (is_plotly) plotly::ggplotly(p)
 }
 
+#' 绘制拟合序列
+#'
+#' @param data 拟合结果表，含 `id`、`date`、`base` 及待绘制的各列。
+#' @param outfile 输出 PDF 文件名；`NULL` 时不写文件。
+#' @param ... 保留参数。
+#' @param show 是否立即显示。
+#' @return 不可见地返回 `ggplot` 对象。
 #' @export
 plot_output <- function(data, outfile = NULL, ..., show=FALSE) {
   d2 <- melt(data, c("id", "date", "base"))
