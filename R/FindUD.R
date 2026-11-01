@@ -88,67 +88,13 @@ FindUD <- function(
     I2 <- oout3$Ic
 
     Ns <- 1
-    Ips <- c(I1, N)
-    if (I1 > 0) {
-      otmp <- LSmultiple(Y1, Ti, Ips)
-      resi <- otmp$resi
-      fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns, IY0flg)
-      cor1 <- otmp$cor
-      corL1 <- otmp$corl
-      corU1 <- otmp$corh
-      W <- otmp$W + fitted
-      otmp <- PMFxKc(Y1, Ti, I0, I4, I1)
-      PFx1 <- otmp$PFc
-      otmp <- PMFxKc(W, Ti, I0, I4, I1)
-      prob1 <- otmp$prob
-    } else {
-      prob1 <- 0
-      PFx1 <- 0
-    }
-
-    Ips <- c(I2, N)
-    if (I2 > 0) {
-      otmp <- LSmultiple(Y1, Ti, Ips)
-      resi <- otmp$resi
-      fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns, IY0flg)
-      cor2 <- otmp$cor
-      corL2 <- otmp$corl
-      corU2 <- otmp$corh
-      W <- otmp$W + fitted
-      otmp <- PMFxKc(Y1, Ti, I0, I4, I2)
-      PFx2 <- otmp$PFc
-      otmp <- PMFxKc(W, Ti, I0, I4, I2)
-      prob2 <- otmp$prob
-    } else {
-      prob2 <- 0
-      PFx2 <- 0
-    }
-
-    Ips <- c(I3, N)
-    if (I3 > 0) {
-      otmp <- LSmultiple(Y1, Ti, Ips)
-      resi <- otmp$resi
-      fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns, IY0flg)
-      cor3 <- otmp$cor
-      corL3 <- otmp$corl
-      corU3 <- otmp$corh
-      W <- otmp$W + fitted
-      otmp <- PMFxKc(Y1, Ti, I0, I4, I3)
-      PFx3 <- otmp$PFc
-      otmp <- PMFxKc(W, Ti, I0, I4, I3)
-      prob3 <- otmp$prob
-    } else {
-      prob3 <- 0
-      PFx3 <- 0
-    }
-
-    tmp <- sort(c(PFx1, PFx2, PFx3), decreasing = T, index.return = T)
-    PFx.mx <- tmp$x[1]
-    prob.mx <- c(prob1, prob2, prob3)[tmp$ix[1]]
-    Imx <- c(I1, I2, I3)[tmp$ix[1]]
+    indices <- c(I1, I2, I3)
+    candidates <- pmf_candidates(indices, Y1, Ti, N, IY0flg)
+    PFx <- vapply(candidates, `[[`, numeric(1), "PFx")
+    best <- sort(PFx, decreasing = TRUE, index.return = TRUE)$ix[1]
+    PFx.mx <- PFx[best]
+    prob.mx <- candidates[[best]]$prob
+    Imx <- indices[best]
     if (prob.mx < plev) {
       #     cat("PMF finds the series to be homogeneous!\n",file=ofileIout)
       cat(paste(0, "changepoints in Series", "\n"), file = ofileIout)
@@ -163,21 +109,7 @@ FindUD <- function(
       Ids <- c(0, 1)
     }
   } else {
-    Ips <- c(rep(0, Ns), N) #
-    Ids <- rep(0, Ns)
-
-    for (i in 1:Ns) { # using YYYYMMDD as index, searching for the largest
-      # date less or equal to given YYYYMMDD
-      # ymdtmp <- as.numeric(substr(itmp[i+1],7,16))
-      ymdtmp <- TP$date[i] # %>% format("%Y%m%d") %>% as.numeric()
-      it <- match(ymdtmp, IY0)
-      if (!is.na(it)) {
-        Ips[i] <- it
-      } else {
-        Ips[i] <- max(c(1:N)[IY0 <= ymdtmp])
-      }
-      # Ids[i] <- as.numeric(substr(itmp[i+1],1,1))
-    }
+    Ips <- match_changepoint_dates(TP$date, IY0)
     Ids <- TP$kind
 
     if (sum(is.na(Ips)) > 0 | !identical(Ips, sort(Ips))) {
@@ -276,20 +208,7 @@ FindUD <- function(
   }
   # all changepoints are significant, calculate stats and output
 
-  if (Ns > 0) {
-    Nsegs <- Ips - c(0, Ips[1:Ns])
-    Iseg.longest <- sort(Nsegs, index = T, decreasing = T)$ix[1]
-  } else {
-    Iseg.longest <- 0
-  }
-
-  if (Iadj > (Ns + 1) | Iseg.longest == 0) {
-    Iseg.adj <- Ns + 1
-  } else if (Iadj == 0) {
-    Iseg.adj <- Iseg.longest
-  } else {
-    Iseg.adj <- Iadj
-  }
+  Iseg.adj <- adjustment_segment(Ips, Ns, Iadj)
 
   otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
   Y1 <- otmp$Y0

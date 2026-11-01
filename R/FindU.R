@@ -167,75 +167,15 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     oout3<-PMFxKxI0I2(Y1,Ti,I1,I3, Nmin)
     I2<-oout3$Ic
 
-    Ns<-1
-    Ips<-c(I1,N)
-    if(I1>0){
-        otmp   <- LSmultiple(Y1,Ti,Ips)
-        resi   <- otmp$resi
-        fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
-        cor1   <- otmp$cor
-        corL1  <- otmp$corl
-        corU1  <- otmp$corh
-        W      <- otmp$W+fitted
-        otmp   <- PMFxKc(Y1,Ti,I0,I4,I1)
-        PFx1   <- otmp$PFc
-        otmp   <- PMFxKc(W,Ti,I0,I4,I1)
-        prob1  <- otmp$prob
-    } else{
-        prob1 <- 0
-        PFx1  <- 0
-        cor1  <- 0
-        corL1 <- 0
-    }
-
-    Ips<-c(I2,N)
-    if(I2>0){
-        otmp   <- LSmultiple(Y1,Ti,Ips)
-        resi   <- otmp$resi
-        fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
-        cor2   <- otmp$cor
-        corL2  <- otmp$corl
-        corU2  <- otmp$corh
-        W      <- otmp$W+fitted
-        otmp   <- PMFxKc(Y1,Ti,I0,I4,I2)
-        PFx2   <- otmp$PFc
-        otmp   <- PMFxKc(W,Ti,I0,I4,I2)
-        prob2  <- otmp$prob
-    } else {
-        prob2 <- 0
-        PFx2  <- 0
-        cor2  <- 0
-        corL2 <- 0
-    }
-
-    Ips <- c(I3,N)
-    if(I3>0){
-        otmp   <- LSmultiple(Y1,Ti,Ips)
-        resi   <- otmp$resi
-        fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
-        cor3   <- otmp$cor
-        corL3  <- otmp$corl
-        corU3  <- otmp$corh
-        W      <- otmp$W+fitted
-        otmp   <- PMFxKc(Y1,Ti,I0,I4,I3)
-        PFx3   <- otmp$PFc
-        otmp   <- PMFxKc(W,Ti,I0,I4,I3)
-        prob3  <- otmp$prob
-    } else {
-        prob3 <- 0
-        PFx3  <- 0
-        cor3  <- 0
-        corL3 <- 0
-    }
-
-    tmp     <- sort(c(PFx1,PFx2,PFx3),decreasing=T,index.return=T)
-    PFx.mx  <- tmp$x[1]
-    prob.mx <- c(prob1,prob2,prob3)[tmp$ix[1]]
-    Imx     <- c(I1,I2,I3)[tmp$ix[1]]
-    cor.mx  <- c(corL1,corL2,corL3)[tmp$ix[1]]
+    Ns <- 1
+    indices <- c(I1, I2, I3)
+    candidates <- pmf_candidates(indices, Y1, Ti, N, IY0flg)
+    PFx <- vapply(candidates, `[[`, numeric(1), "PFx")
+    best <- sort(PFx, decreasing = TRUE, index.return = TRUE)$ix[1]
+    PFx.mx <- PFx[best]
+    prob.mx <- candidates[[best]]$prob
+    Imx <- indices[best]
+    cor.mx <- candidates[[best]]$corL
     PFx95L  <- getPFx95(cor.mx,N, phi, PFmax)
     if(PFx.mx<PFx95L){
         Ns  <- 0
@@ -326,15 +266,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
 
     }
     # end of detection
-    if(Ns>0) {
-        Nsegs<-Ips-c(0,Ips[1:Ns])
-        Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
-    }
-    else Iseg.longest<-0
-
-    if(Iadj>(Ns+1)|Iseg.longest==0) Iseg.adj<-Ns+1
-    else if(Iadj==0)Iseg.adj<-Iseg.longest
-    else Iseg.adj<-Iadj
+    Iseg.adj <- adjustment_segment(Ips, Ns, Iadj)
 
     oout            <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 

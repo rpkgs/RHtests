@@ -72,20 +72,7 @@ FindUD.wRef <- function(
     Ips.ini <- Ips
     Ids.ini <- Ids
   } else {
-    Ips <- c(rep(0, Ns), N)
-    Ids <- rep(0, Ns)
-    for (i in 1:Ns) { # using YYYYMMDD as index, searching for the largest
-      # date less or equal to given YYYYMMDD
-      # ymdtmp<-as.numeric(substr(itmp[i+1],7,16))
-      ymdtmp <- TP$date[i]
-      it <- match(ymdtmp, IY0)
-      if (!is.na(it)) {
-        Ips[i] <- it
-      } else {
-        Ips[i] <- max(c(1:N)[IY0 <= ymdtmp])
-      }
-      # Ids[i]<-as.numeric(substr(itmp[i+1],1,1))
-    }
+    Ips <- match_changepoint_dates(TP$date, IY0)
     Ids <- TP$kind
 
     if (sum(is.na(Ips)) > 0 | !identical(Ips, sort(Ips))) {
@@ -97,66 +84,9 @@ FindUD.wRef <- function(
     Ids.ini <- Ids
   }
 
-  Niter <- 0 # take cor==0, search for all possible changepoints
-  tt <- TRUE
-  while (tt) {
-    Ns.old <- Ns
-    Niter <- Niter + 1
-    tt <- FALSE
-    Ips0 <- NULL
-    for (Iseg in 1:(Ns + 1)) {
-      I0 <- if (Iseg == 1) 0 else Ips[Iseg - 1]
-      I2 <- Ips[Iseg]
-      otmp <- PTKI0I2(Y0, I0, I2, Nmin)
-      if (otmp$prob > 0) Ips0 <- sort(c(Ips0, otmp$Ic))
-    }
-    # finished find new possible changepoints, sorted in Ips0
-    tt1 <- TRUE
-    while (tt1) { # check Ips0 and insert new break points
-      if (length(Ips0) == 0) {
-        tt1 <- FALSE
-      } else {
-        PTx.mx <- (-9999)
-        PTx95.mx <- .001
-        prob.mx <- 0
-        for (i in 1:length(Ips0)) { # search Ips0 series, find max prob
-          Ips1 <- sort(c(Ips, Ips0[i]))
-          Ic <- Ips0[i]
-          id <- match(Ic, Ips1)
-          if (id == length(Ips1)) {
-            print(Ips1)
-            print(id)
-            stop("error in FindSteps")
-          }
-          I0 <- if (id == 1) 1 else Ips1[id - 1] + 1
-          I2 <- Ips1[id + 1]
-          Ns1 <- Ns + 1
-          Nseg <- I2 - I0
-          PTx95 <- getPTx95(0, (Nseg - 1), phi, PTmax)
-          Pk1 <- Pk.PMT(Nseg)
-          otmp <- PTKIc(Y0[I0:I2], Pk1, Ic - I0 + 1)
-          if (otmp$prob < plev) {
-            Ips0[i] <- 0
-          } else if (otmp$PTk / PTx95 > PTx.mx / PTx95.mx) {
-            PTx.mx <- otmp$PTk
-            PTx95.mx <- PTx95
-            Imx <- Ic
-            inc <- i
-            prob.mx <- otmp$prob
-          }
-        }
-        if (prob.mx >= plev) {
-          Ips <- sort(c(Ips, Imx)) # insert new point into Ips
-          Ns <- Ns + 1
-          Ips0 <- Ips0[-inc] # exclude co-responding point in Ips0
-          tt <- TRUE
-        } else {
-          tt1 <- FALSE
-        } # finish inserting new points into Ips
-        Ips0 <- Ips0[Ips0 != 0]
-      }
-    }
-  } # end of searching for all possible changepoints
+  found <- search_pmt_candidates(Y0, Ips, Ns, Nmin, phi, PTmax, plev)
+  Ips <- found$Ips
+  Ns <- found$Ns
 
   Ns.initial <- Ns
   oout <- Rphi(Y0, Ips, Ns, IY0flg)
@@ -323,20 +253,7 @@ FindUD.wRef <- function(
   }
 
   # all changepoints in the list are significant, final estimates of step size
-  if (Ns > 0) {
-    Nsegs <- Ips - c(0, Ips[1:Ns])
-    Iseg.longest <- sort(Nsegs, index = T, decreasing = T)$ix[1]
-  } else {
-    Iseg.longest <- 0
-  }
-
-  if (Iadj > (Ns + 1) | Iseg.longest == 0) {
-    Iseg.adj <- Ns + 1
-  } else if (Iadj == 0) {
-    Iseg.adj <- Iseg.longest
-  } else {
-    Iseg.adj <- Iadj
-  }
+  Iseg.adj <- adjustment_segment(Ips, Ns, Iadj)
 
   ofileMout <- paste(output, "_mCs.txt", sep = "")
   ofileSout <- paste(output, "_UDstat.txt", sep = "")
