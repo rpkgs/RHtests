@@ -65,7 +65,43 @@
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg--state">.state<a class="anchor" aria-label="anchor" href="#arg--state"></a></dt>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>基准序列；仅当 <code>.state</code> 为 <code>NULL</code> 时使用。</p></dd>
+
+
+<dt id="arg-data-ref">data.ref<a class="anchor" aria-label="anchor" href="#arg-data-ref"></a></dt>
+<dd><p>参考序列，可为 <code>NULL</code>。</p></dd>
+
+
+<dt id="arg-tp-">TP2<a class="anchor" aria-label="anchor" href="#arg-tp-"></a></dt>
+<dd><p>待检验的突变点表。</p></dd>
+
+
+<dt id="arg-has-ref">has_ref<a class="anchor" aria-label="anchor" href="#arg-has-ref"></a></dt>
+<dd><p>是否使用参考序列流程；默认依据 <code>data.ref</code> 是否为空。</p></dd>
+
+
+<dt id="arg-prefix">prefix<a class="anchor" aria-label="anchor" href="#arg-prefix"></a></dt>
+<dd><p>输出文件名前缀。</p></dd>
+
+
+<dt id="arg-is-plot">is_plot<a class="anchor" aria-label="anchor" href="#arg-is-plot"></a></dt>
+<dd><p>是否绘图。</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>是否输出迭代信息。</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>保留参数。</p></dd>
+
+
+<dt id="arg-debug">debug<a class="anchor" aria-label="anchor" href="#arg-debug"></a></dt>
+<dd><p>是否写出检验过程统计量。</p></dd>
+
+
+<dt id="arg--state">.state<a class="anchor" aria-label="anchor" href="#arg--state"></a></dt>
 <dd><p>上游传入的 <code>RHState</code> 对象；提供后不再读取输入数据。</p></dd>
 
 </dl></div>

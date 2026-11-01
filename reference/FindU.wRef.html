@@ -124,9 +124,23 @@
     <p>A list with:</p><ul><li><p><code>fit</code> : <code>data.table</code>，合并参考序列后的拟合与订正结果</p></li>
 <li><p><code>TP</code>  : <code>data.table</code>，突变点检验结果</p></li>
 </ul></div>
+    <div id="-">
+    <h2>数据流与参数来源</h2>
+
+
+<p>输入数据只读取一次，其余参数均由 <a href="RHState.html">RHState</a> 携带：</p><ul><li><p><code>Bseries</code>、<code>Rseries</code>、<code>MissingValueCode</code>、<code>plev</code> → <code><a href="Read.wRef.html">Read.wRef()</a></code></p></li>
+<li><p><code>N &lt;- length(Y0)</code> ← <code>state@series$Y0</code>（两序列共同时段长度）</p></li>
+<li><p><code>Y0</code>、<code>Ti</code>、<code>IY0</code>、<code>IY0flg</code>、<code>TiB</code>、<code>IYBflg</code>、<code>bdata</code>、<code>ori.bdata</code>、
+<code>owflg</code> ← <code>state@series</code></p></li>
+<li><p><code>Nt</code> ← <code>state@season</code></p></li>
+<li><p><code>phi</code>、<code>PTmax</code> ← <code>state@critical_values</code>，由
+<code>readPTtable(N, plev)</code> 按序列长度与置信水平生成</p></li>
+</ul><p>传入 <code>.state</code> 时跳过读取，而 <code>plev</code> 必须与建表时一致，由
+<code>check_rh_state()</code> 校验。</p>
+    </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code><a href="Read.wRef.html">Read.wRef()</a></code>、<code>FindUD.wRef()</code>、<code><a href="StepSize.wRef.html">StepSize.wRef()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="Read.wRef.html">Read.wRef()</a></code>、<code><a href="FindUD.wRef.html">FindUD.wRef()</a></code>、<code><a href="StepSize.wRef.html">StepSize.wRef()</a></code></p></div>
     </div>
 
   </div>

@@ -69,8 +69,62 @@
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg--state">.state<a class="anchor" aria-label="anchor" href="#arg--state"></a></dt>
-<dd><p>内部计算状态；未提供时根据输入数据创建。</p></dd>
+<dl><dt id="arg-bseries">Bseries<a class="anchor" aria-label="anchor" href="#arg-bseries"></a></dt>
+<dd><p>base series，文件路径或数据框。</p></dd>
+
+
+<dt id="arg-rseries">Rseries<a class="anchor" aria-label="anchor" href="#arg-rseries"></a></dt>
+<dd><p>reference series，文件路径或数据框。</p></dd>
+
+
+<dt id="arg-incs">InCs<a class="anchor" aria-label="anchor" href="#arg-incs"></a></dt>
+<dd><p>待检验的突变点，data.frame 或文件路径，含列 <code>date</code> 与 <code>kind</code>。</p></dd>
+
+
+<dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
+<dd><p>输出文件前缀。</p></dd>
+
+
+<dt id="arg-missingvaluecode">MissingValueCode<a class="anchor" aria-label="anchor" href="#arg-missingvaluecode"></a></dt>
+<dd><p>缺测值标记。</p></dd>
+
+
+<dt id="arg-plev">plev<a class="anchor" aria-label="anchor" href="#arg-plev"></a></dt>
+<dd><p>置信水平，取 0.75、0.80、0.90、0.95、0.99、0.9999 之一。</p></dd>
+
+
+<dt id="arg-iadj">Iadj<a class="anchor" aria-label="anchor" href="#arg-iadj"></a></dt>
+<dd><p>订正到哪一段：<code>0</code> 为最长段，<code>&gt; Ns + 1</code> 视为最后一段。</p></dd>
+
+
+<dt id="arg-mq">Mq<a class="anchor" aria-label="anchor" href="#arg-mq"></a></dt>
+<dd><p>分位数匹配的类别数；<code>0</code> 按最短段长度自动定，<code>1</code> 为均值订正。</p></dd>
+
+
+<dt id="arg-gui">GUI<a class="anchor" aria-label="anchor" href="#arg-gui"></a></dt>
+<dd><p>为 <code>TRUE</code> 时只返回 <code>0</code>，不返回结果列表。</p></dd>
+
+
+<dt id="arg-ny-a">Ny4a<a class="anchor" aria-label="anchor" href="#arg-ny-a"></a></dt>
+<dd><p>用于输出的年数参数。</p></dd>
+
+
+<dt id="arg-is-plot">is_plot<a class="anchor" aria-label="anchor" href="#arg-is-plot"></a></dt>
+<dd><p>是否画图。</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>保留参数。</p></dd>
+
+
+<dt id="arg-debug">debug<a class="anchor" aria-label="anchor" href="#arg-debug"></a></dt>
+<dd><ul><li><p><code>true</code>  : <code>_Fstat.txt</code> will be shown</p></li>
+<li><p><code>false</code> : no <code>_Fstat.txt</code></p></li>
+</ul></dd>
+
+
+<dt id="arg--state">.state<a class="anchor" aria-label="anchor" href="#arg--state"></a></dt>
+<dd><p>由 <a href="Read.wRef.html">Read.wRef</a> 生成的 <code>RHState</code>；提供后不再读取数据。</p></dd>
 
 </dl></div>
 
@@ -87,7 +141,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1974-02-01"</span>, <span class="st">"1975-11-01"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="RHtests_process.html">RHtests_process</a></span><span class="op">(</span><span class="va">base</span>, <span class="va">ref</span>, <span class="va">metadata</span>, outdir <span class="op">=</span> <span class="st">"OUTPUT/example02"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="RHtests_process.html">RHtests_process</a></span><span class="op">(</span><span class="va">base</span>, <span class="va">ref</span>, <span class="va">metadata</span>, outdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example02"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[stepwize] 1th iteration:</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [data.table]: </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A data frame: 11 × 14</span></span>
@@ -105,7 +159,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>     1 <span style="color: #949494;">"</span>Yes… 1.99<span style="color: #949494;">e</span>7   485    31    2.16  1     1      0.95  5.91   2.89   3.34</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more row</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: prob &lt;dbl&gt;, PFx95 &lt;dbl&gt;</span></span>
-<span class="r-in"><span><span class="fu">plot_RHtests</span><span class="op">(</span><span class="va">r</span>, <span class="st">"RHtests-ref.pdf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_RHtests.html">plot_RHtests</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"RHtests-ref.pdf"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># expect_equal(nrow(r$turningPoint), 11)</span></span></span>
 <span class="r-in"><span><span class="co"># expect_equal(as.character(r$turningPoint[kind == 0]$date), metadata$date)</span></span></span>
