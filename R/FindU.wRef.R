@@ -1,26 +1,64 @@
+#' Penalized maximal t (PMT) test with a reference series
+#'
+#' 以基准序列与参考序列的差值序列作检验，识别平均突变点（Wang 2008b）。
+#' 与 [FindU()] 的区别是：检验对象为 `Y0 = base - reference`，且临界值表
+#' 由 `readPTtable()` 生成。
+#'
+#' @param Bseries base series，文件路径或数据框。
+#' @param Rseries reference series，文件路径或数据框。
+#' @param output 输出文件前缀。
+#' @param MissingValueCode 缺测值标记。
+#' @param plev 置信水平，取 0.75、0.80、0.90、0.95、0.99、0.9999 之一。
+#' @param Iadj 订正到哪一段：`0` 为最长段，`> Ns + 1` 视为最后一段。
+#' @param Mq 分位数匹配的类别数；`0` 按最短段长度自动定，`1` 为均值订正。
+#' @param GUI 为 `TRUE` 时只返回 `0`，不返回结果列表。
+#' @param Ny4a 用于输出的年数参数。
+#' @param is_plot 是否画图。
+#' @param ... 保留参数。
+#' @param .state 由 [Read.wRef] 生成的 `RHState`；提供后不再读取数据。
+#'
+#' @section 数据流与参数来源：
+#' 输入数据只读取一次，其余参数均由 [RHState] 携带：
+#'
+#' - `Bseries`、`Rseries`、`MissingValueCode`、`plev` → `Read.wRef()`
+#' - `N <- length(Y0)` ← `state@series$Y0`（两序列共同时段长度）
+#' - `Y0`、`Ti`、`IY0`、`IY0flg`、`TiB`、`IYBflg`、`bdata`、`ori.bdata`、
+#'   `owflg` ← `state@series`
+#' - `Nt` ← `state@season`
+#' - `phi`、`PTmax` ← `state@critical_values`，由
+#'   `readPTtable(N, plev)` 按序列长度与置信水平生成
+#'
+#' 传入 `.state` 时跳过读取，而 `plev` 必须与建表时一致，由
+#' `check_rh_state()` 校验。
+#'
+#' @return
+#' A list with:
+#'
+#' - `fit` : `data.table`，合并参考序列后的拟合与订正结果
+#' - `TP`  : `data.table`，突变点检验结果
+#'
+#' @seealso [Read.wRef()]、[FindUD.wRef()]、[StepSize.wRef()]
 #' @export
 FindU.wRef <- function(
     Bseries = NULL, Rseries = NULL, output, MissingValueCode = "-999.99",
     plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
-    is_plot = TRUE, ...) {
+    is_plot = TRUE, ..., .state = NULL) {
   mkdir(dirname(output))
-  Read.wRef(Bseries, Rseries, MissingValueCode) # read in data for both base and ref series
+  state <- if (is.null(.state)) {
+    Read.wRef(Bseries, Rseries, MissingValueCode, plev)
+  } else .state
+  check_rh_state(state, reference = TRUE, plev = plev)
+  c(Y0 =, Ti =, IY0 =, IY0flg =, TiB =, IYBflg =,
+    bdata =, ori.bdata =, owflg =) %<-% state@series
+  Nt <- state@season$Nt
+  c(phi =, PTmax =) %<-% state@critical_values
 
-  back_Ti <- Ti
-  back_IY0flg <- IY0flg
-  on.exit({
-    assign("Ti", back_Ti, envir = .GlobalEnv)
-    assign("IY0flg", back_IY0flg, envir = .GlobalEnv)
-  })
-
-  Nmin <- 5 # set global parameter of Nmin
-  assign("Nmin", Nmin, envir = .GlobalEnv)
+  Nmin <- 5
 
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
   N <- length(Y0)
   Nadj <- Ny4a * Nt # Y0 is Base-Ref on common period
-  readPTtable(N, plev) # read in PTmax table
 
   Pk0 <- Pk.PMT(N) # calculate penalty vector for target Y0 series
   oout <- PTK(Y0, Pk0, Nmin) # find 1st break point, then get 2 more, pick max(prob)
@@ -76,7 +114,7 @@ FindU.wRef <- function(
             I2 <- Ips1[id + 1]
             Ns1 <- Ns + 1
             Nseg <- I2 - I0
-            PTx95 <- getPTx95(0, (Nseg - 1))
+            PTx95 <- getPTx95(0, (Nseg - 1), phi, PTmax)
             Pk1 <- Pk.PMT(Nseg)
             otmp <- PTKIc(Y0[I0:I2], Pk1, Ic - I0 + 1)
             if (otmp$prob < plev) {
@@ -107,15 +145,15 @@ FindU.wRef <- function(
   }
 
   Ns.initial <- Ns
-  oout <- Rphi(Y0, Ips, Ns)
+  oout <- Rphi(Y0, Ips, Ns, IY0flg)
   cor <- oout$cor
   corL <- oout$corl
   corU <- oout$corh
 
   # find first possible changepoint
-  PTx95 <- getPTx95(cor, N - 1)
-  PTx95L <- getPTx95(corL, N - 1)
-  PTx95U <- getPTx95(corU, N - 1)
+  PTx95 <- getPTx95(cor, N - 1, phi, PTmax)
+  PTx95L <- getPTx95(corL, N - 1, phi, PTmax)
+  PTx95U <- getPTx95(corU, N - 1, phi, PTmax)
 
   I0 <- 1
   Ic <- I02
@@ -175,7 +213,7 @@ FindU.wRef <- function(
             Ns1 <- Ns + 1
             Nseg <- I2 - I0
             Pk1 <- Pk.PMT(Nseg)
-            PTx95L <- getPTx95(corL, I2 - I0 - 1)
+            PTx95L <- getPTx95(corL, I2 - I0 - 1, phi, PTmax)
             otmp <- PTKIc(Y0[(I0 + 1):I2], Pk1, Ic - I0)
             if (otmp$PTk < PTx95L) {
               Ips0[i] <- 0
@@ -219,7 +257,7 @@ FindU.wRef <- function(
             Ic <- Ips[i]
             Nseg <- I3 - I1
             Pk0 <- Pk.PMT(Nseg)
-            PTx95 <- getPTx95(corL, Nseg - 1)
+            PTx95 <- getPTx95(corL, Nseg - 1, phi, PTmax)
             otmp <- PTKIc(Y0[(I1 + 1):I3], Pk0, Ic - I1)
             #     otmp<-PTKI0I2(W,I1,I3, Nmin)
             if (otmp$PTk / PTx95 < PTx.mn / PTx95L.mn) {
@@ -236,7 +274,7 @@ FindU.wRef <- function(
           }
         }
       }
-      otmp <- Rphi(Y0, Ips, Ns)
+      otmp <- Rphi(Y0, Ips, Ns, IY0flg)
       W <- otmp$W
       WL <- otmp$WL
       WU <- otmp$WU
@@ -282,9 +320,9 @@ FindU.wRef <- function(
       Ic <- Ips[i]
       I3 <- Ips[i + 1]
       Nseg <- I3 - I0
-      PTx95 <- getPTx95(cor, Nseg)
-      PTx95l <- getPTx95(corl, Nseg)
-      PTx95h <- getPTx95(corh, Nseg)
+      PTx95 <- getPTx95(cor, Nseg, phi, PTmax)
+      PTx95l <- getPTx95(corl, Nseg, phi, PTmax)
+      PTx95h <- getPTx95(corh, Nseg, phi, PTmax)
       Pk0 <- Pk.PMT(Nseg)
       otmpW <- PTKIc(W[(I0 + 1):I3], Pk0, Ic - I0)
       otmpL <- PTKIc(WL[(I0 + 1):I3], Pk0, Ic - I0)
@@ -347,7 +385,7 @@ FindU.wRef <- function(
   }
 
   # estimate delta from Y0 (Base-Ref)
-  otmp <- Rphi(Y0, Ips, Ns)
+  otmp <- Rphi(Y0, Ips, Ns, IY0flg)
   cor <- otmp$cor
   muDif <- rep(0, Ns + 1)
   Ro <- Y0
@@ -381,9 +419,7 @@ FindU.wRef <- function(
 
   ## those two variables changed, kongdd, 20200725
   Ti <- TiB
-  assign("Ti", Ti, envir = .GlobalEnv)
   IY0flg <- IYBflg
-  assign("IY0flg", IY0flg, envir = .GlobalEnv)
 
   dtmp <- rmCycle(bdata)
   adjBase <- dtmp$Base
@@ -410,7 +446,7 @@ FindU.wRef <- function(
   }
   Aadj <- dtmp$Base # de-seasonalize Badj
   Ipd <- c(N)
-  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg)
+  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg, Nt)
   # muD  <- dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD <- dtmp$mu[1]
   betaD <- dtmp$trend
@@ -424,7 +460,7 @@ FindU.wRef <- function(
   dtmp <- rmCycle(bdata) # de-seasonalized Base series
   tbase <- dtmp$Base
   Ipd <- length(tbase)
-  dtmp <- LSmultipleRed(tbase, Ti, Ipd, IY0flg)
+  dtmp <- LSmultipleRed(tbase, Ti, Ipd, IY0flg, Nt)
   beta0 <- dtmp$trend
   meanhat0 <- dtmp$meanhat
   Ehat0 <- mean(meanhat0)
@@ -464,7 +500,7 @@ FindU.wRef <- function(
   while (tt) {
     Niter <- Niter + 1
     EB00 <- EB
-    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg)
+    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg, Nt)
     meanhat <- otmp$meanhat
     df <- (N - 2 - Nt - Ns)
     p.cor <- pt(abs(otmp$cor) * sqrt(df / (1 - otmp$cor^2)), df)
@@ -571,7 +607,7 @@ FindU.wRef <- function(
     plot_FindU.ref(
       output, Base, EB, EB1, B,
       oY0, omuDif, otmp, meanhatD,
-      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
+      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, IY0, bdata, ori.bdata, owflg
     )
   }
 

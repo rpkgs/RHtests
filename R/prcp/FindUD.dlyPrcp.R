@@ -26,7 +26,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
 
   Nall<-dim(ori.itable)[1]
   N<-length(Y0); Pfreq<-N/Nall; Nadj<-Ny4a*366*Pfreq
-  readPFtable(N, plev)
+  critical_values <- readPFtable(N, plev)
+  phi <- critical_values$phi
+  PFmax <- critical_values$PFmax
 
   # itmp<-readLines(InCs)
   TP = if (is.character(InCs)) fread(InCs) else InCs
@@ -115,13 +117,13 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
           Ip0<-N
           Pk0<-Pk.PMFT(N)
 
-          oout<-PMFT(Y1,Ti,Pk0)
+          oout<-PMFT(Y1,Ti,Pk0, Nmin)
           I0<-0
           I2<-oout$KPx
           I4<-N
-          I1<-PMFxKxI0I2(Y1,Ti,I0,I2)$Ic
-          I3<-PMFxKxI0I2(Y1,Ti,I2,I4)$Ic
-          I2<-PMFxKxI0I2(Y1,Ti,I1,I3)$Ic
+          I1<-PMFxKxI0I2(Y1,Ti,I0,I2, Nmin)$Ic
+          I3<-PMFxKxI0I2(Y1,Ti,I2,I4, Nmin)$Ic
+          I2<-PMFxKxI0I2(Y1,Ti,I1,I3, Nmin)$Ic
 
           Ns<-1
           Ips<-c(I1,N)
@@ -129,7 +131,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
             otmp<-LSmultiple(Y1,Ti,Ips)
             resi<-otmp$resi
             fitted<-otmp$fitted
-            otmp<-Rphi(resi,Ips,Ns)
+            otmp<-Rphi(resi,Ips,Ns, IY0flg)
             cor1<-otmp$cor
             corL1<-otmp$corl
             corU1<-otmp$corh
@@ -152,7 +154,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
             otmp<-LSmultiple(Y1,Ti,Ips)
             resi<-otmp$resi
             fitted<-otmp$fitted
-            otmp<-Rphi(resi,Ips,Ns)
+            otmp<-Rphi(resi,Ips,Ns, IY0flg)
             cor2<-otmp$cor
             corL2<-otmp$corl
             corU2<-otmp$corh
@@ -175,7 +177,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
             otmp<-LSmultiple(Y1,Ti,Ips)
             resi<-otmp$resi
             fitted<-otmp$fitted
-            otmp<-Rphi(resi,Ips,Ns)
+            otmp<-Rphi(resi,Ips,Ns, IY0flg)
             cor3<-otmp$cor
             corL3<-otmp$corl
             corU3<-otmp$corh
@@ -198,7 +200,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
           prob.mx<-c(prob1,prob2,prob3)[tmp$ix[1]]
           Imx<-c(I1,I2,I3)[tmp$ix[1]]
           cor.mx<-c(corL1,corL2,corL3)[tmp$ix[1]]
-          PFx95L<-getPFx95(cor.mx,N)
+          PFx95L<-getPFx95(cor.mx,N, phi, PFmax)
           if(prob.mx<plev){
             Ns<-0
             tt<-FALSE
@@ -224,7 +226,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
           for(i in 1:(Ns+1)){ # search for new break points
             I0<- if(i==1) 0 else Ips[i-1]
             I2<-Ips[i]
-            otmp<-PMFxKxI0I2(Y1,Ti,I0,I2)
+            otmp<-PMFxKxI0I2(Y1,Ti,I0,I2, Nmin)
             if(otmp$prob>0) Ips0<-sort(c(Ips0,otmp$Ic))
           }
           # finished search for possible new changepoints, start estimate the p-value
@@ -240,7 +242,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
               for(i in 1:length(Ips0)){
                 Ips1<-sort(c(Ips,Ips0[i]))
                 ith<-match(Ips0[i],Ips1)
-                otmp<-PMFxIseg(Y1,Ti,Ips1,ith)
+                otmp<-PMFxIseg(Y1,Ti,Ips1,ith, IY0flg, Nt, phi, PFmax)
                 probL<-min(c(otmp$probL,otmp$probU,otmp$prob))
                 probU<-max(c(otmp$probL,otmp$probU,otmp$prob))
                 #	      if(otmp$PFx<otmp$PFx95L) Ips0[i]<-0
@@ -278,7 +280,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
           probL.mn<-99999
           for(i in 1:Ns){
             if(Ids[i]==0){ # check those un-documented
-              otmp<-PMFxIseg(Y1,Ti,Ips,i)
+              otmp<-PMFxIseg(Y1,Ti,Ips,i, IY0flg, Nt, phi, PFmax)
               probL<-min(otmp$probL,otmp$probU)
               if(probL<probL.mn){
                 Iseg.mn<-i
@@ -297,7 +299,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
       # all changepoints are significant, calculate stats and output
       if(length(Ips)==1) if(is.na(Ips)) Ips<-N
 
-      otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
+      otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg, Nt)
       SSEf<-sum(otmp$resi**2)
       LH<--log(SSEf/(N-2-Ns))*N/2+(lambda-1)*sumLogPi
       LHs[ind]<-LH
@@ -353,14 +355,14 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   else Iseg.adj<-Iadj
 
   Ipd<-c(N)
-  dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg)
+  dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg, Nt)
   beta0<-dtmp$trend
   cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
             "(p=", round(dtmp$p.tr,4), "); cor=", round(dtmp$cor,4),
             "(",round(dtmp$corl,4),",",round(dtmp$corh,4),")\n\n"),
       file=ofileSout,append=TRUE)
 
-  otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
+  otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg, Nt)
   cor<-otmp$cor
   corL<-otmp$corl
   corU<-otmp$corh
@@ -664,9 +666,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
       Ic<-Ips[i]
       I3<-Ips[i+1]
       Nseg<-I3-I1+1
-      PFx95<-getPFx95(cor,Nseg)
-      PFx95l<-getPFx95(corL,Nseg)
-      PFx95h<-getPFx95(corU,Nseg)
+      PFx95<-getPFx95(cor,Nseg, phi, PFmax)
+      PFx95l<-getPFx95(corL,Nseg, phi, PFmax)
+      PFx95h<-getPFx95(corU,Nseg, phi, PFmax)
       SSEf.Iseg<-sum(resi[I1:I3]^2)
       Ips1<-Ips[-i]
       otmp1<-LSmultiple(Y1,Ti,Ips1)

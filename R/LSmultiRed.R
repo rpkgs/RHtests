@@ -1,4 +1,4 @@
-LSmultipleRed <- function(Y0, Ti, Ips, IY0flg) {
+LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   Ns <- length(Ips) - 1
   N <- length(Y0)
   otmp <- LSmultiple(Y0, Ti, Ips)
@@ -57,22 +57,18 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg) {
 #' @return
 #' - `resi`: residual
 #' - `meanhat`: linear trend
-LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj,
-                            IY0flg,
-                            EB = get("EB", envir = .GlobalEnv),
-                            Imd = get("Imd", envir = .GlobalEnv)) {
+LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt) {
   N <- length(Y0)
   Ns <- length(Ips) - 1
   Niter <- 0
   tt <- TRUE
   EB1 <- EB
-  # global variables: Imd, Icy
   while (tt) {
     tt <- FALSE
     Niter <- Niter + 1
     EB0 <- EB1
 
-    otmp <- LSmultipleRed(Y0, Ti, Ips, IY0flg)
+    otmp <- LSmultipleRed(Y0, Ti, Ips, IY0flg, Nt)
     trend <- otmp$trend
     betaL <- otmp$betaL
     betaU <- otmp$betaU

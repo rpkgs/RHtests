@@ -15,11 +15,12 @@ FindU(
   Ny4a = 0,
   is_plot = FALSE,
   ...,
-  debug = TRUE
+  debug = TRUE,
+  .state = NULL
 )
 }
 \arguments{
-\item{InSeries}{file path of the input data}
+\item{InSeries}{file path or data frame of the input series}
 
 \item{output}{prefix of the outputs}
 
@@ -44,29 +45,15 @@ Mq=1 corresponds to mean adjustments (one adjustment for all data in
 the same segment).}
 
 \item{Ny4a}{--}
+
+\item{.state}{An \code{RHState} object returned by \link{Read}, used instead of \code{InSeries}.}
 }
 \value{
-Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
+A list with:
 \itemize{
-\item Example1_1Cs.txt
-
-Ns >= 0 is the number of changepoints identified; changepoint positions are
-Ip(1), Ip(2),...,Ip(Ns)
-\item OutFile_U.dat
-}
-\itemize{
-\item \code{id}   :
-\item \code{date} :
-\item \code{base} : the original input series
-\item \code{base_trend+meanshift}: \code{trend} + \verb{abrupt shift} (for base)
-\item \code{base_mean_adj}: \code{base} - \verb{abrupt shift}
-\item \code{base_anomaly}: \code{base} - \verb{seasonal cycle}
-\item \code{fit_of_base_anomaly}: \code{trend} + \verb{abrupt shift} (for anomaly)
-\item \code{annualC+meanShifts}: \verb{seasonal cycle} + \verb{abrupt shift} (for base)
-\item \code{QM_adjusted}:
-\item \code{fit_of_deseason_base}: linear trend of \code{anomal}. A multi-phase regression
-model fit to the de-seasonalized base series without accounting for any
-shifts (i.e. ignore all shifts identified)
+\item \code{fit} : \code{data.table}，逐年/逐月的拟合与订正结果，列含义见下
+\item \code{TP}  : \code{data.table}，突变点检验结果，列 \code{kind}、\code{Idc}、\code{date}、\code{Ic}、
+\code{Nseg}、\code{stepsize}、\code{probL}、\code{probU}、\code{plev}、\code{PFx}、\code{PFx95l}、\code{PFx95h}
 }
 }
 \description{
@@ -85,4 +72,7 @@ print(r)
 
 plot_output(r$fit)
 
+}
+\seealso{
+\code{\link[=Read]{Read()}}、\code{\link[=FindUD]{FindUD()}}、\code{\link[=readPFtable]{readPFtable()}}
 }

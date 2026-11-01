@@ -1,7 +1,6 @@
 
-plot_stepsize <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-    Ips, Iseg.adj,
-    otmp, ...)
+plot_stepsize <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Mq, Ns, adj,
+    Ips, Iseg.adj, otmp, ori.itable, ooflg, ...)
 {
     pdf(file=ofilePdf,onefile=T,paper='letter')
     op <- par(no.readonly = TRUE) # the whole list of settable par's.

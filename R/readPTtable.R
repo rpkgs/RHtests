@@ -1,12 +1,10 @@
-readPTtable<-function(Nx, plev)
-{
+readPTtable <- function(Nx, plev) {
   if (!plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
     stop(paste0("invalid : input plev = ", plev, " !\n"))
   }
   pkth <- match(plev, c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999))
 
-  # read in PTmax table, assign PTmax table as global variable;
-  # phi -- vector for cor catalog -- as global variable
+  # 计算临界值表及其对应的自相关系数。
   # itmp <- read.table("PTtable.csv", header = FALSE) %>% as.matrix()
   itmp   <- PTtable
   # itmp <- matrix(, ncol=8,byrow=T)
@@ -41,7 +39,5 @@ readPTtable<-function(Nx, plev)
                             length=(Nx-Nmax+1),by=delta)
     }
   # PTmax<-PTmax[-1,]
-  assign("phi", phi, envir=.GlobalEnv)
-  assign("PTmax", PTmax, envir=.GlobalEnv)
   listk(phi, PTmax)
 }

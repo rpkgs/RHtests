@@ -3,18 +3,17 @@ FindUD.wRef <- function(
     Bseries = NULL, Rseries = NULL, InCs, output,
     MissingValueCode = "-999.99",
     plev = 0.95, Iadj = 10000, Mq = 10, GUI = F, Ny4a = 0,
-    is_plot = TRUE) {
-  Read.wRef(Bseries, Rseries, MissingValueCode)
-
-  back_Ti <- Ti
-  back_IY0flg <- IY0flg
-  on.exit({
-    assign("Ti", back_Ti, envir = .GlobalEnv)
-    assign("IY0flg", back_IY0flg, envir = .GlobalEnv)
-  })
+    is_plot = TRUE, .state = NULL) {
+  state <- if (is.null(.state)) {
+    Read.wRef(Bseries, Rseries, MissingValueCode, plev)
+  } else .state
+  check_rh_state(state, reference = TRUE, plev = plev)
+  c(Y0 =, Ti =, IY0 =, IY0flg =, TiB =, IYBflg =,
+    bdata =, ori.bdata =, owflg =) %<-% state@series
+  Nt <- state@season$Nt
+  c(phi =, PTmax =) %<-% state@critical_values
 
   Nmin <- 5
-  assign("Nmin", Nmin, envir = .GlobalEnv)
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
   N <- length(Y0)
@@ -69,12 +68,8 @@ FindUD.wRef <- function(
     Ids <- TP$kind
 
     if (sum(is.na(Ips)) > 0 | !identical(Ips, sort(Ips))) {
-      ErrorMSG <<- paste(
-        "FindUD.wRef: Ips read in from ", InCs, "error!\n",
-        get("ErrorMSG", env = .GlobalEnv), "\n"
-      )
-      if (!GUI) cat(ErrorMSG)
-      return(-1)
+      message <- paste("FindUD.wRef: invalid changepoint indices:", paste(Ips, collapse = " "), "\n")
+      stop(message, call. = FALSE)
     }
     Ns.ini <- Ns
     Ips.ini <- Ips
@@ -116,7 +111,7 @@ FindUD.wRef <- function(
           I2 <- Ips1[id + 1]
           Ns1 <- Ns + 1
           Nseg <- I2 - I0
-          PTx95 <- getPTx95(0, (Nseg - 1))
+          PTx95 <- getPTx95(0, (Nseg - 1), phi, PTmax)
           Pk1 <- Pk.PMT(Nseg)
           otmp <- PTKIc(Y0[I0:I2], Pk1, Ic - I0 + 1)
           if (otmp$prob < plev) {
@@ -143,7 +138,7 @@ FindUD.wRef <- function(
   } # end of searching for all possible changepoints
 
   Ns.initial <- Ns
-  oout <- Rphi(Y0, Ips, Ns)
+  oout <- Rphi(Y0, Ips, Ns, IY0flg)
   cor <- oout$cor
   corL <- oout$corl
   corU <- oout$corh
@@ -170,11 +165,7 @@ FindUD.wRef <- function(
         cat("PMT finds the series to be homogeneous!\n")
         return()
       } else {
-        ErrorMSG <<- paste("PMT finds the series", Bseries, "to be homogeneous!\n",
-          get("ErrorMSG", env = .GlobalEnv), "\n",
-          sep = ""
-        )
-        return(-1)
+        stop("PMT finds the series ", Bseries, " to be homogeneous!", call. = FALSE)
       }
     } else {
       Ns <- 1
@@ -219,7 +210,7 @@ FindUD.wRef <- function(
           Ns1 <- Ns + 1
           Nseg <- I2 - I0
           Pk1 <- Pk.PMT(Nseg)
-          PTx95L <- getPTx95(corL, I2 - I0)
+          PTx95L <- getPTx95(corL, I2 - I0, phi, PTmax)
           PTx <- PTKIc(Y0[(I0 + 1):I2], Pk1, Ic - I0)$PTk
           prob1 <- PTKIc(W[(I0 + 1):I2], Pk1, Ic - I0)$prob
           prob2 <- PTKIc(WL[(I0 + 1):I2], Pk1, Ic - I0)$prob
@@ -294,7 +285,7 @@ FindUD.wRef <- function(
         if (Ns > 0) tt <- TRUE
       }
     } # end of do-while
-    otmp <- Rphi(Y0, Ips, Ns)
+    otmp <- Rphi(Y0, Ips, Ns, IY0flg)
     W <- otmp$W
     WL <- otmp$WL
     WU <- otmp$WU
@@ -343,11 +334,7 @@ FindUD.wRef <- function(
       cat("PMT finds the series to be homogeneous!\n")
       return()
     } else {
-      ErrorMSG <<- paste("PMT finds the series", Bseries, "to be homogeneous!\n",
-        get("ErrorMSG", env = .GlobalEnv), "\n",
-        sep = ""
-      )
-      return(-1)
+      stop("PMT finds the series ", Bseries, " to be homogeneous!", call. = FALSE)
     }
   } else {
     cat(paste(
@@ -365,9 +352,9 @@ FindUD.wRef <- function(
     I0 <- if (i == 1) 0 else Ips[i - 1]
     I3 <- Ips[i + 1]
     Nseg <- I3 - I0
-    PTx95 <- getPTx95(cor, Nseg)
-    PTx95L <- getPTx95(corl, Nseg)
-    PTx95U <- getPTx95(corh, Nseg)
+    PTx95 <- getPTx95(cor, Nseg, phi, PTmax)
+    PTx95L <- getPTx95(corl, Nseg, phi, PTmax)
+    PTx95U <- getPTx95(corh, Nseg, phi, PTmax)
 
     Pk0 <- Pk.PMT(Nseg)
     otmp <- PTKIc(W[(I0 + 1):I3], Pk0, Ic - I0)
@@ -424,7 +411,7 @@ FindUD.wRef <- function(
   }
 
   # estimate delta and final output
-  otmp <- Rphi(Y0, Ips, Ns)
+  otmp <- Rphi(Y0, Ips, Ns, IY0flg)
   cor <- otmp$cor
   muDif <- rep(0, Ns + 1)
   Ro <- Y0
@@ -453,9 +440,7 @@ FindUD.wRef <- function(
   Ips[Ns + 1] <- length(IY1)
 
   Ti <- TiB
-  assign("Ti", Ti, envir = .GlobalEnv)
   IY0flg <- IYBflg
-  assign("IY0flg", IY0flg, envir = .GlobalEnv)
   N <- length(TiB)
 
   dtmp <- rmCycle(bdata)
@@ -482,7 +467,7 @@ FindUD.wRef <- function(
   }
   Aadj <- dtmp$Base # de-seasonalize Badj
   Ipd <- c(N)
-  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg)
+  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg, Nt)
   # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD <- dtmp$mu[1]
   betaD <- dtmp$trend
@@ -496,7 +481,7 @@ FindUD.wRef <- function(
   dtmp <- rmCycle(bdata) # de-seasonalized Base series
   tbase <- dtmp$Base
   Ipd <- length(tbase)
-  dtmp <- LSmultipleRed(tbase, Ti, Ipd, IY0flg)
+  dtmp <- LSmultipleRed(tbase, Ti, Ipd, IY0flg, Nt)
   beta0 <- dtmp$trend
   cor <- dtmp$cor
   corL <- dtmp$corl
@@ -537,7 +522,7 @@ FindUD.wRef <- function(
   while (tt) {
     Niter <- Niter + 1
     EB00 <- EB
-    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg)
+    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg, Nt)
     p.cor <- pt(abs(otmp$cor) * sqrt((N - 2) / (1 - otmp$cor^2)), N - 2)
     meanhat <- otmp$meanhat
     corout <- c(otmp$cor, otmp$corl, otmp$corh, p.cor)
@@ -643,7 +628,7 @@ FindUD.wRef <- function(
     plot_FindUD.ref(
       output, Base, EB, EB1, B,
       oY0, omuDif, otmp, meanhatD,
-      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj
+      QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, IY0, ori.bdata, owflg
     )
   }
 

@@ -1,9 +1,7 @@
 
-# global variales:
-# - `ori.itable`
-#
-plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-    Ips, Iseg.adj)
+# 使用原始观测日期和有效值位置绘图。
+plot_FindU <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Mq, Ns, adj,
+    Ips, Iseg.adj, ori.itable, ooflg)
 {
     pdf(file=ofilePdf, onefile=TRUE, paper='letter')
     op <- par(no.readonly = TRUE) # the whole list of settable par's.

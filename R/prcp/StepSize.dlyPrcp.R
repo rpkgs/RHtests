@@ -16,7 +16,9 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
   itmp <- ReadDLY(InSeries,MissingValueCode,pthr)
   N    <- length(Y0)
   Nall <- dim(ori.itable)[1]; Pfreq<-N/Nall; Nadj<-Ny4a*366*Pfreq
-  readPFtable(N, plev)
+  critical_values <- readPFtable(N, plev)
+  phi <- critical_values$phi
+  PFmax <- critical_values$PFmax
   # if(itmp==(-1)){
   #   ErrorMSG<<-paste("StepSize.dlyprcp: Error in read data from",InSeries,"\n",
   #                    get("ErrorMSG",env=.GlobalEnv),"\n")
@@ -103,7 +105,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       }
       else{
         Y1<-BCtrans(P,lambda)
-        otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
+        otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg, Nt)
         SSEf<-sum(otmp$resi**2)
         LH<--log(SSEf*(N-3)/(N-2-Ns))*N/2+(lambda-1)*sumLogPi
         LHs[ind]<-LH
@@ -123,14 +125,14 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
   Y1<-BCtrans(Y0,lambda)
 
   Ipd<-c(N)
-  dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg)
+  dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg, Nt)
   beta0<-dtmp$trend
   cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
             "(p=", round(dtmp$p.tr,4), "); cor=", round(dtmp$cor,4),
             "(",round(dtmp$corl,4),",",round(dtmp$corh,4),")\n\n"),
       file=ofileSout,append=TRUE)
 
-  otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg)
+  otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg, Nt)
   cor<-otmp$cor
   corL<-otmp$corl
   corU<-otmp$corh
@@ -433,9 +435,9 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       I3<-Ips[i+1]
       Id<-Ids[i]
       Nseg<-I3-I1+1
-      PFx95<-getPFx95(cor,Nseg)
-      PFx95l<-getPFx95(corL,Nseg)
-      PFx95h<-getPFx95(corU,Nseg)
+      PFx95<-getPFx95(cor,Nseg, phi, PFmax)
+      PFx95l<-getPFx95(corL,Nseg, phi, PFmax)
+      PFx95h<-getPFx95(corU,Nseg, phi, PFmax)
       SSEf.Iseg<-sum(resi[I1:I3]^2)
       Ips1<-Ips[-i]
       otmp1<-LSmultiple(Y1,Ti,Ips1)

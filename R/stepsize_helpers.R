@@ -1,10 +1,5 @@
-# Convert year, month and day columns to YYYYMMDD.
-.make_date <- function(data) {
-  data$year * 10000 + data$month * 100 + data$day
-}
-
-# Map changepoint dates to the last observation on or before each date.
-stepsize_points <- function(InCs, dates) {
+# 将突变日期映射到当天或之前最近的观测位置。
+locate_changepoints <- function(InCs, dates) {
   TP <- if (is.character(InCs)) fread(InCs) else InCs
   if (is.Date(TP$date)) TP$date <- date2num(TP$date)
   Ns <- nrow(TP)
@@ -19,16 +14,16 @@ stepsize_points <- function(InCs, dates) {
   list(Ips = Ips, Ids = TP$kind, Ns = Ns)
 }
 
-# Get inclusive boundaries for each segment.
-stepsize_bounds <- function(Ips) {
-  list(start = c(1, Ips[-length(Ips)] + 1), end = Ips)
+# 将各段订正量加到对应的观测值。
+add_segment_adjustment <- function(x, segments, adjustment) {
+  x + rep(adjustment, times = segments$end - segments$start + 1L)
 }
 
-# Choose the reference segment for adjustment.
-stepsize_segment <- function(Ips, Iadj) {
-  Ns <- length(Ips) - 1
+# 选择订正所用的基准段。
+select_base_segment <- function(breaks, Iadj) {
+  Ns <- length(breaks) - 1
   longest <- if (Ns > 0) {
-    sort(Ips - c(0, Ips[seq_len(Ns)]), index.return = TRUE, decreasing = TRUE)$ix[1]
+    sort(breaks - c(0, breaks[seq_len(Ns)]), index.return = TRUE, decreasing = TRUE)$ix[1]
   } else 0
 
   if (Iadj > Ns + 1 || longest == 0) Ns + 1
@@ -36,8 +31,8 @@ stepsize_segment <- function(Ips, Iadj) {
   else Iadj
 }
 
-# Classify type-0 and type-1 changepoints using their confidence bounds.
-stepsize_classify <- function(Id, probL, probU, plev, statistic, lower, upper) {
+# 根据置信界限判定 0 类和 1 类突变点。
+classify_changepoint <- function(Id, probL, probU, plev, statistic, lower, upper) {
   if (Id == 0) {
     if (statistic >= upper) return("Yes ")
     if (probU < plev) return("No  ")
@@ -52,15 +47,8 @@ stepsize_classify <- function(Id, probL, probU, plev, statistic, lower, upper) {
   stop("Unknown changepoint type: ", Id)
 }
 
-# Place fitted values back into the original observation positions.
-stepsize_expand <- function(x, rows, n) {
-  result <- rep(NA_real_, n)
-  result[rows] <- round(x, 4)
-  result
-}
-
-# Restore leap-day values omitted from the fitting series.
-stepsize_leap <- function(odata, original, break_dates, Rb, Ti, trend, QMout,
+# 恢复拟合时剔除的闰日数据。
+restore_leap_days <- function(odata, original, break_dates, Rb, Ti, trend, QMout,
                           Mq, Iseg.adj, Nadj, Nt, fitted_cols, adjusted_cols) {
   md <- original$month * 100 + original$day
   observed <- !is.na(original$data)
@@ -70,7 +58,7 @@ stepsize_leap <- function(odata, original, break_dates, Rb, Ti, trend, QMout,
   Ns <- length(break_dates) - 1
   if (Ns > 0) {
     tdata <- original[observed, ]
-    dates <- .make_date(tdata)
+    dates <- ymd2num(tdata)
     Ips <- c(match(break_dates[seq_len(Ns)], dates), length(dates))
     leap_fit <- which(tdata$month * 100 + tdata$day == 229)
     Rb1 <- tdata$data
@@ -97,28 +85,4 @@ stepsize_leap <- function(odata, original, break_dates, Rb, Ti, trend, QMout,
     }
   }
   odata
-}
-
-# Write quantile-mapping diagnostics for the selected reference segment.
-stepsize_qm_log <- function(QMout, segments, Iseg.adj, Ny4a, adjustment, file) {
-  fprintf("Nseg_shortest = %d ; Mq =  %d ; Ny4a =  %g \n",
-    QMout$Nseg.mn, QMout$Mq, Ny4a, file = file, append = TRUE
-  )
-  fprintf("\n Adjust to segment %d : from %d to %d \n",
-    Iseg.adj, segments$start[Iseg.adj], segments$end[Iseg.adj], file = file, append = TRUE
-  )
-  if (QMout$Mq <= 1) return(invisible(NULL))
-
-  Ns <- length(segments$end) - 1
-  oline <- paste("#Fcat: frequency category boundaries\n",
-    "#DP: Difference in the category means\n#", sep = ""
-  )
-  for (i in seq_len(Ns)) oline <- paste(oline, paste0("Fcat.Seg", i), paste0("DP.Seg", i))
-  cat(paste(oline, "\n"), file = file, append = TRUE)
-  write.table(round(QMout$osmean, 4), file = file, append = TRUE, row.names = FALSE, col.names = FALSE)
-  for (i in seq_along(segments$end)) {
-    if (i != Iseg.adj) {
-      fprintf("Seg. %d: mean of QM-adjustments =%.4f\n", i, adjustment(i), file = file, append = TRUE)
-    }
-  }
 }

@@ -8,7 +8,7 @@
 #' series will be used in any of these functions; the base series is tested in
 #' this case.
 #'
-#' @param InSeries file path of the input data
+#' @param InSeries file path or data frame of the input series
 #' @param output prefix of the outputs
 #' @param MissingValueCode string, missing value code
 #' @param GUI boolean
@@ -26,9 +26,32 @@
 #' Mq=1 corresponds to mean adjustments (one adjustment for all data in
 #' the same segment).
 #' @param Ny4a --
+#' @param .state An `RHState` object returned by [Read], used instead of `InSeries`.
+#'
+#' @section 数据流与参数来源：
+#' 输入数据只读取一次，其余参数均由 [RHState] 携带：
+#'
+#' - `InSeries`、`MissingValueCode`、`plev` → `Read()`
+#' - `N <- length(Y0)` ← `state@series$Y0`
+#' - `Y0`、`Ti`、`IY0`、`IY0flg`、`Imd`、`itable`、`ori.itable`、`ooflg`
+#'   ← `state@series`
+#' - `Icy`、`Nt` ← `state@season`
+#' - `phi`、`PFmax` ← `state@critical_values`，其中 `PFmax` 由
+#'   `readPFtable(N, plev)` 按序列长度与置信水平生成
+#'
+#' 传入 `.state` 时跳过读取，而 `plev` 必须与建表时一致，由
+#' `check_rh_state()` 校验。
 #'
 #' @return
-
+#' A list with:
+#'
+#' - `fit` : `data.table`，逐年/逐月的拟合与订正结果，列含义见下
+#' - `TP`  : `data.table`，突变点检验结果，列 `kind`、`Idc`、`date`、`Ic`、
+#'   `Nseg`、`stepsize`、`probL`、`probU`、`plev`、`PFx`、`PFx95l`、`PFx95h`
+#'
+#' @seealso [Read()]、[FindUD()]、[readPFtable()]
+#'
+#' @section 输出文件：
 #' Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf
 #'
 #' * Example1_1Cs.txt
@@ -37,7 +60,7 @@
 #'   Ip(1), Ip(2),...,Ip(Ns)
 #'
 #' * OutFile_U.dat
-#' 
+#'
 #' - `id`   :
 #' 
 #' - `date` : 
@@ -71,23 +94,22 @@
 #' @export
 FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCode="-999.99",
 	GUI=FALSE, plev=0.95,
-	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE, ..., debug = TRUE)
+	Iadj=10000, Mq=10, Ny4a=0, is_plot = FALSE, ..., debug = TRUE, .state = NULL)
 {
   mkdir(dirname(output))
-  if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
+  state <- if (is.null(.state)) {
+    Read(InSeries, MissingValueCode, plev)
+  } else .state
+  check_rh_state(state, reference = FALSE, plev = plev)
+  c(Y0 =, Ti =, IY0 =, IY0flg =, Imd =,
+    itable =, ori.itable =, ooflg =) %<-% state@series
+  c(Icy =, Nt =) %<-% state@season
+  c(phi =, PFmax =) %<-% state@critical_values
 
-  ErrorMSG <- NA
-  assign("ErrorMSG", ErrorMSG, envir = .GlobalEnv)
   Nmin <- 10
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
-  assign("Nmin", Nmin, envir = .GlobalEnv)
-    # if(is.null(data)){
-    #     ErrorMSG<<-paste("FindU: Error in read data from",InSeries,"\n",
-    #                      get("ErrorMSG",env=.GlobalEnv),"\n")
-    #     if(!GUI) cat(ErrorMSG)
-    #     return(-1)
-    # }
+    # 输入数据错误由 Read 直接报告。
     ofilePdf <- paste(output, "_U.pdf", sep = "")
 
     ofileAout <- paste(output,"_U.dat",sep="")
@@ -100,7 +122,6 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     file.create(ofileIout)
 
     N <- length(Y0); Nadj <- Ny4a*Nt
-    readPFtable(N, plev)
     
     if (debug) {
       cat(paste("The nominal level of confidence (1-alpha)=", plev, "\n"), file = ofileSout)
@@ -111,17 +132,13 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     oout <- rmCycle(itable)
     Y1   <- oout$Base
     EB   <- oout$EB
-    assign("EB",EB,envir=.GlobalEnv)
 
     if(length(EB) != length(Icy)) {
-        ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
-                         "\n", get("ErrorMSG",env=.GlobalEnv),"\n")
-        if(!GUI) print(ErrorMSG)
-        return(-1)
+        stop("Annual cycle length differs from original dataset", call. = FALSE)
     }
 
     Ip0      <- N
-    otmp     <- LSmultiRedCycle(Y1,Ti,Ip0,1, IY0flg)
+    otmp     <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, EB, Imd, Icy, Nt)
     beta0    <- otmp$trend
     meanhat0 <- otmp$meanhat
     Ehat0    <- mean(meanhat0)
@@ -136,15 +153,15 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
       ), append = T)
     }
     
-    oout<-PMFT(Y1,Ti,Pk0)
+    oout<-PMFT(Y1,Ti,Pk0, Nmin)
     I0<-0
     I2<-oout$KPx
     I4<-N
-    oout1<-PMFxKxI0I2(Y1,Ti,I0,I2)
+    oout1<-PMFxKxI0I2(Y1,Ti,I0,I2, Nmin)
     I1<-oout1$Ic
-    oout2<-PMFxKxI0I2(Y1,Ti,I2,I4)
+    oout2<-PMFxKxI0I2(Y1,Ti,I2,I4, Nmin)
     I3<-oout2$Ic
-    oout3<-PMFxKxI0I2(Y1,Ti,I1,I3)
+    oout3<-PMFxKxI0I2(Y1,Ti,I1,I3, Nmin)
     I2<-oout3$Ic
 
     Ns<-1
@@ -153,7 +170,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         otmp   <- LSmultiple(Y1,Ti,Ips)
         resi   <- otmp$resi
         fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns)
+        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
         cor1   <- otmp$cor
         corL1  <- otmp$corl
         corU1  <- otmp$corh
@@ -174,7 +191,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         otmp   <- LSmultiple(Y1,Ti,Ips)
         resi   <- otmp$resi
         fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns)
+        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
         cor2   <- otmp$cor
         corL2  <- otmp$corl
         corU2  <- otmp$corh
@@ -195,7 +212,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
         otmp   <- LSmultiple(Y1,Ti,Ips)
         resi   <- otmp$resi
         fitted <- otmp$fitted
-        otmp   <- Rphi(resi,Ips,Ns)
+        otmp   <- Rphi(resi,Ips,Ns, IY0flg)
         cor3   <- otmp$cor
         corL3  <- otmp$corl
         corU3  <- otmp$corh
@@ -216,7 +233,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     prob.mx <- c(prob1,prob2,prob3)[tmp$ix[1]]
     Imx     <- c(I1,I2,I3)[tmp$ix[1]]
     cor.mx  <- c(corL1,corL2,corL3)[tmp$ix[1]]
-    PFx95L  <- getPFx95(cor.mx,N)
+    PFx95L  <- getPFx95(cor.mx,N, phi, PFmax)
     if(PFx.mx<PFx95L){
         Ns  <- 0
         Ips <- N
@@ -239,7 +256,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             for(i in 1:(Ns+1)){ # search for new break points
                 I0   <- if(i==1) 0 else Ips[i-1]
                 I2   <- Ips[i]
-                otmp <- PMFxKxI0I2(Y1,Ti,I0,I2)
+                otmp <- PMFxKxI0I2(Y1,Ti,I0,I2, Nmin)
                 if(otmp$prob>0) Ips0 <- sort(c(Ips0,otmp$Ic))
             }
             #   if(Debug) {
@@ -259,7 +276,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
                     for(i in 1:length(Ips0)){
                         Ips1 <- sort(c(Ips,Ips0[i]))
                         ith  <- match(Ips0[i],Ips1)
-                        otmp <- PMFxIseg(Y1,Ti,Ips1,ith)
+                        otmp <- PMFxIseg(Y1,Ti,Ips1,ith, IY0flg, Nt, phi, PFmax)
                         if(otmp$PFx<otmp$PFx95L) Ips0[i]<-0
                         else
                             if(otmp$PFx>PFx.mx){
@@ -290,7 +307,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             PFx.mn    <- 99999
             PFx95L.mn <- 99999
             for(i in 1:Ns){
-                otmp<-PMFxIseg(Y1,Ti,Ips,i)
+                otmp<-PMFxIseg(Y1,Ti,Ips,i, IY0flg, Nt, phi, PFmax)
                 if(otmp$PFx<PFx.mn){
                     Iseg.mn   <- i
                     PFx.mn    <- otmp$PFx
@@ -316,7 +333,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     else if(Iadj==0)Iseg.adj<-Iseg.longest
     else Iseg.adj<-Iadj
 
-    oout            <- LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj, IY0flg)
+    oout            <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 
     Y1              <- oout$Y0
     cor             <- oout$cor
@@ -492,9 +509,9 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
             Ic   <- Ips[i]
             I3   <- Ips[i+1]
             Nseg <- I3-I1+1
-            PFx95     <- getPFx95(cor,Nseg)
-            PFx95l    <- getPFx95(corl,Nseg)
-            PFx95h    <- getPFx95(corh,Nseg)
+            PFx95     <- getPFx95(cor,Nseg, phi, PFmax)
+            PFx95l    <- getPFx95(corl,Nseg, phi, PFmax)
+            PFx95h    <- getPFx95(corh,Nseg, phi, PFmax)
             SSEf.Iseg <- sum(resi[I1:I3]^2)
             Ips1  <- Ips[-i]
             otmp1 <- LSmultiple(Y1,Ti,Ips1)
@@ -567,8 +584,8 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     }
 
     if (is_plot)
-        plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-            Ips, Iseg.adj)
+        plot_FindU(oout, ofilePdf, EBfull, EEB, B, QMout, Mq, Ns, adj,
+            Ips, Iseg.adj, ori.itable, ooflg)
 
     odata = as.data.table(odata)
     odata$date %<>% num2date()

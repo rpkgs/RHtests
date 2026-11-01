@@ -17,8 +17,12 @@ StepSize.wRef(
   Ny4a = 0,
   is_plot = TRUE,
   ...,
-  debug = TRUE
+  debug = TRUE,
+  .state = NULL
 )
+}
+\arguments{
+\item{.state}{内部计算状态；未提供时根据输入数据创建。}
 }
 \description{
 StepSize.wRef

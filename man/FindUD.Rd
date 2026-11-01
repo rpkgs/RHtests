@@ -14,11 +14,12 @@ FindUD(
   Iadj = 10000,
   Mq = 10,
   Ny4a = 0,
-  is_plot = FALSE
+  is_plot = FALSE,
+  .state = NULL
 )
 }
 \arguments{
-\item{InSeries}{file path of the input data}
+\item{InSeries}{file path or data frame of the input series}
 
 \item{InCs}{A data.frame of detected turning points returned from \link{FindU},
 with the columns of \code{c("kind", "Idc", "date", "probL", "probU", "plev", "PFx", "PFx95l", "PFx95h")}.}
@@ -46,6 +47,8 @@ Mq=1 corresponds to mean adjustments (one adjustment for all data in
 the same segment).}
 
 \item{Ny4a}{--}
+
+\item{.state}{An \code{RHState} object returned by \link{Read}, used instead of \code{InSeries}.}
 }
 \description{
 FindUD
@@ -54,7 +57,7 @@ FindUD
 f = system.file("extdata/Example1.dat", package = "RHtests")
 r1 = FindU(f)
 
-r2 = FindUD(InCs = r1$TP, output = "OUTPUT/example1")
+r2 = FindUD(InSeries = f, InCs = r1$TP, output = "OUTPUT/example1")
 print(r2)
 
 plot_output(r2$fit)

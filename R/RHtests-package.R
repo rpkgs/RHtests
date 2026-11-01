@@ -49,6 +49,7 @@ listk <- function(...) {
 #' @importFrom Ipaper %do% foreach set_dimnames
 #' @importFrom magrittr %>% %<>%
 #' @importFrom purrr map_dbl map_int
+#' @importFrom zeallot %<-%
 #' 
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {

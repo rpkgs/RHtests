@@ -46,7 +46,7 @@ Pk.PMFT<-function(N){
   return(P)
 }
 
-PMFT<-function(Y,T,Pk0){
+PMFT <- function(Y, T, Pk0, Nmin) {
   N     <- length(Y)
   PFx   <- (-99999.)
   Fx    <- (-99999.)
@@ -99,7 +99,7 @@ PMFxKc<-function(Y,T,I0,I2,Ic){
   return(oout)
 }
 
-PMFxKxI0I2<-function(Y,T,I0,I2){
+PMFxKxI0I2 <- function(Y, T, I0, I2, Nmin) {
   Nmin2 <- Nmin*2
   prob  <- (-1)
   Ic    <- I0
@@ -108,7 +108,7 @@ PMFxKxI0I2<-function(Y,T,I0,I2){
     Y0   <- Y[(I0+1):I2]
     T0   <- T[(I0+1):I2]
     Pk0  <- Pk.PMFT(Nseg)
-    oout <- PMFT(Y0, T0, Pk0)
+    oout <- PMFT(Y0, T0, Pk0, Nmin)
     Ic   <- I0+oout$KPx
     prob <- pf(oout$Fx,1,(Nseg-3))
   }
@@ -118,7 +118,7 @@ PMFxKxI0I2<-function(Y,T,I0,I2){
   return(oout)
 }
 
-Rphi <- function(Y0,Ips,Ns){
+Rphi <- function(Y0, Ips, Ns, IY0flg) {
 # calculate auto-correlation of given data vector Y0 and breakpoints Ips
 # output: cor -- autocorrelation; W -- prewhitenning vector of Y0
 #  corl -- lower bound of cor; corh -- upper bound of cor
@@ -189,7 +189,7 @@ autocorlh<-function(Y,IY){
   # return(oout)
 }
 
-getPFx95<-function(cor,N){
+getPFx95 <- function(cor, N, phi, PFmax) {
   n = length(phi)
 # if(cor<phi[1]|cor>phi[length(phi)]) stop("input series autocorrelation outbound!")
   if(cor<=phi[1])
@@ -213,7 +213,7 @@ getPFx95<-function(cor,N){
   return(PTx95)
 }
 
-PMFxIseg<-function(Y0,Ti,Ips,Iseg){
+PMFxIseg <- function(Y0, Ti, Ips, Iseg, IY0flg, Nt, phi, PFmax) {
   Ns   <- length(Ips)-1
   N    <- length(Y0)
   I0   <- if(Iseg==1) 0 else Ips[Iseg-1]
@@ -222,16 +222,16 @@ PMFxIseg<-function(Y0,Ti,Ips,Iseg){
   Nseg <- I3-I0
   Ip0  <- Ips[-Iseg]
 
-  otmp   <- LSmultipleRed(Y0,Ti,Ips, IY0flg)
+  otmp   <- LSmultipleRed(Y0, Ti, Ips, IY0flg, Nt)
   cor    <- otmp$cor
   corl   <- otmp$corl
   corh   <- otmp$corh
   W      <- otmp$W
   WL     <- otmp$WL
   WU     <- otmp$WU
-  PFx95  <- getPFx95(cor,Nseg)
-  PFx95L <- getPFx95(corl,Nseg)
-  PFx95U <- getPFx95(corh,Nseg)
+  PFx95  <- getPFx95(cor, Nseg, phi, PFmax)
+  PFx95L <- getPFx95(corl, Nseg, phi, PFmax)
+  PFx95U <- getPFx95(corh, Nseg, phi, PFmax)
 
   otmp      <- LSmultiple(W,Ti,Ip0)
   SSE0.Iseg <- sum(otmp$resi[(I0+1):I3]^2)
@@ -343,7 +343,7 @@ PTKIc<-function(Y,Pk,Ic){
   return(oout)
 }
 
-getPTx95<-function(cor,N){
+getPTx95 <- function(cor, N, phi, PTmax) {
 # if(cor<phi[1]|cor>phi[length(phi)]) stop("input series autocorrelation outbound!")
   if(cor<=phi[1])
     PTx95<-PTmax[N,1]

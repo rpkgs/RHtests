@@ -13,8 +13,12 @@ RHtests_stepsize(
   is_plot = FALSE,
   verbose = TRUE,
   ...,
-  debug = TRUE
+  debug = TRUE,
+  .state = NULL
 )
+}
+\arguments{
+\item{.state}{上游传入的 \code{RHState} 对象；提供后不再读取输入数据。}
 }
 \description{
 stepsize will not alter TP2, only delte non-significant record.

@@ -4,15 +4,7 @@
 \alias{LSmultiRedCycle}
 \title{LSmultiRedCycle}
 \usage{
-LSmultiRedCycle(
-  Y0,
-  Ti,
-  Ips,
-  Iseg.adj,
-  IY0flg,
-  EB = get("EB", envir = .GlobalEnv),
-  Imd = get("Imd", envir = .GlobalEnv)
-)
+LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 }
 \value{
 \itemize{

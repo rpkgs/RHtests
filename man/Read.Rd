@@ -7,7 +7,7 @@
 Read(InSeries, MissingValueCode = "-999.99", plev = 0.95)
 }
 \arguments{
-\item{InSeries}{file path of the input data}
+\item{InSeries}{file path or data frame of the input series}
 
 \item{MissingValueCode}{string, missing value code}
 
@@ -16,17 +16,8 @@ nominal level of significance, choose one of the following 6 plev values:
 0.75, 0.80, 0.90, 0.95, 0.99, 0.9999}
 }
 \value{
-If failed, NULL will be returned. If success, a data.table with the following
-columns will be returned:
-\itemize{
-\item \code{IY0}: numeric, \code{year*1000 + month*100 + day}, e.g. '19980100'
-\item \code{IY0flg}: 0 or 1, is \code{y[t]} has \code{y[t+1]} for autocorrelation?
-\item \code{Imd}: numeric, \code{month*100 + day}, e.g. '100'
-\item \code{Ti}: index or original Y
-\item \code{Y0}: original Y after eliminating NA values
-}
-
-\code{NT}=1, 12, and 365 for annual, monthly, and daily series, respectively.
+An S7 \code{RHState} object containing the series, seasonal cycle and critical values.
+\code{Nt} is 1, 12 or 365 for annual, monthly or daily series, respectively.
 }
 \description{
 Remove NA values and flag \code{y[t]} as 0 when it has not corresponding \code{y[t+1]} values.

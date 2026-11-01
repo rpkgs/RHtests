@@ -1,34 +1,31 @@
 RHtests_read <- function(data, data.ref = NULL, plev = 0.95) {
-  if (is.null(data)) return()
-  if (is.null(data.ref)) {
-    Read(data, plev = plev)
-  } else {
-    Read.wRef(data, data.ref, plev = plev)
-  }
+  if (is.null(data.ref)) Read(data, plev = plev) else Read.wRef(data, data.ref, plev = plev)
 }
 
 
 #' RHtests_stepsize
 #' 
 #' stepsize will not alter TP2, only delte non-significant record.
-#' 
+#'
+#' @param .state 上游传入的 `RHState` 对象；提供后不再读取输入数据。
 #' @export
 RHtests_stepsize <- function(
     data = NULL, data.ref = NULL, TP2,
     has_ref = !is.null(data.ref),
     prefix = "./OUTPUT/example03", 
     is_plot = FALSE, verbose = TRUE, ..., 
-    debug = TRUE) 
+    debug = TRUE, .state = NULL)
 {
   mkdir(dirname(prefix))
 
-  RHtests_read(data, data.ref)
+  # 每次迭代共享同一份状态，避免重复读取和污染全局环境。
+  state <- if (is.null(.state)) RHtests_read(data, data.ref) else .state
   FUN_step <- if (has_ref) StepSize.wRef else StepSize
 
   if (nrow(TP2) == 0) {
     return(NULL)
   }
-  r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot)
+  r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot, plev = state@plev, .state = state)
 
   times <- 1
   while (times < nrow(TP2)) {
@@ -44,7 +41,8 @@ RHtests_stepsize <- function(
       }
 
       times <- times + 1
-      r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot, debug = debug)
+      r <- FUN_step(InCs = TP2, output = prefix, is_plot = is_plot, debug = debug,
+                    plev = state@plev, .state = state)
     } else {
       break
     }
@@ -84,18 +82,18 @@ RHtests_process <- function(data, data.ref = NULL, metadata,
   FUN_FindU  <- if (has_ref) FindU.wRef else FindU
   FUN_FindUD <- if (has_ref) FindUD.wRef else FindUD
   
-  RHtests_read(data, data.ref)
-  U <- FUN_FindU(output = prefix, is_plot = is_plot, debug = debug)
+  state <- RHtests_read(data, data.ref)
+  U <- FUN_FindU(output = prefix, is_plot = is_plot, debug = debug, .state = state)
   if (is_empty(U$TP)) return(NULL)
 
-  UD <- FUN_FindUD(InCs = U$TP, output = prefix, is_plot = is_plot)
+  UD <- FUN_FindUD(InCs = U$TP, output = prefix, is_plot = is_plot, .state = state)
   if (is_empty(UD$TP)) return(NULL)
 
   TP  <- UD$TP
   TP2 <- TP_adjustByMeta(TP, metadata, maxgap = maxgap)
   
   r <- RHtests_stepsize(data = NULL, data.ref = NULL, TP2, has_ref,
-      prefix, is_plot, verbose, debug = debug)
+      prefix, is_plot, verbose, debug = debug, .state = state)
   # if null returned,
   if (is.null(r$TP) || nrow(r$TP) == 0) return(NULL)
   r$TP %<>% merge_metainfo(metadata)

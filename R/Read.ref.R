@@ -1,5 +1,5 @@
 #  read-in data from base_data_file and ref_data_file, put MissingValueCode as NA
-#  set several global variables as output:
+#  计算状态包含以下变量：
 #  Nt     --  total numbers of seasonal factors, say, monthly=12, daily=365
 #  Icy    --  catelog of seasonal factors, say, monthly 1:12
 #  Y0     --  data vector of base - ref, take common period for both non-missing
@@ -8,9 +8,16 @@
 #             for autocorrelation calculation
 #  bdata  --  matrix of non-missing base data, 4 columns, yyyy,mm,dd,data
 #  ori.bdata  -- original base data matrix, also 4 columns, same as bdata
+#' 读取基准序列和参考序列
+#'
+#' @param Bseries 基准序列文件路径或数据表。
+#' @param Rseries 参考序列文件路径或数据表。
+#' @param MissingValueCode 缺测值标记。
+#' @param plev 检验的置信水平。
+#' @return 包含序列、季节周期和临界值的 S7 `RHState` 对象。
 #' @export
-Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95){
-    if (is.null(Bseries) || is.null(Rseries)) return()
+Read.wRef <- function(Bseries, Rseries, MissingValueCode = "-999.99", plev = 0.95) {
+    if (is.null(Bseries) || is.null(Rseries)) stop("Bseries and Rseries are required", call. = FALSE)
 
     var_colnames <- c("year", "month", "day", "data")
     # var_colnames <- c("id1", "id2", "id3", "data")
@@ -69,9 +76,8 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95)
     YMD.ref <- rtable[, 10000 * year + month * 100 + day]
 
     for(i in 1:length(Ind2)) if(Ind2[i]!=YMD.ref[i]|is.na(YMD.ref[i])) {
-        ErrorMSG<-paste("input ref series not continuous at:",Ind2[i],YMD.base[i],
-                        "\n",get("ErrorMSG",env=.GlobalEnv))
-        return(-1)
+        message <- paste("input ref series not continuous at:", Ind2[i], YMD.ref[i])
+        stop(message, call. = FALSE)
     }
 
     # take non-missing data only
@@ -127,18 +133,15 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95)
     idenind <- unique(itmp[, 1])
     for(i in 1:Nt){
         if(sum(is.na(itmp[itmp[,1]==Icy[i]])==F)<10){
-            ErrorMSG<<-paste("input data too few at:",Icy[i],
-                             "\n",get("ErrorMSG",env=.GlobalEnv))
-            return(-1)
+            message <- paste("input data too few at:", Icy[i])
+            stop(message, call. = FALSE)
         }
     }
     itmp1 <- 0
     for(i in 1:(dim(itmp)[1]-1))
         if(is.na(itmp[i,2])==F&is.na(itmp[(i+1),2])==F) itmp1<-itmp1+1
     if(itmp1<10) {
-        ErrorMSG<<-paste("input data too few for autocorrelation calculating",
-                         "\n",get("ErrorMSG",env=.GlobalEnv))
-        return(-1)
+        stop("input data too few for autocorrelation calculating", call. = FALSE)
     }
     # finish checking
     Y0   <- itable[ind.base, data]-rtable[ind.ref, data]
@@ -161,20 +164,10 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode="-999.99", plev = 0.95)
     # listk(bdata = itable.nmb, ori.bdata = ori.itable, TiB, IYBflg, owflg, Icy, Nt) %>% str()
 
     N <- length(Y0)
-    readPTtable(N, plev)
-
-    ## data
-    assign("bdata"    , as.data.frame(itable.nmb), envir = .GlobalEnv) # non-missing table for base data
-    assign("ori.bdata", as.data.frame(ori.itable), envir = .GlobalEnv) # original base data
-
-    assign("Ti", Ti, envir = .GlobalEnv) # Time index for LS fitting
-    assign("Y0", Y0, envir = .GlobalEnv) # Data series for Base-Ref
-    assign("IY0", IY0, envir = .GlobalEnv) # Cycle index for Base-Ref
-    assign("IY0flg", IY0flg, envir = .GlobalEnv) # continuous flag for Base-Ref
-
-    assign("TiB", TiB, envir = .GlobalEnv)
-    assign("IYBflg", IYBflg, envir = .GlobalEnv) # continuous flag for Base-Ref
-    assign("owflg", owflg, envir = .GlobalEnv)
-    assign("Icy", Icy, envir = .GlobalEnv) # Cycle index
-    assign("Nt", Nt, envir = .GlobalEnv)   # Cycle length
+    critical_values <- readPTtable(N, plev)
+    state <- listk(
+        bdata = as.data.frame(itable.nmb), ori.bdata = as.data.frame(ori.itable),
+        Ti, Y0, IY0, IY0flg, TiB, IYBflg, owflg, Icy, Nt
+    )
+    new_rh_state(state, critical_values, reference = TRUE, plev = plev)
 }

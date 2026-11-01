@@ -16,7 +16,8 @@ StepSize(
   Ny4a = 0,
   is_plot = TRUE,
   ...,
-  debug = TRUE
+  debug = TRUE,
+  .state = NULL
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ StepSize(
 \item \code{true}  : \verb{_Fstat.txt} will be shown
 \item \code{false} : no \verb{_Fstat.txt}
 }}
+
+\item{.state}{内部计算状态；未提供时根据输入数据创建。}
 }
 \description{
 StepSize

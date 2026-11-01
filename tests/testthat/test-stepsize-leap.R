@@ -1,7 +1,7 @@
 test_that("fitted data uses named tibble columns and preserves missing rows", {
   original <- tibble::tibble(year = c(2001, 2001, 2001), month = 1, day = 1:3, data = c(10, NA, 12))
   fit <- list(Y0 = c(1, 2), meanhat = c(0.5, 1.5), trend = 0)
-  result <- RHtests:::stepsize_data(
+  result <- RHtests:::build_fitted_table(
     original, c(TRUE, FALSE, TRUE), fit, 1, c(11, 13), c(1, 1), c(2, 3),
     0, NULL, c(11, 13), c(1, 2), c(1, 2), 2, c(20010101, 20010103), 1, 1, 0, 1
   )
@@ -19,13 +19,13 @@ test_that("leap-day restoration preserves fitted values and adjustments", {
   colnames(odata) <- c("id", "date", "base", "fitted", "adjusted", "QM_adjusted")
   odata <- tibble::as_tibble(odata)
 
-  result <- RHtests:::stepsize_leap(
+  result <- RHtests:::restore_leap_days(
     odata, original, 20000301, NULL, NULL, NULL, NULL, 1, 1, 0, 1,
     fitted_cols = "fitted", adjusted_cols = "adjusted"
   )
   expect_equal(unlist(result[2, 4:6], use.names = FALSE), c(5, 10, 12))
 
-  result <- RHtests:::stepsize_leap(
+  result <- RHtests:::restore_leap_days(
     odata, original, c(20000228, 20000301), c(10, 14), c(1, 2), 0,
     list(Mq = 1), 1, 1, 0, 1, fitted_cols = "fitted", adjusted_cols = "adjusted"
   )

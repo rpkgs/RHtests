@@ -1,14 +1,16 @@
 QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
     Iadj=10000,Mq=10,Ny4a=0){
-  ErrorMSG<-NA
-  assign("ErrorMSG",ErrorMSG,envir=.GlobalEnv)
-  itmp<-ReadDLY.g(InSeries,MissingValueCode)
-  if(itmp<0){
-    ErrorMSG<<-paste("QMadj.GaussianDLY: Error in read data from",InSeries,"\n",
-               get("ErrorMSG",env=.GlobalEnv),"\n")
-    if(!GUI) cat(ErrorMSG)
-    return(-1)
-  }
+  series <- ReadDLY.g(InSeries, MissingValueCode)
+  Y0 <- series$Y0
+  Ti <- series$Ti
+  IY0 <- series$IY0
+  IY0flg <- series$IY0flg
+  Imd <- series$Imd
+  Icy <- series$Icy
+  Nt <- series$Nt
+  itable <- series$itable
+  ori.itable <- series$ori.itable
+  olflg <- series$olflg
   N<-length(Y0); Nadj<-Ny4a*Nt
   itmp<-readLines(InCs)
   if(length(itmp)>=2){
@@ -24,12 +26,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
       else Ips[i]<-max(c(1:N)[IY0<=ymdtmp])
     }
     if(sum(is.na(Ips))>0|!identical(Ips,sort(Ips))){
-      ErrorMSG<<-paste("QMadj.GaussianDLY: Ips read in from ",InCs,"error:")
-      for(i in 1:Ns)
-        ErrorMSG<<-paste(get("ErrorMSG",env=.GlobalEnv),Ips[i])
-      ErrorMSG<<-paste(get("ErrorMSG",env=.GlobalEnv),"\n\n")
-      if(!GUI) cat(ErrorMSG)
-      return(-1)
+      stop("QMadj.GaussianDLY: invalid changepoint indices: ", paste(Ips, collapse = " "), call. = FALSE)
     }
   }
   else Ns<-0
@@ -51,15 +48,11 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
   oout<-rmCycle(itable)
   Y1<-oout$Base
   EB<-oout$EB
-  assign("EB",EB,envir=.GlobalEnv)
-  if(length(EB)!=length(Icy)) {
-    ErrorMSG<<-paste("Annual cycle length (from non-missing data) differ from original dataset",
-                     "\n",get("ErrorMSG",env=.GlobalEnv),"\n")
-    if(!GUI) cat(ErrorMSG)
-    return(-1)
+  if (length(EB) != length(Icy)) {
+    stop("Annual cycle length differs from original dataset", call. = FALSE)
   }
 
-  otmp<-LSmultiRedCycle(Y1,Ti,Ips,Iseg.adj, IY0flg)
+  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
   Y1<-otmp$Y0
   cor<-otmp$cor
   corl<-otmp$corl
@@ -215,7 +208,17 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
 QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Iadj=10000,Mq=20,Ny4a=5){
   if(Ny4a>0&Ny4a<=5) Ny4a<-5
 
-  Read.wRef(Bseries,Rseries,MissingValueCode)
+  state <- Read.wRef(Bseries, Rseries, MissingValueCode)
+  series <- state@series
+  Y0 <- series$Y0
+  IY0 <- series$IY0
+  IY0flg <- series$IY0flg
+  TiB <- series$TiB
+  IYBflg <- series$IYBflg
+  bdata <- series$bdata
+  ori.bdata <- series$ori.bdata
+  owflg <- series$owflg
+  Nt <- state@season$Nt
   N<-length(Y0); Nadj<-Nt*Ny4a
   itmp<-readLines(InCs)
   if(length(itmp)<2) {
@@ -237,10 +240,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
       Ids[i]<-as.numeric(substr(itmp[i+1],1,1))
     }
     if(sum(is.na(Ips))>0|!identical(Ips,sort(Ips))){
-      ErrorMSG<<-paste("StepSize.wRef: Ips read in from ",InCs,"error!\n",
-                 get("ErrorMSG",env=.GlobalEnv),"\n")
-      if(!GUI) cat(ErrorMSG)
-      return(-1)
+      stop("QMadj.GaussianDLY.wRef: invalid changepoint indices", call. = FALSE)
     }
   }
   if(Ns>0) {
@@ -260,7 +260,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   else Iseg.adj<-Iadj
 
 # estimate delta from Y0 (Base-Ref)
-  otmp<-Rphi(Y0,Ips,Ns)
+  otmp <- Rphi(Y0, Ips, Ns, IY0flg)
   cor<-otmp$cor
   muDif<-rep(0,Ns+1)
   for(i in 1:(Ns+1)){
@@ -279,10 +279,8 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   Ips[Ns+1]<-length(IY1)
 
   Ti<-TiB
-  assign("Ti",Ti,envir=.GlobalEnv)
   N<-length(TiB)
   IY0flg<-IYBflg
-  assign("IY0flg",IY0flg,envir=.GlobalEnv)
 
   dtmp<-rmCycle(bdata)
   adjBase<-dtmp$Base
@@ -308,7 +306,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
     EB[i]<-dtmp$EB[inds==IYM[i]]
   Aadj<-dtmp$Base  # de-seasonalize Badj
   Ipd<-c(N)
-  dtmp<-LSmultipleRed(Aadj,Ti,Ipd, IY0flg)
+  dtmp <- LSmultipleRed(Aadj, Ti, Ipd, IY0flg, Nt)
 # muD<-dtmp$mu[1]+EPBa-mean(bdata[,4])
   muD<-dtmp$mu[1]
   betaD<-dtmp$trend
@@ -324,7 +322,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   while(tt){
     Niter<-Niter+1
     EB00<-EB
-    otmp<-LSmultipleRed(Base,Ti,Ips, IY0flg)
+    otmp <- LSmultipleRed(Base, Ti, Ips, IY0flg, Nt)
     meanhat<-otmp$meanhat
     df<-(N-2-Nt-Ns)
     p.cor<-pt(abs(otmp$cor)*sqrt(df/(1-otmp$cor^2)),df)

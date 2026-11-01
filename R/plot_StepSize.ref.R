@@ -1,6 +1,6 @@
 plot_StepSize.ref <- function(output, Base, EB, EB1, B, 
   oY0, omuDif, otmp, meanhatD, 
-  QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, ...)
+  QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, IY0, ori.bdata, owflg, ...)
 {
   pdf(file = paste0(output, "_F.pdf"), onefile = TRUE, paper = "letter")
   op <- par(no.readonly = TRUE) # the whole list of settable par's.

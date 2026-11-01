@@ -86,3 +86,4 @@ importFrom(utils,
   read.table,
   write.table
 )
+importFrom(zeallot,"%<-%")

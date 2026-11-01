@@ -25,6 +25,28 @@ date2num <- function(date) {
     as.numeric()
 }
 
+# 把 YYYYMMDD 数值转为 Date 列
+dt_num2date <- function(data) {
+  as.data.table(data) %>% mutate(date = num2date(date))
+}
+
+# 由 year/month/day 列生成 YYYYMMDD 数值。
+ymd2num <- function(data) {
+  data$year * 10000 + data$month * 100 + data$day
+}
+
+# 由断点位置生成各段的起止索引（含两端）。
+segment_bounds <- function(breaks) {
+  list(start = c(1, breaks[-length(breaks)] + 1), end = breaks)
+}
+
+# 把压缩后的非缺测值放回原位置，其余位置填 NA。
+expand_values <- function(x, rows, n) {
+  result <- rep(NA_real_, n)
+  result[rows] <- round(x, 4)
+  result
+}
+
 fprintf <- function(fmt, ..., file = "", append = FALSE) {
   cat(sprintf(fmt, ...), file = file, append = append)
 }

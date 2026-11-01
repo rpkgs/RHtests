@@ -10,26 +10,28 @@
 #' f = system.file("extdata/Example1.dat", package = "RHtests")
 #' r1 = FindU(f)
 #' 
-#' r2 = FindUD(InCs = r1$TP, output = "OUTPUT/example1")
+#' r2 = FindUD(InSeries = f, InCs = r1$TP, output = "OUTPUT/example1")
 #' print(r2)
 #' 
 #' plot_output(r2$fit)
 #' @export
 FindUD <- function(
     InSeries = NULL, InCs, output, MissingValueCode = "-999.99",
-    GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, is_plot = FALSE) {
-  
-  if (!is.null(InSeries)) data <- Read(InSeries, MissingValueCode) # data not used
-  # all necessary variables have been in global env
-  
+    GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, is_plot = FALSE, .state = NULL) {
+  state <- if (is.null(.state)) {
+    Read(InSeries, MissingValueCode, plev)
+  } else .state
+  check_rh_state(state, reference = FALSE, plev = plev)
+  c(Y0 =, Ti =, IY0 =, IY0flg =, Imd =,
+    itable =, ori.itable =, ooflg =) %<-% state@series
+  c(Icy =, Nt =) %<-% state@season
+  c(phi =, PFmax =) %<-% state@critical_values
+
   Debug <- TRUE
-  ErrorMSG <- NA
-  assign("ErrorMSG", ErrorMSG, envir = .GlobalEnv)
   flog <- paste(output, ".log", sep = "")
   Nmin <- 10
   if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
 
-  assign("Nmin", Nmin, envir = .GlobalEnv)
   N <- length(Y0)
   Nadj <- Ny4a * Nt
 
@@ -44,13 +46,8 @@ FindUD <- function(
   oout <- rmCycle(itable)
   Y1 <- oout$Base
   EB <- oout$EB
-  assign("EB", EB, envir = .GlobalEnv)
   if (length(EB) != length(Icy)) {
-    ErrorMSG <<- paste(
-      "Annual cycle length (from non-missing data) differ from original dataset",
-      "\n", get("ErrorMSG", env = .GlobalEnv), "\n")
-    if (!GUI) cat(ErrorMSG)
-    return(-1)
+    stop("Annual cycle length differs from original dataset", call. = FALSE)
   }
 
   ofileIout <- paste(output, "_pCs.txt", sep = "")
@@ -65,7 +62,7 @@ FindUD <- function(
   cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
 
   Ip0 <- N
-  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg)
+  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, EB, Imd, Icy, Nt)
   beta0 <- oout$trend
   betaL0 <- oout$betaL
   betaU0 <- oout$betaU
@@ -77,16 +74,16 @@ FindUD <- function(
   corDU <- oout$corh
 
   if (Ns == 0) { # no input changepoints no input changepoints
-    oout <- PMFT(Y1, Ti, Pk0)
+    oout <- PMFT(Y1, Ti, Pk0, Nmin)
     I0 <- 0
     I2 <- oout$KPx
     I4 <- N
 
-    oout1 <- PMFxKxI0I2(Y1, Ti, I0, I2)
+    oout1 <- PMFxKxI0I2(Y1, Ti, I0, I2, Nmin)
     I1 <- oout1$Ic
-    oout2 <- PMFxKxI0I2(Y1, Ti, I2, I4)
+    oout2 <- PMFxKxI0I2(Y1, Ti, I2, I4, Nmin)
     I3 <- oout2$Ic
-    oout3 <- PMFxKxI0I2(Y1, Ti, I1, I3)
+    oout3 <- PMFxKxI0I2(Y1, Ti, I1, I3, Nmin)
     I2 <- oout3$Ic
 
     Ns <- 1
@@ -95,7 +92,7 @@ FindUD <- function(
       otmp <- LSmultiple(Y1, Ti, Ips)
       resi <- otmp$resi
       fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns)
+      otmp <- Rphi(resi, Ips, Ns, IY0flg)
       cor1 <- otmp$cor
       corL1 <- otmp$corl
       corU1 <- otmp$corh
@@ -114,7 +111,7 @@ FindUD <- function(
       otmp <- LSmultiple(Y1, Ti, Ips)
       resi <- otmp$resi
       fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns)
+      otmp <- Rphi(resi, Ips, Ns, IY0flg)
       cor2 <- otmp$cor
       corL2 <- otmp$corl
       corU2 <- otmp$corh
@@ -133,7 +130,7 @@ FindUD <- function(
       otmp <- LSmultiple(Y1, Ti, Ips)
       resi <- otmp$resi
       fitted <- otmp$fitted
-      otmp <- Rphi(resi, Ips, Ns)
+      otmp <- Rphi(resi, Ips, Ns, IY0flg)
       cor3 <- otmp$cor
       corL3 <- otmp$corl
       corU3 <- otmp$corh
@@ -183,13 +180,8 @@ FindUD <- function(
     Ids <- TP$kind
 
     if (sum(is.na(Ips)) > 0 | !identical(Ips, sort(Ips))) {
-      ErrorMSG <<- paste("FindUD: Ips read in from ", InCs, "error:")
-      for (i in 1:Ns) {
-        ErrorMSG <<- paste(get("ErrorMSG", env = .GlobalEnv), Ips[i])
-      }
-      ErrorMSG <<- paste(get("ErrorMSG", env = .GlobalEnv), "\n")
-      if (!GUI) cat(ErrorMSG)
-      return(-1)
+      message <- paste("FindUD: invalid changepoint indices:", paste(Ips, collapse = " "), "\n")
+      stop(message, call. = FALSE)
     }
   }
 
@@ -205,7 +197,7 @@ FindUD <- function(
       for (i in 1:(Ns + 1)) {
         I0 <- if (i == 1) 0 else Ips[i - 1]
         I2 <- Ips[i]
-        otmp <- PMFxKxI0I2(Y1, Ti, I0, I2)
+        otmp <- PMFxKxI0I2(Y1, Ti, I0, I2, Nmin)
         if (otmp$prob > 0) Ips0 <- sort(c(Ips0, otmp$Ic))
       }
       # estimate p-value of each changepoint in series Ips0, find the most significant
@@ -222,7 +214,7 @@ FindUD <- function(
           for (i in 1:length(Ips0)) {
             Ips1 <- sort(c(Ips, Ips0[i]))
             ith <- match(Ips0[i], Ips1)
-            otmp <- PMFxIseg(Y1, Ti, Ips1, ith)
+            otmp <- PMFxIseg(Y1, Ti, Ips1, ith, IY0flg, Nt, phi, PFmax)
             probL <- min(c(otmp$probL, otmp$probU, otmp$prob))
             probU <- max(c(otmp$probL, otmp$probU, otmp$prob))
             PFx <- otmp$PFx
@@ -265,7 +257,7 @@ FindUD <- function(
       for (i in 1:Ns) {
         if (Ids[i] == 0) { # check those un-documented
           Ips0 <- Ips[-i]
-          otmp <- PMFxIseg(Y1, Ti, Ips, i)
+          otmp <- PMFxIseg(Y1, Ti, Ips, i, IY0flg, Nt, phi, PFmax)
           probL <- min(otmp$probL, otmp$probU)
           if (probL < probL.mn) {
             Iseg.mn <- i
@@ -298,7 +290,7 @@ FindUD <- function(
     Iseg.adj <- Iadj
   }
 
-  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg)
+  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
   Y1 <- otmp$Y0
   cor <- otmp$cor
   corl <- otmp$corl
@@ -401,8 +393,8 @@ FindUD <- function(
 
   if (is_plot) {
     plot_FindUD(
-      oout, ofilePdf, EBfull, EEB, B, QMout, Ms, Mq, Ns, adj,
-      Ips, Iseg.adj, otmp
+      oout, ofilePdf, EBfull, EEB, B, QMout, Mq, Ns, adj,
+      Ips, Iseg.adj, otmp, ori.itable, ooflg
     )
   }
 
@@ -483,9 +475,9 @@ FindUD <- function(
       Id <- Ids[i]
       Nseg <- I3 - I1 + 1
 
-      PFx95 <- getPFx95(cor, Nseg)
-      PFx95l <- getPFx95(corl, Nseg)
-      PFx95h <- getPFx95(corh, Nseg)
+      PFx95 <- getPFx95(cor, Nseg, phi, PFmax)
+      PFx95l <- getPFx95(corl, Nseg, phi, PFmax)
+      PFx95h <- getPFx95(corh, Nseg, phi, PFmax)
       SSEf.Iseg <- sum(Rf[I1:I3]^2)
       Ips0 <- Ips[-i]
 

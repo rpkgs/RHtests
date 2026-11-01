@@ -5,20 +5,14 @@
 #' @inheritParams FindU
 #'
 #' @return
-#' If failed, NULL will be returned. If success, a data.table with the following
-#' columns will be returned:
-#' - `IY0`: numeric, `year*1000 + month*100 + day`, e.g. '19980100'
-#' - `IY0flg`: 0 or 1, is `y[t]` has `y[t+1]` for autocorrelation?
-#' - `Imd`: numeric, `month*100 + day`, e.g. '100'
-#' - `Ti`: index or original Y
-#' - `Y0`: original Y after eliminating NA values
-#'
-#' `NT`=1, 12, and 365 for annual, monthly, and daily series, respectively.
+#' An S7 `RHState` object containing the series, seasonal cycle and critical values.
+#' `Nt` is 1, 12 or 365 for annual, monthly or daily series, respectively.
 #' @examples
 #' infile = system.file("extdata/Example1.dat", package = "RHtests")
 #' Read(infile, "-999.99")
 #' @export
-Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95){    
+Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95) {
+    if (is.null(InSeries)) stop("InSeries is required", call. = FALSE)
 
     itable <- if (is.character(InSeries)) {
         sep = ifelse(is.csv(InSeries), ",", " ")
@@ -55,15 +49,9 @@ Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95){
 
     ind  <- ori.itable[ooflg, year*10000+month*100+day]
     if(sum(!(ind%in%Ind2))>0|all.equal(ind,sort(ind))!=T){
-        ErrorMSG <<- paste("Input data series not continuous\n")
-        return(-1)
+        stop("Input data series not continuous", call. = FALSE)
     } 
-    # for(i in 1:length(Ind2))
-    #   if(Ind2[i]!=ind[i]) {
-    #     ErrorMSG<<-paste("Input data series not continuous at:",Ind2[i],ind[i],"\n")
-    #     return(-1)
-    #   }
-    # IY0<-ind[is.na(itable[,4])==F]
+    # 允许缺测，但有效观测日期须按时间顺序排列。
     IY0    <- ind
     IY0flg <- rep(0, length(IY0))
     Y0     <- itable[!is.na(data), data]
@@ -79,29 +67,18 @@ Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95){
         if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
     }
     if(sum(IY0flg)<10){  # too few available data for autocorlh
-        ErrorMSG<<-paste("Too many missing values in ", "to estimate autocorrelation\n")
-        return(-1)
+        stop("Too many missing values to estimate autocorrelation", call. = FALSE)
     }
 
     N <- length(Y0)
-    readPFtable(N, plev)
+    critical_values <- readPFtable(N, plev)
 
     itable <- itable[!is.na(data), ]
-    assign("ori.itable", as.data.frame(ori.itable), envir = .GlobalEnv)
-    assign("itable", as.data.frame(itable), envir = .GlobalEnv)
-
-    assign("IY0", IY0, env = .GlobalEnv)
-    assign("ooflg", ooflg, envir = .GlobalEnv) # numeric index, other than boolean
-    assign("Ti", Ti, envir = .GlobalEnv)   # Time index for LS fitting
-    assign("Y0", Y0, envir = .GlobalEnv)   # Data series for Base
-    assign("IY0", IY0, envir = .GlobalEnv) # Cycle index for Base
-    assign("Imd", Imd, envir = .GlobalEnv) # Cycle index for Base
-    assign("IY0flg", IY0flg, envir = .GlobalEnv) # continuous flag for Base
-    assign("Icy", Icy, envir = .GlobalEnv) # Cycle index
-    assign("Nt", Nt, envir = .GlobalEnv)   # Cycle length
-    d = data.table(IY0, Imd, IY0flg, Ti, Y0)
-    d
-    # return(0)
+    state <- listk(
+        ori.itable = as.data.frame(ori.itable), itable = as.data.frame(itable),
+        ooflg, Ti, Y0, IY0, Imd, IY0flg, Icy, Nt
+    )
+    new_rh_state(state, critical_values, plev = plev)
 }
 
 is.csv<-function(names){
@@ -112,31 +89,20 @@ is.csv<-function(names){
 
 
 ReadDLY.g<-function(InSeries,MissingValueCode){
-    if(!file.exists(InSeries)) {
-        ErrorMSG<<-paste("Input datafile",InSeries,"does not exist!\n")
-        return(-1)
-    }
+    if (!file.exists(InSeries)) stop("Input datafile does not exist: ", InSeries, call. = FALSE)
     if(is.csv(InSeries)){
         itmp<-try(read.table(InSeries,sep=",",header=F,na.strings=MissingValueCode,
                              colClasses=rep("real",4)),silent=T)
-        if(inherits(itmp,"try-error")){
-            ErrorMSG<<-geterrmessage()
-            return(-1)
-        } else itable<-itmp
+        if (inherits(itmp, "try-error")) stop(as.character(itmp), call. = FALSE)
+        else itable <- itmp
     }
     else{
         itmp<-try(read.table(InSeries,sep="",header=F,na.strings=MissingValueCode,
                              colClasses=rep("real",4)),silent=T)
-        if(inherits(itmp,"try-error")){
-            ErrorMSG<<-geterrmessage()
-            return(-1)
-        }
-        else itable<-itmp
+        if (inherits(itmp, "try-error")) stop(as.character(itmp), call. = FALSE)
+        else itable <- itmp
     }
-    if(ncol(itable)!=4){
-        ErrorMSG<<-paste(InSeries,"has",ncol(itable),"columns. The number of columns should be 4\n")
-        return(-1)
-    }
+    if (ncol(itable) != 4) stop(InSeries, " must have 4 columns", call. = FALSE)
     colnames(itable)<-c("id1","id2","id3","data")
 
     iyrbegin<-itable[1,1]
@@ -154,11 +120,7 @@ ReadDLY.g<-function(InSeries,MissingValueCode){
     Nt<-length(Icy)
     Nall<-dim(itable)[1]
     ind<-itable[,1]*10000+itable[,2]*100+itable[,3]
-    # for(i in 1:length(Ind2))
-    #   if(Ind2[i]!=ind[i]) {
-    #     ErrorMSG<<-paste("Input data series not continuous at:",Ind2[i],ind[i],"\n")
-    #     return(-1)
-    #   }
+    # 按有效观测日期构造拟合索引。
     IY0<-ind[is.na(itable[,4])==F]
     IY0flg<-rep(0,length(IY0))
     Y0<-itable[is.na(itable[,4])==F,4]
@@ -173,20 +135,9 @@ ReadDLY.g<-function(InSeries,MissingValueCode){
     for(i in 1:(length(IY0)-1)){
         if(Ti[i+1]-Ti[i]==1) IY0flg[i]<-1
     }
-    if(sum(IY0flg)<10){  # too few available data for autocorlh
-        ErrorMSG<<-paste("Too many missing values in ", "to estimate autocorrelation\n")
-        return(-1)
+    if (sum(IY0flg) < 10) {  # too few available data for autocorlh
+        stop("Too many missing values to estimate autocorrelation", call. = FALSE)
     }
     itable <- itable[is.na(itable[, 4]) == F, ]
-    assign("ori.itable", ori.itable, envir = .GlobalEnv)
-    assign("itable", itable, envir = .GlobalEnv)
-    assign("Ti", Ti, envir = .GlobalEnv) # Time index for LS fitting
-    assign("Y0", Y0, envir = .GlobalEnv) # Data series for Base
-    assign("IY0", IY0, envir = .GlobalEnv) # Cycle index for Base
-    assign("Imd", Imd, envir = .GlobalEnv) # Cycle index for Base
-    assign("IY0flg", IY0flg, envir = .GlobalEnv) # continuous flag for Base
-    assign("Icy", Icy, envir = .GlobalEnv) # Cycle index
-    assign("Nt", Nt, envir = .GlobalEnv) # Cycle length
-    assign("olflg", olflg, envir = .GlobalEnv)
-    return(0)
+    listk(ori.itable, itable, Ti, Y0, IY0, Imd, IY0flg, Icy, Nt, olflg)
 }
