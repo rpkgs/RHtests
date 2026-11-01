@@ -70,7 +70,8 @@ this case.</p>
 <span>  Ny4a <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  is_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  debug <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  debug <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  .state <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,7 +80,7 @@ this case.</p>
 
 
 <dl><dt id="arg-inseries">InSeries<a class="anchor" aria-label="anchor" href="#arg-inseries"></a></dt>
-<dd><p>file path of the input data</p></dd>
+<dd><p>file path or data frame of the input series</p></dd>
 
 
 <dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
@@ -119,26 +120,21 @@ the same segment).</p></dd>
 <dt id="arg-ny-a">Ny4a<a class="anchor" aria-label="anchor" href="#arg-ny-a"></a></dt>
 <dd><p>–</p></dd>
 
+
+<dt id="arg--state">.state<a class="anchor" aria-label="anchor" href="#arg--state"></a></dt>
+<dd><p>An <code>RHState</code> object returned by <a href="Read.html">Read</a>, used instead of <code>InSeries</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Example1_1Cs.txt, Example1_Ustat.txt, Example1_U.dat, Example1_U.pdf</p><ul><li><p>Example1_1Cs.txt</p>
-<p>Ns &gt;= 0 is the number of changepoints identified; changepoint positions are
-Ip(1), Ip(2),...,Ip(Ns)</p></li>
-<li><p>OutFile_U.dat</p></li>
-</ul><ul><li><p><code>id</code>   :</p></li>
-<li><p><code>date</code> :</p></li>
-<li><p><code>base</code> : the original input series</p></li>
-<li><p><code>base_trend+meanshift</code>: <code>trend</code> + <code>abrupt shift</code> (for base)</p></li>
-<li><p><code>base_mean_adj</code>: <code>base</code> - <code>abrupt shift</code></p></li>
-<li><p><code>base_anomaly</code>: <code>base</code> - <code>seasonal cycle</code></p></li>
-<li><p><code>fit_of_base_anomaly</code>: <code>trend</code> + <code>abrupt shift</code> (for anomaly)</p></li>
-<li><p><code>annualC+meanShifts</code>: <code>seasonal cycle</code> + <code>abrupt shift</code> (for base)</p></li>
-<li><p><code>QM_adjusted</code>:</p></li>
-<li><p><code>fit_of_deseason_base</code>: linear trend of <code>anomal</code>. A multi-phase regression
-model fit to the de-seasonalized base series without accounting for any
-shifts (i.e. ignore all shifts identified)</p></li>
+    <p>A list with:</p><ul><li><p><code>fit</code> : <code>data.table</code>，逐年/逐月的拟合与订正结果，列含义见下</p></li>
+<li><p><code>TP</code>  : <code>data.table</code>，突变点检验结果，列 <code>kind</code>、<code>Idc</code>、<code>date</code>、<code>Ic</code>、
+<code>Nseg</code>、<code>stepsize</code>、<code>probL</code>、<code>probU</code>、<code>plev</code>、<code>PFx</code>、<code>PFx95l</code>、<code>PFx95h</code></p></li>
 </ul></div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code><a href="Read.html">Read()</a></code>、<code><a href="FindUD.html">FindUD()</a></code>、<code>readPFtable()</code></p></div>
+    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
