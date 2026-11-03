@@ -196,9 +196,10 @@ OnCalCor<-function(){
 
     for(rfname in filelist) {
       otmp=CalCor(ifname,rfname,MissingStr)
-      cat(paste(basename(ifname),basename(rfname),'Cor=',round(otmp$ocor,2),
-                ', total sample number:',otmp$ocnt,', comment:',otmp$ocomm,'\n'),
-          file=oflog,append=!(rfname==filelist[1]))
+      fprintf("%s %s Cor= %s , total sample number: %s , comment: %s \n",
+        basename(ifname), basename(rfname), round(otmp$ocor,2), otmp$ocnt, otmp$ocomm,
+        file = oflog, append = !(rfname==filelist[1])
+      )
     }
 
     par(op)

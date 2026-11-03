@@ -33,7 +33,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
 
   ofileSout<-paste(output,"_QMadjDLYstat.txt",sep="")
   file.create(ofileSout)
-  cat(paste("Input data filename:","; N=",N,"\n"),file=ofileSout)
+  fprintf("Input data filename: ; N= %s \n", N, file = ofileSout)
 
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])
@@ -83,11 +83,12 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
   B<-B+otmp$trend*Ti
 
   if(Ns>0){
-    cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
-        file=ofileSout,append=T)
-    cat(paste("\n Adjust to segment", Iseg.adj,": from",
-        if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-        "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
+    fprintf("Nseg_shortest = %s ; Mq =  %s ; Ny4a =  %s \n",
+      QMout$Nseg.mn, QMout$Mq, Ny4a, file = ofileSout, append = TRUE
+    )
+    fprintf("\n Adjust to segment %s : from %s to %s \n",
+      Iseg.adj, if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1, Ips[Iseg.adj], file = ofileSout, append = TRUE
+    )
 #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
 #       append=T)
     if(QMout$Mq>1){
@@ -103,18 +104,17 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
         if(i!=Iseg.adj)
-        cat(paste("Seg. ",i,": mean of QM-adjustments =",round(mean(QMout$W[I1:I2]),4),
-            "\n",sep=""),file=ofileSout,append=T)
+        fprintf("Seg. %s: mean of QM-adjustments =%s\n",
+          i, round(mean(QMout$W[I1:I2]),4), file = ofileSout, append = TRUE
+        )
       }
     }
   }
 
-  cat(paste("#steps= ",Ns,"; trend=",round(otmp$trend,6),"(",
-            round(otmp$betaL,6),",",round(otmp$betaU,6),") (p=",
-	    round(otmp$p.tr,4),"); cor=",
-	    round(cor,4),"(",round(corl,4),",",round(corh,4),")",
-	    round(pcor,4),"\n"),
-	    file=ofileSout,append=T)
+  fprintf("#steps=  %s ; trend= %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s ) %s \n",
+    Ns, round(otmp$trend,6), round(otmp$betaL,6), round(otmp$betaU,6), round(otmp$p.tr,4),
+    round(cor,4), round(corl,4), round(corh,4), round(pcor,4), file = ofileSout, append = TRUE
+  )
 
   if(Ns>0) for(i in 1:(Ns+1)){
     I1<-if(i==1) 1 else Ips[i-1]+1
@@ -122,8 +122,9 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
     Delta<-otmp$mu[Iseg.adj]-otmp$mu[i]
     adj[I1:I2]<-adj[I1:I2]+Delta
     stepsize<-otmp$mu[i+1]-otmp$mu[i]
-    cat(paste(Ips[i],IY0[Ips[i]],"stepsize=",round(stepsize,4),"\n"),
-        file=ofileSout,append=T)
+    fprintf("%s %s stepsize= %s \n",
+      Ips[i], IY0[Ips[i]], round(stepsize,4), file = ofileSout, append = TRUE
+    )
   }
 
 # oR<-Y1-otmp$meanhat
@@ -251,8 +252,8 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
 
   ofileSout<-paste(output,"_QMadjDLYwRefstat.txt",sep="")
   file.create(ofileSout)
-  cat(paste("The base data filename is:", Bseries,"; N=",N,"\n"),file=ofileSout)
-  cat(paste("The ref data filename is:", Rseries,"\n"),file=ofileSout,append=T)
+  fprintf("The base data filename is: %s ; N= %s \n", Bseries, N, file = ofileSout)
+  fprintf("The ref data filename is: %s \n", Rseries, file = ofileSout, append = TRUE)
 
 # if(Iadj==1|Iseg.longest==0) Iseg.adj<-Ns+1 else Iseg.adj<-Iseg.longest
   if(Iadj>(Ns+1)|Iseg.longest==0) Iseg.adj<-Ns+1
@@ -377,11 +378,12 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   if(Ns>0){
     QMout<-QMadjGaussian.wRef(bdata[,4],bdata[,4]-bdata[,5],Ips,Mq,Iseg.adj,Nadj,Nt,Ny4a)
     B<-QMout$PA
-    cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"; Ny4a = ",Ny4a,"\n"),
-        file=ofileSout,append=T)
-    cat(paste("\n Adjust to segment", Iseg.adj,": from",
-        if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-        "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
+    fprintf("Nseg_shortest = %s ; Mq =  %s ; Ny4a =  %s \n",
+      QMout$Nseg.mn, QMout$Mq, Ny4a, file = ofileSout, append = TRUE
+    )
+    fprintf("\n Adjust to segment %s : from %s to %s \n",
+      Iseg.adj, if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1, Ips[Iseg.adj], file = ofileSout, append = TRUE
+    )
 #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
 #       append=T)
     if(QMout$Mq>1){
@@ -397,8 +399,9 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
         if(i!=Iseg.adj)
-        cat(paste("Seg. ",i,": mean of QM-adjustments =",round(QMout$AdjM[i],4),
-            "\n",sep=""),file=ofileSout,append=T)
+        fprintf("Seg. %s: mean of QM-adjustments =%s\n",
+          i, round(QMout$AdjM[i],4), file = ofileSout, append = TRUE
+        )
       }
     }
   }

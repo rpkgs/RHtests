@@ -59,8 +59,8 @@ FindUD <- function(
   file.create(ofileIout)
   file.create(ofilePdf)
   file.create(ofileSout)
-  cat(paste("The nominal level of confidence (1-alpha)=", plev, "\n"), file = ofileSout)
-  cat(paste("Input data filename:", "N=", N, "\n"), file = ofileSout, append = T)
+  fprintf("The nominal level of confidence (1-alpha)= %s \n", plev, file = ofileSout)
+  fprintf("Input data filename: N= %s \n", N, file = ofileSout, append = TRUE)
 
   Ip0 <- N
   oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, EB, Imd, Icy, Nt)
@@ -97,7 +97,7 @@ FindUD <- function(
     Imx <- indices[best]
     if (prob.mx < plev) {
       #     cat("PMF finds the series to be homogeneous!\n",file=ofileIout)
-      cat(paste(0, "changepoints in Series", "\n"), file = ofileIout)
+      fprintf("%s changepoints in Series \n", 0, file = ofileIout)
       cat("PMF finds the series to be homogeneous!\n")
       #     return()
       Ns <- 0
@@ -235,14 +235,11 @@ FindUD <- function(
     Rb <- Y1 - otmp$trend * Ti + EBfull
     QMout <- QMadjGaussian(Rb, Ips, Mq, Iseg.adj, Nadj, Nt)
     B <- QMout$PA
-    cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
-      file = ofileSout, append = T
-    )
-    cat(paste(
-      "\n Adjust to segment", Iseg.adj, ": from",
-      if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
-      "to", Ips[Iseg.adj], "\n"
-    ), file = ofileSout, append = T)
+    fprintf("Nseg_shortest = %s ; Mq =  %s ; Ny4a =  %s \n",
+      QMout$Nseg.mn, QMout$Mq, Ny4a, file = ofileSout, append = TRUE)
+    fprintf("\n Adjust to segment %s : from %s to %s \n",
+      Iseg.adj, if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
+      Ips[Iseg.adj], file = ofileSout, append = TRUE)
     #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
     #       append=T)
     if (QMout$Mq > 1) {
@@ -261,8 +258,8 @@ FindUD <- function(
         I1 <- if (i == 1) 1 else Ips[i - 1] + 1
         I2 <- Ips[i]
         if (i != Iseg.adj) {
-          cat(paste("Seg. ", i, ": mean of QM-adjustments =", round(mean(QMout$W[I1:I2]), 4),
-            "\n", sep = ""), file = ofileSout, append = T)
+          fprintf("Seg. %s: mean of QM-adjustments =%.4f\n",
+            i, mean(QMout$W[I1:I2]), file = ofileSout, append = TRUE)
         }
       }
     }
@@ -274,24 +271,16 @@ FindUD <- function(
   # B<-B+EBfull+otmp$trend*Ti
   B <- B + otmp$trend * Ti
 
-  cat(file = ofileSout, paste(
-    " Ignore changepoints -> trend0 =",
-    round(beta0, 6), "(", round(betaL0, 6), ",", round(betaU0, 6), ") (p=",
-    round(p.tr0, 4), "); cor=", round(corD, 4), "(", round(corDL, 4),
-    ",", round(corDU, 4), ")\n"
-  ), append = T)
+  fprintf(" Ignore changepoints -> trend0 = %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s )\n",
+    round(beta0, 6), round(betaL0, 6), round(betaU0, 6), round(p.tr0, 4), round(corD, 4),
+    round(corDL, 4), round(corDU, 4), file = ofileSout, append = TRUE
+  )
   cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
     file = ofileSout, append = T
   )
-  cat(
-    paste(
-      "#steps= ", Ns, "; trend=", round(otmp$trend, 6), "(",
-      round(otmp$betaL, 6), ",", round(otmp$betaU, 6), ") (p=",
-      round(otmp$p.tr, 4), "); cor=",
-      round(cor, 4), "(", round(corl, 4), ",", round(corh, 4), ")",
-      round(pcor, 4), "\n"
-    ),
-    file = ofileSout, append = T
+  fprintf("#steps=  %s ; trend= %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s ) %s \n",
+    Ns, round(otmp$trend, 6), round(otmp$betaL, 6), round(otmp$betaU, 6), round(otmp$p.tr, 4),
+    round(cor, 4), round(corl, 4), round(corh, 4), round(pcor, 4), file = ofileSout, append = TRUE
   )
   if (Ns > 0) {
     for (i in 1:(Ns + 1)) {
@@ -300,9 +289,8 @@ FindUD <- function(
       Delta <- otmp$mu[Iseg.adj] - otmp$mu[i]
       adj[I1:I2] <- adj[I1:I2] + Delta
       stepsize <- otmp$mu[i + 1] - otmp$mu[i]
-      cat(paste(Ips[i], IY0[Ips[i]], "stepsize=", round(stepsize, 4), "\n"),
-        file = ofileSout, append = T
-      )
+      fprintf("%s %s stepsize= %.4f \n", Ips[i], IY0[Ips[i]],
+        stepsize, file = ofileSout, append = TRUE)
     }
   }
 
@@ -440,42 +428,23 @@ FindUD <- function(
       # browser()
       Idc <- guess_sign_level(Id, plev, probL, probU, PFx, PFx95l, PFx95h)
 
-      cat(
-        paste(sprintf("%1.0f", as.numeric(Id)), " ",
-          sprintf("%-4.4s", Idc),
-          sprintf("%10.0f", IY0[Ic]), " (",
-          sprintf("%6.4f", probL), "-",
-          sprintf("%6.4f", probU), ")",
-          sprintf("%6.3f", plev),
-          sprintf("%10.4f", PFx), " (",
-          sprintf("%10.4f", PFx95l), "-",
-          sprintf("%10.4f", PFx95h), ")\n",
-          sep = ""
-        ),
-        file = ofileIout,
-        append = TRUE
+      fprintf("%s %s%s (%s-%s)%s%s (%s-%s)\n",
+        sprintf("%1.0f", as.numeric(Id)), sprintf("%-4.4s", Idc), sprintf("%10.0f", IY0[Ic]),
+        sprintf("%6.4f", probL), sprintf("%6.4f", probU), sprintf("%6.3f", plev),
+        sprintf("%10.4f", PFx), sprintf("%10.4f", PFx95l), sprintf("%10.4f", PFx95h),
+        file = ofileIout, append = TRUE
       )
-      cat(
-        paste("PMF : c=", sprintf("%4.0f", Ic),
-          "; (Time ", sprintf("%10.0f", IY0[Ic]),
-          "); Type= ", sprintf("%4.0f", as.numeric(Id)),
-          "; p=", sprintf("%10.4f", prob),
-          "(", sprintf("%10.4f", probL),
-          "-", sprintf("%10.4f", probU),
-          "); PFmax=", sprintf("%10.4f", PFx),
-          "; CV95=", sprintf("%10.4f", PFx95),
-          "(", sprintf("%10.4f", PFx95l),
-          "-", sprintf("%10.4f", PFx95h),
-          "); Nseg=", sprintf("%4.0f", Nseg), "\n",
-          sep = ""
-        ),
-        file = ofileSout, append = T
+      fprintf("PMF : c=%s; (Time %s); Type= %s; p=%s(%s-%s); PFmax=%s; CV95=%s(%s-%s); Nseg=%s\n",
+        sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%4.0f", as.numeric(Id)),
+        sprintf("%10.4f", prob), sprintf("%10.4f", probL), sprintf("%10.4f", probU),
+        sprintf("%10.4f", PFx), sprintf("%10.4f", PFx95), sprintf("%10.4f", PFx95l),
+        sprintf("%10.4f", PFx95h), sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
       )
       d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
     }
 
     if (Ns == 0) cat("PMF finds the series to be homogeneous!\n")
-    cat(paste("# ", Ns, "changepoints in Series", "\n"), file = ofileIout)
+    fprintf("#  %s changepoints in Series \n", Ns, file = ofileIout)
 
     if (!is_empty(d_TP)) {
       d_TP %<>% do.call(rbind, .)

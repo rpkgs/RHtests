@@ -69,23 +69,16 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
   meanhat0 <- dtmp$meanhat
   Ehat0 <- mean(meanhat0)
 
-  cat(
-    paste(
-      "Ignore changepoints -> trend0 =", round(dtmp$trend, 6),
-      "(", round(dtmp$betaL, 6), ",", round(dtmp$betaU, 6), ")",
-      "(p=", round(dtmp$p.tr, 4), "); cor=", round(dtmp$cor, 4),
-      "(", round(dtmp$corl, 4), ",", round(dtmp$corh, 4), ")\n\n"
-    ),
-    file = ofileSout, append = TRUE
+  fprintf("Ignore changepoints -> trend0 = %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s )\n\n",
+    round(dtmp$trend, 6), round(dtmp$betaL, 6), round(dtmp$betaU, 6), round(dtmp$p.tr, 4),
+    round(dtmp$cor, 4), round(dtmp$corl, 4), round(dtmp$corh, 4), file = ofileSout, append = TRUE
   )
   cat("Step-sizes estimated from difference series:\n", file = ofileSout, append = TRUE)
   cat(round(diff(muDif), 4), file = ofileSout, append = TRUE, fill = 80)
-  cat(paste(
-    "\n after such adjustments, the base series trend=",
-    round(betaD, 6), "(", round(betaDL, 6), ",", round(betaDU, 6),
-    ") (p=", round(p.trD, 4), "); cor=",
-    round(corD, 3), "(", round(corDL, 3), ",", round(corDU, 3), ")\n\n"
-  ), file = ofileSout, append = TRUE)
+  fprintf("\n after such adjustments, the base series trend= %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s )\n\n",
+    round(betaD, 6), round(betaDL, 6), round(betaDU, 6), round(p.trD, 4), round(corD, 3),
+    round(corDL, 3), round(corDU, 3), file = ofileSout, append = TRUE
+  )
 
   # 迭代：拟合多段趋势 → 订正 → 重估季节周期，直到季节周期稳定。
   EB <- rmCycle(bdata)$EB[match(IYM, inds)]
@@ -128,21 +121,19 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
       bdata[, 4], bdata[, 4] - bdata[, 5], Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a
     )
     B <- QMout$PA
-    cat(paste("Nseg_shortest =", QMout$Nseg.mn, "; Mq = ", QMout$Mq, "; Ny4a = ", Ny4a, "\n"),
-      file = ofileSout, append = TRUE
+    fprintf("Nseg_shortest = %s ; Mq =  %s ; Ny4a =  %s \n",
+      QMout$Nseg.mn, QMout$Mq, Ny4a, file = ofileSout, append = TRUE
     )
-    cat(paste(
-      "\n Adjust to segment", Iseg.adj, ": from",
-      if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
-      "to", Ips[Iseg.adj], "\n"
-    ), file = ofileSout, append = TRUE)
+    fprintf("\n Adjust to segment %s : from %s to %s \n",
+      Iseg.adj, if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1, Ips[Iseg.adj], file = ofileSout, append = TRUE
+    )
     if (QMout$Mq > 1) {
       oline <- paste("#Fcat: frequency category boundaries\n",
         "#DP: Difference in the category means\n#",
         sep = ""
       )
       for (i in seq_len(Ns)) oline <- paste(oline, paste0("Fcat.Seg", i), paste0("DP.Seg", i))
-      cat(paste(oline, "\n"), file = ofileSout, append = TRUE)
+      fprintf("%s \n", oline, file = ofileSout, append = TRUE)
       write.table(round(QMout$osmean, 4),
         file = ofileSout, append = TRUE, row.names = FALSE, col.names = FALSE
       )
@@ -185,13 +176,9 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
   cat("Common trend TPR fit to the de-seasonalized Base series:\n",
     file = ofileSout, append = TRUE
   )
-  cat(
-    paste(
-      "#steps= ", Ns, "; trend=", round(sig[2], 6), "(p=", round(p.tro, 4),
-      "); cor=", round(corout[1], 4), "(", round(corout[2], 4), ",",
-      round(corout[3], 4), ")  p=", round(corout[4], 4), "\n"
-    ),
-    file = ofileSout, append = TRUE
+  fprintf("#steps=  %s ; trend= %s (p= %s ); cor= %s ( %s , %s )  p= %s \n",
+    Ns, round(sig[2], 6), round(p.tro, 4), round(corout[1], 4), round(corout[2], 4),
+    round(corout[3], 4), round(corout[4], 4), file = ofileSout, append = TRUE
   )
   # 段间位移：首段取 sig[3]，其后取相邻 sig 之差。
   if (Ns > 0) {

@@ -1,7 +1,7 @@
 # 写出有参考序列时的输入信息及差值序列自相关。
 log_ref_inputs <- function(file, base, reference, fit, probability) {
-  cat(paste("Input Base Series:", base, "\n"), file = file)
-  cat(paste("Input Ref Series:", reference, "\n"), file = file, append = TRUE)
+  fprintf("Input Base Series: %s \n", base, file = file)
+  fprintf("Input Ref Series: %s \n", reference, file = file, append = TRUE)
   fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
     fit$cor, fit$corl, fit$corh, probability, file = file, append = TRUE
   )
@@ -81,7 +81,7 @@ write_qm_log <- function(QMout, segments, Iseg.adj, Ny4a, adjustment, file) {
     "#DP: Difference in the category means\n#", sep = ""
   )
   for (i in seq_len(Ns)) oline <- paste(oline, paste0("Fcat.Seg", i), paste0("DP.Seg", i))
-  cat(paste(oline, "\n"), file = file, append = TRUE)
+  fprintf("%s \n", oline, file = file, append = TRUE)
   write.table(round(QMout$osmean, 4), file = file, append = TRUE, row.names = FALSE, col.names = FALSE)
   for (i in seq_along(segments$end)) {
     if (i != Iseg.adj) {

@@ -74,12 +74,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
 
   ofileSout<-paste(output,"_UDstat.txt",sep="")
   file.create(ofileSout)
-  cat(paste("Input data filename:","; N=",N,"; Nday=",Nall,
-            "; pthr=",pthr,"\n"), file=ofileSout)
-  cat(paste("The nominal level of confidence (1-alpha)=",plev,"\n"),
-      file=ofileSout,append=T)
-  cat(paste("The smallest non-zero dailyP is:",smallestP,"\n"),
-      file=ofileSout,append=T)
+  fprintf("Input data filename: ; N= %s ; Nday= %s ; pthr= %s \n", N, Nall, pthr, file = ofileSout)
+  fprintf("The nominal level of confidence (1-alpha)= %s \n", plev, file = ofileSout, append = TRUE)
+  fprintf("The smallest non-zero dailyP is: %s \n", smallestP, file = ofileSout, append = TRUE)
 
   P<-Y0
   aa<-(-1)
@@ -275,8 +272,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   else Ids<-0
 
 
-  cat(paste("Best lambda=",round(lambda,2),"; Ns=",Ns,"; likelihood=",
-            round(LH.max,2),"\n\n"),file=ofileSout,append=T)
+  fprintf("Best lambda= %s ; Ns= %s ; likelihood= %s \n\n",
+    round(lambda,2), Ns, round(LH.max,2), file = ofileSout, append = TRUE
+  )
   Y1<-BCtrans(Y0,lambda)
 
   if(Ns>0) {
@@ -292,10 +290,10 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   Ipd<-c(N)
   dtmp<-LSmultipleRed(Y1,Ti,Ipd, IY0flg, Nt)
   beta0<-dtmp$trend
-  cat(paste("Ignore changepoints -> trend0 =",round(beta0,6),
-            "(p=", round(dtmp$p.tr,4), "); cor=", round(dtmp$cor,4),
-            "(",round(dtmp$corl,4),",",round(dtmp$corh,4),")\n\n"),
-      file=ofileSout,append=TRUE)
+  fprintf("Ignore changepoints -> trend0 = %s (p= %s ); cor= %s ( %s , %s )\n\n",
+    round(beta0,6), round(dtmp$p.tr,4), round(dtmp$cor,4), round(dtmp$corl,4), round(dtmp$corh,4),
+    file = ofileSout, append = TRUE
+  )
 
   otmp<-LSmultipleRed(Y1,Ti,Ips, IY0flg, Nt)
   cor<-otmp$cor
@@ -319,7 +317,7 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
   #           file=ofileSout,append=T)
 
   if(Ns>0) {
-    cat(paste("Step-sizes of the transfromed/original series:\n"),file=ofileSout,append=T)
+    fprintf("Step-sizes of the transfromed/original series:\n", file = ofileSout, append = TRUE)
     C<-rep(NA,Ns); sumC<-0; E<-rep(0,Ns+1)
     for(i in 1:Ns){
       I1<-if(i==1) 1 else Ips[i-1]+1
@@ -333,10 +331,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
       sumC<-sumC+C[i]
       E[i+1]<-sumC
       stepsize<-otmp$mu[i+1]-otmp$mu[i]
-      cat(paste(Ips[i],IY0[Ips[i]],
-                "transfered stepsize=",round(stepsize,4),
-                "original stepsize=",round(C[i],4),
-                "\n"), file=ofileSout,append=T)
+      fprintf("%s %s transfered stepsize= %s original stepsize= %s \n",
+        Ips[i], IY0[Ips[i]], round(stepsize,4), round(C[i],4), file = ofileSout, append = TRUE
+      )
     }
 
     # calculate IBC adjustment
@@ -391,11 +388,12 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
     PA<-QMout$PA
     #   PA[PA<smallestP]<-max(c(smallestP,pthr))
     PA[PA<smallestP]<-smallestP
-    cat(paste("Nseg_shortest =",QMout$Nseg.mn,"; Mq = ",QMout$Mq,"\n"),
-        file=ofileSout,append=T)
-    cat(paste("\n Adjust to segment", Iseg.adj,": from",
-              if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1,
-              "to",Ips[Iseg.adj],"\n"),file=ofileSout,append=T)
+    fprintf("Nseg_shortest = %s ; Mq =  %s \n",
+      QMout$Nseg.mn, QMout$Mq, file = ofileSout, append = TRUE
+    )
+    fprintf("\n Adjust to segment %s : from %s to %s \n",
+      Iseg.adj, if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1, Ips[Iseg.adj], file = ofileSout, append = TRUE
+    )
 
     if(QMout$Mq>1){
       cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
@@ -405,8 +403,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
-        cat(paste("Seg. ",i,": mean of QM-adjustments =",round(mean(QMout$W[I1:I2]),4),
-                  "\n",sep=""),file=ofileSout,append=T)
+        fprintf("Seg. %s: mean of QM-adjustments =%s\n",
+          i, round(mean(QMout$W[I1:I2]),4), file = ofileSout, append = TRUE
+        )
       }
     }
     if(QMout$Mq==1) PA<-rep(NA,length(QMout$PA))
@@ -433,15 +432,18 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
     otrend.ori<-getMtrendFdly(itable[,2:5])
     otrend.IBC<-getMtrendFdly(cbind(itable[,2:4],PdA))
 
-    cat(paste("Linear trend in the original monthly total P is trend0=",
-              round(otrend.ori,5),"mm/month\n"),file=ofileSout,append=T)
+    fprintf("Linear trend in the original monthly total P is trend0= %s mm/month\n",
+      round(otrend.ori,5), file = ofileSout, append = TRUE
+    )
     if(QMout$Mq>1){
       otrend.QM<-getMtrendFdly(cbind(itable[,2:4],PA))
-      cat(paste("Linear trend in QMadjusted monthly total P is trendQM=",
-                round(otrend.QM,5),"mm/month\n"),file=ofileSout,append=T)
+      fprintf("Linear trend in QMadjusted monthly total P is trendQM= %s mm/month\n",
+        round(otrend.QM,5), file = ofileSout, append = TRUE
+      )
     }
-    cat(paste("Linear trend in mean adjusted(IBC) monthly total P is trend(IBC)=",
-              round(otrend.IBC,5),"mm/month\n\n"),file=ofileSout,append=T)
+    fprintf("Linear trend in mean adjusted(IBC) monthly total P is trend(IBC)= %s mm/month\n\n",
+      round(otrend.IBC,5), file = ofileSout, append = TRUE
+    )
 
   }
   else{
@@ -450,8 +452,9 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
     odata<-cbind(1:nrow(ori.itable),ori.itable[,1]*10000+ori.itable[,2]*100+ori.itable[,3],
                  ori.itable[,4],ori.itable[,4],0,0,0,0,0,0,0,0)
     otrend.ori<-getMtrendFdly(itable[,2:5])
-    cat(paste("Linear trend in the original monthly total P is trend0=",
-              round(otrend.ori,5),"mm/month\n"),file=ofileSout,append=T)
+    fprintf("Linear trend in the original monthly total P is trend0= %s mm/month\n",
+      round(otrend.ori,5), file = ofileSout, append = TRUE
+    )
   }
   # ofileDout<-paste(output,"_adj_UD.dat",sep="")
   # write.table(odata,file=ofileDout,na=MissingValueCode,col.names=F,row.names=F)
@@ -590,12 +593,11 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
 
   d_TP = list()
   if(Ns==0) {
-    cat(paste(Ns,"changepoints in Series","\n"),file=ofileIout)
+    fprintf("%s changepoints in Series \n", Ns, file = ofileIout)
     cat("PMF finds no Type-1 changepoints in the series!\n")
   }
   else{
-    cat(paste(Ns,"changepoints in Series","\n"),
-        file=ofileIout)
+    fprintf("%s changepoints in Series \n", Ns, file = ofileIout)
     for(i in 1:Ns){
       I1<- if(i==1) 1 else Ips[i-1]+1
       Ic<-Ips[i]
@@ -649,28 +651,18 @@ FindUD.dlyPrcp<-function(InSeries, InCs, output,
         else if(PFx>=PFx95h) Idc<-"Yes "
       }
 
-      cat(paste(sprintf("%1.0f",Ids[i])," ",
-                sprintf("%-4.4s",Idc),
-                sprintf("%10.0f", IY0[Ic])," (",
-                sprintf("%10.4f",probL),"-",
-                sprintf("%10.4f",probU),")",
-                sprintf("%6.3f",plev),
-                sprintf("%10.4f",PFx)," (",
-                sprintf("%10.4f",PFx95l),"-",
-                sprintf("%10.4f",PFx95h),")\n",sep=""),
-          file=ofileIout,
-          append=TRUE)
-      cat(paste("PMF : c=", sprintf("%4.0f",Ic),
-                "; (Time ", sprintf("%10.0f",IY0[Ic]),
-                "); Type= 1; p=",sprintf("%10.4f",prob),"(",
-                sprintf("%10.4f",probL),"-",
-                sprintf("%10.4f",probU),")",
-                "; PFmax=", sprintf("%10.4f",PFx),
-                "; CV95=", sprintf("%10.4f",PFx95),
-                "(", sprintf("%10.4f",PFx95l),
-                "-", sprintf("%10.4f",PFx95h),
-                "); Nseg=", sprintf("%4.0f",Nseg),"\n",sep=""),
-          file=ofileSout, append=T)
+      fprintf("%s %s%s (%s-%s)%s%s (%s-%s)\n",
+        sprintf("%1.0f",Ids[i]), sprintf("%-4.4s",Idc), sprintf("%10.0f", IY0[Ic]),
+        sprintf("%10.4f",probL), sprintf("%10.4f",probU), sprintf("%6.3f",plev),
+        sprintf("%10.4f",PFx), sprintf("%10.4f",PFx95l), sprintf("%10.4f",PFx95h),
+        file = ofileIout, append = TRUE
+      )
+      fprintf("PMF : c=%s; (Time %s); Type= 1; p=%s(%s-%s); PFmax=%s; CV95=%s(%s-%s); Nseg=%s\n",
+        sprintf("%4.0f",Ic), sprintf("%10.0f",IY0[Ic]), sprintf("%10.4f",prob),
+        sprintf("%10.4f",probL), sprintf("%10.4f",probU), sprintf("%10.4f",PFx),
+        sprintf("%10.4f",PFx95), sprintf("%10.4f",PFx95l), sprintf("%10.4f",PFx95h),
+        sprintf("%4.0f",Nseg), file = ofileSout, append = TRUE
+      )
        d_TP[[i]] <- data.table(kind = Ids[i], Idc, date = IY0[Ic],
                 probL, probU, plev, PFx, PFx95l, PFx95h) 
     }

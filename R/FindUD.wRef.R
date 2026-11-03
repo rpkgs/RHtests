@@ -109,7 +109,7 @@ FindUD.wRef <- function(
     probU <- max(c(prob1, prob2, prob3))
     if (probU < plev) {
       #     cat("PMT finds the series to be homogeneous!\n",file=ofileIout)
-      cat(paste(Ns, "changepoints in Series", Bseries, ",", Rseries, "\n"),
+      fprintf("%s changepoints in Series %s , %s \n", Ns, Bseries, Rseries,
         file = ofileIout
       )
       if (!GUI) {
@@ -260,10 +260,10 @@ FindUD.wRef <- function(
   # ofileRout<-paste(output,"_Base_Ref.fitUD",sep="")
   file.create(ofileSout)
   # file.create(ofileRout)
-  cat(paste("Input Base Series:", Bseries, "\n"), file = ofileSout)
-  cat(paste("Input Ref Series:", Rseries, "\n"), file = ofileSout, append = T)
+  fprintf("Input Base Series: %s \n", Bseries, file = ofileSout)
+  fprintf("Input Ref Series: %s \n", Rseries, file = ofileSout, append = TRUE)
   if (Ns == 0) {
-    cat(paste(Ns, "changepoints in Series", Bseries, ",", Rseries, "\n"),
+    fprintf("%s changepoints in Series %s , %s \n", Ns, Bseries, Rseries,
       file = ofileIout
     )
     #   cat("PMT finds the series to be homogeneous!\n",
@@ -275,13 +275,10 @@ FindUD.wRef <- function(
       stop("PMT finds the series ", Bseries, " to be homogeneous!", call. = FALSE)
     }
   } else {
-    cat(paste(
-      "The adj-diff. autocor is:", round(cor, 4), "(", round(corl, 4),
-      ",", round(corh, 4), "p=", round(p.cor, 4), ")\n"
-    ), file = ofileSout, append = T)
-    cat(paste(Ns, "changepoints in Series", Bseries, "\n"),
-      file = ofileIout
-    )
+    fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
+      cor, corl, corh, p.cor,
+      file = ofileSout, append = TRUE)
+    fprintf("%s changepoints in Series %s \n", Ns, Bseries, file = ofileIout)
   }
   d_TP <- list()
   for (i in 1:Ns) {
@@ -321,21 +318,11 @@ FindUD.wRef <- function(
       } else if (PTx0 >= PTx95U) Idc <- "Yes "
     }
 
-    cat(
-      paste("PMT : c=", sprintf("%4.0f", Ic),
-        "; (Time ", sprintf("%10.0f", IY0[Ic]),
-        "); Type=", sprintf("%4.0f", as.numeric(Id)),
-        "; p=", sprintf("%10.4f", prob),
-        "(", sprintf("%10.4f", probL),
-        "-", sprintf("%10.4f", probU),
-        "); PTmax=", sprintf("%10.4f", PTx0),
-        "; CV95=", sprintf("%10.4f", PTx95),
-        "(", sprintf("%10.4f", PTx95L),
-        "-", sprintf("%10.4f", PTx95U),
-        "); Nseg=", sprintf("%4.0f", Nseg), "\n",
-        sep = ""
-      ),
-      file = ofileSout, append = TRUE
+    fprintf("PMT : c=%s; (Time %s); Type=%s; p=%s(%s-%s); PTmax=%s; CV95=%s(%s-%s); Nseg=%s\n",
+      sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%4.0f", as.numeric(Id)),
+      sprintf("%10.4f", prob), sprintf("%10.4f", probL), sprintf("%10.4f", probU),
+      sprintf("%10.4f", PTx0), sprintf("%10.4f", PTx95), sprintf("%10.4f", PTx95L),
+      sprintf("%10.4f", PTx95U), sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
     )
     d_TP[[i]] <- data.table(
       kind = Id, Idc, date = IY0[Ic],

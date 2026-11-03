@@ -53,7 +53,7 @@ StepSize.wRef <- function(
 
   if (debug) log_ref_inputs(ofileSout, Bseries, Rseries, fit_diff, p.cor)
 
-  cat(paste(Ns, "changepoints in Series", Bseries, "\n"), file = ofileIout)
+  fprintf("%s changepoints in Series %s \n", Ns, Bseries, file = ofileIout)
   d_TP <- test_changepoints_ref(Y0, IY0, Ips, Ids, fit_diff, plev, phi, PTmax)
   if (debug) write_test_log(d_TP, "PMT", ofileSout)
 

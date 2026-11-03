@@ -563,7 +563,7 @@ OnadjDLYp<-function(){
           ifileAout<-paste(ofname,"_",Snames[ith],"_adjDLYp.dat",sep="")
           iftmp<-paste(ofname,"_",Snames[ith],".dat",sep="")
           if(ith>1) cat("\n\n",file=ofileSout,append=T)
-          cat(paste("#  ",ifname,"season:",Snames[ith],"\n"),file=ofileSout,append=T)
+          fprintf("#   %s season: %s \n", ifname, Snames[ith], file = ofileSout, append = TRUE)
           file.append(ofileSout,ifileSout)
           file.remove(ifileSout)
           i1data<-read.table(ifileAout)

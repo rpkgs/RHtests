@@ -107,13 +107,12 @@ FindU.wRef <- function(
   # ofileMout <- paste(output, "_mCs.txt", sep = "")
   # ofileRout<-paste(output,"_Base_Ref.fitU",sep="")
   if (otmp$PTk < PTx95L) { # search for more changepoints
-    cat(paste(
-      Ns, "changepoints in Series", Bseries,
-      paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
+    fprintf("%s changepoints in Series %s %s \n",
+      Ns, Bseries, paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
         sprintf("%10.0f", 19000101), ")",
         sep = ""
-      ), "\n"
-    ), file = ofileIout)
+      ), file = ofileIout
+    )
     cat("PMT finds no Type-1 changepoints in the series!\n")
     Ns <- 0
     Ips <- N
@@ -240,8 +239,8 @@ FindU.wRef <- function(
 
   ofileSout <- paste(output, "_Ustat.txt", sep = "")
   file.create(ofileSout)
-  cat(paste("Input Base Series:", Bseries, "\n"), file = ofileSout)
-  cat(paste("Input Ref Series:", Rseries, "\n"), file = ofileSout, append = T)
+  fprintf("Input Base Series: %s \n", Bseries, file = ofileSout)
+  fprintf("Input Ref Series: %s \n", Rseries, file = ofileSout, append = TRUE)
 
   d_TP <- list()
   if (Ns > 0) {
@@ -268,20 +267,11 @@ FindU.wRef <- function(
         Idc <- "?   "
       } else if (otmp$PTk >= PTx95h) Idc <- "Yes "
       #     }
-      cat(
-        paste("PMT : c=", sprintf("%4.0f", Ic),
-          "; (Time ", sprintf("%10.0f", IY0[Ic]),
-          "); Type= 1; p=", sprintf("%10.4f", probW), "(",
-          sprintf("%6.4f", probL), "-",
-          sprintf("%6.4f", probU), ")",
-          "; PTmax=", sprintf("%10.4f", otmp$PTk),
-          "; CV95=", sprintf("%10.4f", PTx95),
-          "(", sprintf("%10.4f", PTx95l),
-          "-", sprintf("%10.4f", PTx95h),
-          "); Nseg=", sprintf("%4.0f", Nseg), "\n",
-          sep = ""
-        ),
-        file = ofileSout, append = TRUE
+      fprintf("PMT : c=%s; (Time %s); Type= 1; p=%s(%s-%s); PTmax=%s; CV95=%s(%s-%s); Nseg=%s\n",
+        sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%10.4f", probW),
+        sprintf("%6.4f", probL), sprintf("%6.4f", probU), sprintf("%10.4f", otmp$PTk),
+        sprintf("%10.4f", PTx95), sprintf("%10.4f", PTx95l), sprintf("%10.4f", PTx95h),
+        sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
       )
       d_TP[[i]] <- data.table(
         kind = 1, Idc, date = IY0[Ic],
@@ -291,21 +281,19 @@ FindU.wRef <- function(
   }
 
   if (Ns == 0) {
-    cat(paste(
-      Ns, "changepoints in Series", Bseries, ",", Rseries,
-      paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
+    fprintf("%s changepoints in Series %s , %s %s \n",
+      Ns, Bseries, Rseries, paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
         sprintf("%10.0f", 19000101), ")",
         sep = ""
-      ), "\n"
-    ), file = ofileIout)
+      ), file = ofileIout
+    )
     cat("PMT finds no Type-1 changepoints in the series!\n")
   } else {
-    cat(paste(
-      "The adj-diff. autocor is:", round(cor, 4), "(", round(corl, 4),
-      ",", round(corh, 4), "p=", round(p.cor, 4), ")\n"
-    ), file = ofileSout, append = T)
-    cat(paste(Ns, "changepoints in Series", Bseries, ",", Rseries, "\n"),
-      file = ofileIout, append = T
+    fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
+      cor, corl, corh, p.cor,
+      file = ofileSout, append = TRUE)
+    fprintf("%s changepoints in Series %s , %s \n", Ns, Bseries, Rseries,
+      file = ofileIout, append = TRUE
     )
   }
   if (!is_empty(d_TP)) {
