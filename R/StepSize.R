@@ -17,7 +17,9 @@ StepSize <- function(
   # 读取计算状态，或使用上游传入的状态。
   state <- if (is.null(.state)) {
     Read(InSeries, MissingValueCode, plev)
-  } else .state
+  } else {
+    .state
+  }
   check_rh_state(state, reference = FALSE, plev = plev)
   c(Y0, Ti, IY0, IY0flg, Imd, itable, ori.itable, ooflg) %<-%
     state@series[c("Y0", "Ti", "IY0", "IY0flg", "Imd", "itable", "ori.itable", "ooflg")]
@@ -134,13 +136,14 @@ StepSize <- function(
 
 # 写出趋势拟合与订正结果摘要。
 log_fit_summary <- function(ofileSout, plev, N, fit_base, Ns, QMout, Ny4a,
-                         Iseg.adj, Ips, otmp, cor, corl, corh, pcor) {
+                            Iseg.adj, Ips, otmp, cor, corl, corh, pcor) {
   fprintf("The nominal level of confidence (1-alpha)= %.4f \n", plev, file = ofileSout)
   fprintf("Input data filename: N= %d \n", N, file = ofileSout, append = TRUE)
   fprintf(
     " Ignore changepoints -> trend0 = %.6f ( %.6f , %.6f ) (p= %.4f ); cor= %.4f ( %.4f , %.4f )\n",
     fit_base$trend, fit_base$betaL, fit_base$betaU, fit_base$p.tr,
-    fit_base$cor, fit_base$corl, fit_base$corh, file = ofileSout, append = TRUE
+    fit_base$cor, fit_base$corl, fit_base$corh,
+    file = ofileSout, append = TRUE
   )
   cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
     file = ofileSout, append = T
@@ -156,13 +159,14 @@ log_fit_summary <- function(ofileSout, plev, N, fit_base, Ns, QMout, Ny4a,
   fprintf(
     "#steps=  %d ; trend= %.6f ( %.6f , %.6f ) (p= %.4f ); cor= %.4f ( %.4f , %.4f ) %.4f \n",
     Ns, otmp$trend, otmp$betaL, otmp$betaU, otmp$p.tr, cor, corl, corh,
-    pcor, file = ofileSout, append = TRUE
+    pcor,
+    file = ofileSout, append = TRUE
   )
 }
 
 # 组装拟合序列，并恢复闰日数据。
 build_fitted_table <- function(ori.itable, ooflg, otmp, EEB, adj, EBfull, meanhat0,
-                          Ns, QMout, B, Y1, Ti, Ips, IY0, Mq, Iseg.adj, Nadj, Nt) {
+                               Ns, QMout, B, Y1, Ti, Ips, IY0, Mq, Iseg.adj, Nadj, Nt) {
   ori.itable <- as_tibble(ori.itable)
   n <- nrow(ori.itable)
   expand <- function(x) expand_values(x, ooflg, n)
@@ -257,7 +261,6 @@ test_changepoints <- function(Y1, Ti, Ips, Ids, IY0, fit, plev, stepsizes, phi, 
         probL, probU, plev, PFx, PFx95l, PFx95h, prob, PFx95
       )
     }
-
   }
   d_TP
 }

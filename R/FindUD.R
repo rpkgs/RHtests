@@ -31,7 +31,7 @@ FindUD <- function(
   Debug <- TRUE
   flog <- paste(output, ".log", sep = "")
   Nmin <- 10
-  if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
+  if (Ny4a > 0 && Ny4a <= 5) Ny4a <- 5
 
   N <- length(Y0)
   Nadj <- Ny4a * Nt
@@ -112,7 +112,7 @@ FindUD <- function(
     Ips <- match_changepoint_dates(TP$date, IY0)
     Ids <- TP$kind
 
-    if (sum(is.na(Ips)) > 0 | !identical(Ips, sort(Ips))) {
+    if (sum(is.na(Ips)) > 0 || !identical(Ips, sort(Ips))) {
       message <- paste("FindUD: invalid changepoint indices:", paste(Ips, collapse = " "), "\n")
       stop(message, call. = FALSE)
     }
@@ -144,7 +144,7 @@ FindUD <- function(
           prob.mx <- (-1)
           probL.mx <- (-1)
           PFx.mx <- (-1)
-          for (i in 1:length(Ips0)) {
+          for (i in seq_along(Ips0)) {
             Ips1 <- sort(c(Ips, Ips0[i]))
             ith <- match(Ips0[i], Ips1)
             otmp <- PMFxIseg(Y1, Ti, Ips1, ith, IY0flg, Nt, phi, PFmax)
@@ -173,7 +173,7 @@ FindUD <- function(
       }
     }
     Ids0 <- rep(NA, length(Ips))
-    for (i in 1:length(Ips)) {
+    for (i in seq_along(Ips)) {
       if (Ips[i] %in% Ips.i) {
         Ids0[i] <- Ids[Ips.i == Ips[i]]
       } else {
@@ -198,7 +198,7 @@ FindUD <- function(
           }
         } # end if documented
       }
-      if (Iseg.mn > 0 & probL.mn < plev) {
+      if (Iseg.mn > 0 && probL.mn < plev) {
         Ips <- Ips[-Iseg.mn]
         Ids <- Ids[-Iseg.mn]
         Ns <- Ns - 1
@@ -229,7 +229,7 @@ FindUD <- function(
 
   itmp <- merge(itmp1, itmp2, by = "Icy")
   EBfull <- itmp[order(itmp[, "idx"]), "EB1"]
-  EEB <- mean(EB1, na.rm = T)
+  EEB <- mean(EB1, na.rm = TRUE)
 
   if (Ns > 0) {
     Rb <- Y1 - otmp$trend * Ti + EBfull
@@ -249,10 +249,10 @@ FindUD <- function(
         paste("DP.Seg", i, sep = ""))
       
       oline <- paste(oline, "\n")
-      cat(oline, file = ofileSout, append = T)
+      cat(oline, file = ofileSout, append = TRUE)
 
       write.table(round(QMout$osmean, 4),
-        file = ofileSout, append = T, row.names = F, col.names = F)
+        file = ofileSout, append = TRUE, row.names = FALSE, col.names = FALSE)
       
       for (i in 1:(Ns + 1)) {
         I1 <- if (i == 1) 1 else Ips[i - 1] + 1
@@ -276,7 +276,7 @@ FindUD <- function(
     round(corDL, 4), round(corDU, 4), file = ofileSout, append = TRUE
   )
   cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
-    file = ofileSout, append = T
+    file = ofileSout, append = TRUE
   )
   fprintf("#steps=  %s ; trend= %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s ) %s \n",
     Ns, round(otmp$trend, 6), round(otmp$betaL, 6), round(otmp$betaU, 6), round(otmp$p.tr, 4),
@@ -323,24 +323,24 @@ FindUD <- function(
   odata[ooflg, 10] <- round(meanhat0, 4)
 
   Imd1 <- ori.itable[, 2] * 100 + ori.itable[, 3]
-  if (sum(is.na(ori.itable[, 4]) == F & Imd1 == 229) > 0) {
+  if (sum(is.na(ori.itable[, 4]) == FALSE & Imd1 == 229) > 0) {
     if (Ns > 0) {
-      tdata <- ori.itable[is.na(ori.itable[, 4]) == F, ]
+      tdata <- ori.itable[is.na(ori.itable[, 4]) == FALSE, ]
       IY1 <- tdata[, 1] * 10000 + tdata[, 2] * 100 + tdata[, 3]
       Ips.ymd <- IY0[Ips]
       Ips.1 <- rep(NA, Ns + 1)
-      for (i in 1:Ns) Ips.1[i] <- c(1:length(IY1))[IY1 == Ips.ymd[i]]
+      for (i in 1:Ns) Ips.1[i] <- c(seq_along(IY1))[IY1 == Ips.ymd[i]]
       Ips.1[Ns + 1] <- length(IY1)
-      #     Ips.1<-c(1:length(IY1))[Ips.ymd==IY1]
+      #     Ips.1<-c(seq_along(IY1))[Ips.ymd==IY1]
       Imd2 <- tdata[, 2] * 100 + tdata[, 3]
-      Ids.leap <- c(1:length(Imd2))[Imd2 == 229]
+      Ids.leap <- c(seq_along(Imd2))[Imd2 == 229]
       Nl <- length(Ids.leap)
       Rb <- Y1 - otmp$trend * Ti + EBfull
       Rb1 <- tdata[, 4]
       Rb1[-Ids.leap] <- Rb
       Ti1 <- rep(NA, length(IY1))
       Ti1[-Ids.leap] <- Ti
-      for (i in 1:length(Ids.leap)) {
+      for (i in seq_along(Ids.leap)) {
         Rb1[Ids.leap[i]] <- tdata[Ids.leap[i], 4] + Rb1[Ids.leap[i] - 1] - tdata[Ids.leap[i] - 1, 4]
         Ti1[Ids.leap[i]] <- Ti1[Ids.leap[i] - 1]
       }
@@ -348,13 +348,13 @@ FindUD <- function(
         B1 <- QMadjGaussian(Rb1, Ips.1, Mq, Iseg.adj, Nadj, Nt)$PA
         B1 <- B1 + otmp$trend * Ti1
         B1.leap <- B1[Ids.leap]
-        odata[is.na(odata[, 3]) == F & Imd1 == 229, 9] <- round(B1.leap, 4)
+        odata[is.na(odata[, 3]) == FALSE & Imd1 == 229, 9] <- round(B1.leap, 4)
       }
     } else {
       odata[Imd1 == 229, 9] <- odata[Imd1 == 229, 3]
     }
-    Ids.leapo <- c(1:dim(ori.itable)[1])[is.na(ori.itable[, 4]) == F & Imd1 == 229]
-    for (jth in 1:length(Ids.leapo)) {
+    Ids.leapo <- c(1:dim(ori.itable)[1])[is.na(ori.itable[, 4]) == FALSE & Imd1 == 229]
+    for (jth in seq_along(Ids.leapo)) {
       kth <- Ids.leapo[jth]
       if (Ns > 0) {
         k1th <- if (odata[kth - 1, 2] %in% IY0[Ips]) (kth + 1) else (kth - 1)
@@ -470,7 +470,7 @@ guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
   if (Id == 0) { # type-0 changepoints
     if (plev > probU) {
       Idc <- "No  "
-    } else if (plev > probL & plev <= probU) {
+    } else if (plev > probL && plev <= probU) {
       Idc <- "?   "
     } else if (plev <= probL) {
       Idc <- "YifD"
@@ -480,7 +480,7 @@ guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
   } else if (Id == 1) { # type-1 changepoints
     if (PFx < PFx95l) {
       Idc <- "No  "
-    } else if (PFx >= PFx95l & PFx < PFx95h) {
+    } else if (PFx >= PFx95l && PFx < PFx95h) {
       Idc <- "?   "
     } else if (PFx >= PFx95h) {
       Idc <- "Yes "

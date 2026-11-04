@@ -40,7 +40,7 @@ RHState <- S7::new_class(
       return("reference must be a single non-missing logical value")
     }
     if (length(self@plev) != 1L || is.na(self@plev) ||
-        !self@plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
+      !self@plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
       return("plev must be a supported confidence level")
     }
 
@@ -54,11 +54,13 @@ RHState <- S7::new_class(
       c("Imd", "itable", "ori.itable", "ooflg")
     })
     missing <- setdiff(required, names(series))
-    if (length(missing)) return(paste("Missing series fields: ", paste(missing, collapse = ", ")))
+    if (length(missing)) {
+      return(paste("Missing series fields: ", paste(missing, collapse = ", ")))
+    }
 
     if (!is.numeric(series$Y0) || !is.numeric(series$IY0) || !is.numeric(series$Ti) ||
-        !(is.numeric(series$IY0flg) || is.logical(series$IY0flg)) ||
-        anyNA(series$IY0flg) || any(!series$IY0flg %in% c(0, 1))) {
+      !(is.numeric(series$IY0flg) || is.logical(series$IY0flg)) ||
+      anyNA(series$IY0flg) || any(!series$IY0flg %in% c(0, 1))) {
       return("Values, dates and time indices must be numeric; continuity flags must be 0 or 1")
     }
     n <- length(series$Y0)
@@ -66,27 +68,27 @@ RHState <- S7::new_class(
       return("Values, dates, time indices and continuity flags must have the same nonzero length")
     }
     if (!is.numeric(season$Nt) || length(season$Nt) != 1L || is.na(season$Nt) ||
-        season$Nt < 1L || length(season$Icy) != season$Nt) {
+      season$Nt < 1L || length(season$Icy) != season$Nt) {
       return("Season length must match the number of cycle indices")
     }
     if (self@reference) {
       if (!is.data.frame(series$bdata) || !is.data.frame(series$ori.bdata) ||
-          length(series$TiB) != nrow(series$bdata) ||
-          length(series$IYBflg) != nrow(series$bdata) ||
-          !is.logical(series$owflg) || length(series$owflg) != nrow(series$ori.bdata) ||
-          anyNA(series$owflg) || sum(series$owflg) != nrow(series$bdata)) {
+        length(series$TiB) != nrow(series$bdata) ||
+        length(series$IYBflg) != nrow(series$bdata) ||
+        !is.logical(series$owflg) || length(series$owflg) != nrow(series$ori.bdata) ||
+        anyNA(series$owflg) || sum(series$owflg) != nrow(series$bdata)) {
         return("Base series, time indices and observation flags have inconsistent lengths")
       }
     } else if (!is.data.frame(series$itable) || !is.data.frame(series$ori.itable) ||
-               nrow(series$itable) != n || length(series$Imd) != n ||
-               !is.numeric(series$ooflg) || length(series$ooflg) != n || anyNA(series$ooflg) ||
-               any(series$ooflg < 1L | series$ooflg > nrow(series$ori.itable))) {
+      nrow(series$itable) != n || length(series$Imd) != n ||
+      !is.numeric(series$ooflg) || length(series$ooflg) != n || anyNA(series$ooflg) ||
+      any(series$ooflg < 1L | series$ooflg > nrow(series$ori.itable))) {
       return("Base series, cycle indices and observation positions have inconsistent lengths")
     }
 
     table <- if (self@reference) values$PTmax else values$PFmax
     if (!is.numeric(values$phi) || !is.matrix(table) ||
-        ncol(table) != length(values$phi) || nrow(table) < n) {
+      ncol(table) != length(values$phi) || nrow(table) < n) {
       return("Critical value table does not match autocorrelation values or series length")
     }
     NULL
@@ -98,8 +100,10 @@ RHState <- S7::new_class(
 new_rh_state <- function(series, critical_values, reference = FALSE, plev = 0.95) {
   season <- series[c("Icy", "Nt")]
   series[c("Icy", "Nt")] <- NULL
-  RHState(series = series, season = season, critical_values = critical_values,
-          reference = reference, plev = plev)
+  RHState(
+    series = series, season = season, critical_values = critical_values,
+    reference = reference, plev = plev
+  )
 }
 
 # 由 FindU/FindUD/StepSize（及 wRef 版）在计算前调用：

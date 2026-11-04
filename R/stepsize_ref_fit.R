@@ -1,6 +1,6 @@
 # 拟合基准序列，交替更新分段均值和季节周期。
 fit_reference_cycle <- function(base, seasonal, previous_cycle, cycle_index, cycle_values,
-                             time, points, continuous, reference_segment, n_cycles) {
+                                time, points, continuous, reference_segment, n_cycles) {
   segments <- segment_bounds(points)
   n_breaks <- length(points) - 1
   iteration <- 0

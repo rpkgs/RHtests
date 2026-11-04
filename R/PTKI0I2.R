@@ -24,13 +24,13 @@ PTK <- function(Y, Pk, Nmin) {
 
   for (k in Nmin:(N - Nmin)) {
     EY1 <- mean(Y[1:k])
-    EY2 <- (ALL - EY1*k) / (N - k) # mean(Y[(k + 1):N])
+    EY2 <- (ALL - EY1 * k) / (N - k) # mean(Y[(k + 1):N])
     var <- sum(c((Y[1:k] - EY1)^2, (Y[(k + 1):N] - EY2)^2))
     std <- sqrt(var / (N - 2))
     Tk <- sqrt(k * (N - k) / N) * abs(EY1 - EY2) / std
     PTk <- Tk * Pk[k]
-  
-    # Ipaper::fprintf("var = %f, sd = %f, Tk = %f, PTk = %f \n", 
+
+    # Ipaper::fprintf("var = %f, sd = %f, Tk = %f, PTk = %f \n",
     #   var, std, Tk, PTk)
     if (PTk > PTx) {
       PTx <- PTk

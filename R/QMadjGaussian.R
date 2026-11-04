@@ -29,8 +29,10 @@
 QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj, Nt) {
   min_n <- if (Nt <= 12) 5 else 20
   if (Mq <= 0) Mq <- 100
-  r <- .quantile_mapping(y, breaks = head(Ips, -1), ref = Iseg.adj,
-    Mq = Mq, min_n = min_n, window = Nadj)
+  r <- .quantile_mapping(y,
+    breaks = head(Ips, -1), ref = Iseg.adj,
+    Mq = Mq, min_n = min_n, window = Nadj
+  )
 
   probs <- seq(0, by = 1 / r$Mq, length.out = r$Mq + 2)
   group_plot <- .qm_plot_means(probs - .5 / r$Mq, r$adj)
@@ -41,9 +43,13 @@ QMadjGaussian <- function(y, Ips, Mq, Iseg.adj, Nadj, Nt) {
     adjustment <- r$adjustment[idx]
     order_p <- order(pos)
     cbind(idx, pos[order_p], adjustment[order_p])
-  }) %>% do.call(rbind, .) %>% set_dimnames(NULL)
-  listk(PA = r$y, W = r$adjustment, Mq = r$Mq, Nseg.mn = min(diff(c(0, Ips))),
-    osmean = group_plot, osp = point_plot)
+  }) %>%
+    do.call(rbind, .) %>%
+    set_dimnames(NULL)
+  listk(
+    PA = r$y, W = r$adjustment, Mq = r$Mq, Nseg.mn = min(diff(c(0, Ips))),
+    osmean = group_plot, osp = point_plot
+  )
 }
 
 #' @rdname QMadjGaussian
@@ -54,8 +60,10 @@ QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
   Nseg.mn <- min(length(y), map_int(segs, \(idx) sum(!is.na(Dif[idx]))))
   Mq <- max(1, min(Nseg.mn %/% min_n, if (Mq < 0) 100 else Mq, 100))
 
-  r <- .quantile_mapping(y, breaks = head(Ips, -1), ref = Iseg.adj, Mq = Mq,
-    min_n = min_n, window = Ny4a * Nt, Dif = Dif)
+  r <- .quantile_mapping(y,
+    breaks = head(Ips, -1), ref = Iseg.adj, Mq = Mq,
+    min_n = min_n, window = Ny4a * Nt, Dif = Dif
+  )
   Mq <- r$Mq
   probs <- seq(0, by = 1 / Mq, length.out = Mq + 2)
   group_plot <- .qm_plot_means(probs - .5 / Mq, r$adj)
@@ -80,8 +88,10 @@ QMadjGaussian.wRef <- function(y, Dif, Ips, Mq, Iseg.adj, Nadj, Nt, Ny4a) {
     group_plot[, i * 2 + 1] <- bin_means[c(1, seq_len(Mq), Mq)]
   }
   dimnames(point_plot) <- NULL
-  listk(PA = r$y, DB = r$adjustment[segs[[length(segs)]]], Mq, Nseg.mn,
-    osmean = group_plot, osp = point_plot, AdjM = r$AdjM)
+  listk(
+    PA = r$y, DB = r$adjustment[segs[[length(segs)]]], Mq, Nseg.mn,
+    osmean = group_plot, osp = point_plot, AdjM = r$AdjM
+  )
 }
 
 # 按突变点将观测位置分段

@@ -19,7 +19,9 @@ StepSize.wRef <- function(
   # 读取计算状态，或使用上游传入的状态。
   state <- if (is.null(.state)) {
     Read.wRef(Bseries, Rseries, MissingValueCode, plev)
-  } else .state
+  } else {
+    .state
+  }
   check_rh_state(state, reference = TRUE, plev = plev)
   c(Y0, IY0, IY0flg, TiB, IYBflg, bdata, ori.bdata, owflg) %<-%
     state@series[c("Y0", "IY0", "IY0flg", "TiB", "IYBflg", "bdata", "ori.bdata", "owflg")]
@@ -27,7 +29,7 @@ StepSize.wRef <- function(
   c(phi, PTmax) %<-% state@critical_values[c("phi", "PTmax")]
 
   # 定位候选突变点。
-  if (Ny4a > 0 & Ny4a <= 5) Ny4a <- 5
+  if (Ny4a > 0 && Ny4a <= 5) Ny4a <- 5
   N <- length(Y0)
   Nadj <- Nt * Ny4a
   c(Ips, Ids, Ns) %<-% locate_changepoints(InCs, IY0)[c("Ips", "Ids", "Ns")]
@@ -204,8 +206,10 @@ StepSize.wRef <- function(
   odata <- restore_leap_days(
     odata, ori.bdata, IY0[Ips0], Base - otmp$trend * Ti + EB,
     Ti, otmp$trend, QMout, Mq, Iseg.adj, Nadj, Nt,
-    fitted_cols = c("base_trend+meanShift.ref", "base_trend+meanShift.base",
-                    "fit_of_base_anomaly", "annualC+meanShifts", "fit_of_deseason_base"),
+    fitted_cols = c(
+      "base_trend+meanShift.ref", "base_trend+meanShift.base",
+      "fit_of_base_anomaly", "annualC+meanShifts", "fit_of_deseason_base"
+    ),
     adjusted_cols = c("base_mean_adj.ref", "base_mean_adj.base", "base_anomaly")
   )
 

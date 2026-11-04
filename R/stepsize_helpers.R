@@ -24,24 +24,40 @@ select_base_segment <- function(breaks, Iadj) {
   Ns <- length(breaks) - 1
   longest <- if (Ns > 0) {
     sort(breaks - c(0, breaks[seq_len(Ns)]), index.return = TRUE, decreasing = TRUE)$ix[1]
-  } else 0
+  } else {
+    0
+  }
 
-  if (Iadj > Ns + 1 || longest == 0) Ns + 1
-  else if (Iadj == 0) longest
-  else Iadj
+  if (Iadj > Ns + 1 || longest == 0) {
+    Ns + 1
+  } else if (Iadj == 0) {
+    longest
+  } else {
+    Iadj
+  }
 }
 
 # 根据置信界限判定 0 类和 1 类突变点。
 classify_changepoint <- function(Id, probL, probU, plev, statistic, lower, upper) {
   if (Id == 0) {
-    if (statistic >= upper) return("Yes ")
-    if (probU < plev) return("No  ")
-    if (probL < plev) return("?   ")
+    if (statistic >= upper) {
+      return("Yes ")
+    }
+    if (probU < plev) {
+      return("No  ")
+    }
+    if (probL < plev) {
+      return("?   ")
+    }
     return("YifD")
   }
   if (Id == 1) {
-    if (statistic < lower) return("No  ")
-    if (statistic < upper) return("?   ")
+    if (statistic < lower) {
+      return("No  ")
+    }
+    if (statistic < upper) {
+      return("?   ")
+    }
     return("Yes ")
   }
   stop("Unknown changepoint type: ", Id)
@@ -49,11 +65,13 @@ classify_changepoint <- function(Id, probL, probU, plev, statistic, lower, upper
 
 # 恢复拟合时剔除的闰日数据。
 restore_leap_days <- function(odata, original, break_dates, Rb, Ti, trend, QMout,
-                          Mq, Iseg.adj, Nadj, Nt, fitted_cols, adjusted_cols) {
+                              Mq, Iseg.adj, Nadj, Nt, fitted_cols, adjusted_cols) {
   md <- original$month * 100 + original$day
   observed <- !is.na(original$data)
   leap <- which(observed & md == 229)
-  if (!length(leap)) return(odata)
+  if (!length(leap)) {
+    return(odata)
+  }
 
   Ns <- length(break_dates) - 1
   if (Ns > 0) {

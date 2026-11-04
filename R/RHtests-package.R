@@ -32,14 +32,14 @@ listk <- function(...) {
 # Mq (=0, 1, 2, ..., 20) is the number of points (categories) on which
 #     the empirical cumulative distribution function are estimated.
 #     If Mq=0, the actual Mq is determined by the length of the shortest segment
-#     Mq=1 corresponds to mean adjustments (one adjustment for all data in 
+#     Mq=1 corresponds to mean adjustments (one adjustment for all data in
 #     the same segment)
 # In the output: Ns >= 0 is the number of changepoints identified;
 #     changepoint positions are Ip(1), Ip(2),...,Ip(Ns)
 # If Iadj = 0, the data series is adjusted to the longest segment;
-#     otherwise the data series is adjusted to the chosen segment Iadj (if the 
+#     otherwise the data series is adjusted to the chosen segment Iadj (if the
 #     given integer Iadj > Ns+1, we re-set Iadj=Ns+1, which corresponds to
-#     adjusting the series to the last segment). Set Iadj = 10000 if you want 
+#     adjusting the series to the last segment). Set Iadj = 10000 if you want
 #     to ensure that the series is adjusted to the last segment
 
 #' @importFrom utils write.table read.table
@@ -52,18 +52,18 @@ listk <- function(...) {
 #' @importFrom zeallot %<-%
 #' @importFrom utils head
 #' @importFrom methods is
-#' 
+#'
 .onLoad <- function(libname, pkgname) {
   if (getRversion() >= "2.15.1") {
     utils::globalVariables(
       c(
         ".", ".SD", ".N",
-        "ooflg", "owflg", 
+        "ooflg", "owflg",
         "bdata", "ori.bdata",
         "TiB", "IYBflg",
-        "itable", "ori.itable", 
-        "ErrorMSG", 
-        "olflg", "Nmin", 
+        "itable", "ori.itable",
+        "ErrorMSG",
+        "olflg", "Nmin",
         "Ti", "Y0", "Nt", "IY0", "IY0flg", "Icy", "Imd", "phi", "PFmax", "PTmax",
         # 数据集的列名与内置临界值表（data.table 非标准求值中使用）
         "data", "kind", "date_meta", "stepsize", "prob", "probU",

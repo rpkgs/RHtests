@@ -20,7 +20,7 @@ splineN <- function(x, y, yp1, yp2) {
         (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p
     }
   }
-  
+
   if (yp2 > 1E30) {
     qn <- 0
     un <- 0
