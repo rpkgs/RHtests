@@ -9,7 +9,7 @@ test_that("initial candidate statistics match the original calculation", {
   expected <- lapply(indices, function(I) {
     if (I <= 0) return(list(PFx = 0, prob = 0, corL = 0))
     Ips <- c(I, N)
-    fit <- LSmultiple(Y1, Ti, Ips)
+    fit <- LS_MultiBreaks(Y1, Ti, Ips)
     red <- Rphi(fit$resi, Ips, 1, IY0flg)
     raw <- PMFxKc(Y1, Ti, 0, N, I)
     adjusted <- PMFxKc(red$W + fit$fitted, Ti, 0, N, I)

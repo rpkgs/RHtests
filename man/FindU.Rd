@@ -115,8 +115,8 @@ shifts (i.e. ignore all shifts identified)
 }
 
 \examples{
-f = system.file("extdata/Example1.dat", package = "RHtests")
-r = FindU(f, output = file.path(tempdir(), "example01"))
+f <- system.file("extdata/Example1.dat", package = "RHtests")
+r <- FindU(f, output = file.path(tempdir(), "example01"))
 print(r)
 
 plot_output(r$fit)

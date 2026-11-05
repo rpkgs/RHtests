@@ -27,8 +27,8 @@ test_that("segment adjustments apply to each observation", {
 test_that("PMF probability compares reduced and full residuals", {
   time <- 1:12
   series <- c(1, 3, 2, 4, 3, 5, 8, 7, 9, 8, 10, 9)
-  full_residuals <- RHtests:::LSmultiple(series, time, c(6, 12))$resi
-  reduced_residuals <- RHtests:::LSmultiple(series, time, 12)$resi
+  full_residuals <- RHtests:::LS_MultiBreaks(series, time, c(6, 12))$resi
+  reduced_residuals <- RHtests:::LS_MultiBreaks(series, time, 12)$resi
   full_sse <- sum(full_residuals^2)
   statistic <- (sum(reduced_residuals^2) - full_sse) * 9 / full_sse
   expect_equal(

@@ -52,10 +52,10 @@ PMFT <- function(Y, T, Pk0, Nmin) {
   Fx    <- (-99999.)
   KPx   <- 0
   T_anorm = T - mean(T)
-  oout1 <- LSmatrix(Y, T_anorm, NA)
+  oout1 <- LS_OneBreak(Y, T_anorm, NA)
 
   for(i in Nmin:(N-Nmin)){
-    oout2 <- LSmatrix(Y, T_anorm, i, only.SSE = TRUE)
+    oout2 <- LS_OneBreak(Y, T_anorm, i, only.SSE = TRUE)
     Fc    <- (oout1$SSE-oout2$SSE)*(N-3)/oout2$SSE
     PFc   <- Fc*Pk0[i]
     if(PFc > PFx){
@@ -81,8 +81,8 @@ PMFxKc<-function(Y,T,I0,I2,Ic){
     T0      <- T[(I0+1):I2]
 
     T_anorm <- T0 - mean(T0)
-    oout1   <- LSmatrix(Y0, T_anorm, NA)
-    oout2   <- LSmatrix(Y0, T_anorm, Ic1)
+    oout1   <- LS_OneBreak(Y0, T_anorm, NA)
+    oout2   <- LS_OneBreak(Y0, T_anorm, Ic1)
     Fc      <- (oout1$SSE-oout2$SSE)*(Nseg-3)/oout2$SSE
     prob    <- pf(Fc,1,(Nseg-3))
     Pk0     <- Pk.PMFT(Nseg)
@@ -233,9 +233,9 @@ PMFxIseg <- function(Y0, Ti, Ips, Iseg, IY0flg, Nt, phi, PFmax) {
   PFx95L <- getPFx95(corl, Nseg, phi, PFmax)
   PFx95U <- getPFx95(corh, Nseg, phi, PFmax)
 
-  otmp      <- LSmultiple(W,Ti,Ip0)
+  otmp      <- LS_MultiBreaks(W,Ti,Ip0)
   SSE0.Iseg <- sum(otmp$resi[(I0+1):I3]^2)
-  otmp      <- LSmultiple(W,Ti,Ips)
+  otmp      <- LS_MultiBreaks(W,Ti,Ips)
   SSEf.Iseg <- sum(otmp$resi[(I0+1):I3]^2)
   Fx        <- (SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
   if(Fx<0){
@@ -245,23 +245,23 @@ PMFxIseg <- function(Y0, Ti, Ips, Iseg, IY0flg, Nt, phi, PFmax) {
   }
   else prob<-pf(Fx,1,(Nseg-3))
 
-  otmp<-LSmultiple(WL,Ti,Ip0)
+  otmp<-LS_MultiBreaks(WL,Ti,Ip0)
   SSE0.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
-  otmp<-LSmultiple(WL,Ti,Ips)
+  otmp<-LS_MultiBreaks(WL,Ti,Ips)
   SSEf.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
   Fx1<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
   probL1<- if(Fx1<0) 0 else pf(Fx1,1,(Nseg-3))
 
-  otmp<-LSmultiple(WU,Ti,Ip0)
+  otmp<-LS_MultiBreaks(WU,Ti,Ip0)
   SSE0.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
-  otmp<-LSmultiple(WU,Ti,Ips)
+  otmp<-LS_MultiBreaks(WU,Ti,Ips)
   SSEf.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
   Fx1<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
   probU1<- if(Fx1<0) 0 else pf(Fx1,1,(Nseg-3))
 
   probL<-min(c(probL1,probU1)); probU<-max(c(probL1,probU1))
 
-  otmp<-LSmultiple(Y0,Ti,Ips)
+  otmp<-LS_MultiBreaks(Y0,Ti,Ips)
 # fitted<-otmp$fitted
   resi<-otmp$resi
 # otmp<-Rphi(resi,Ips,Ns)
@@ -269,7 +269,7 @@ PMFxIseg <- function(Y0, Ti, Ips, Iseg, IY0flg, Nt, phi, PFmax) {
 # cor<-otmp$cor
   SSEf.Iseg<-sum(resi[(I0+1):I3]^2)
 
-  otmp<-LSmultiple(Y0,Ti,Ip0)
+  otmp<-LS_MultiBreaks(Y0,Ti,Ip0)
   SSE0.Iseg<-sum(otmp$resi[(I0+1):I3]^2)
   Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
   Pk0<-Pk.PMFT(Nseg)

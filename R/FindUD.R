@@ -49,10 +49,10 @@ FindUD <- function(
   if (is.null(Ns)) Ns <- 0
 
   Pk0 <- Pk.PMFT(N)
-  oout <- rmCycle(itable)
-  Y1 <- oout$Base
-  EB <- oout$EB
-  if (length(EB) != length(Icy)) {
+  oout <- RemoveSeasonal(Y0, Imd)
+  Y1 <- oout$anomaly
+  seasonal_mean <- oout$mu
+  if (length(seasonal_mean) != length(Icy)) {
     stop("Annual cycle length differs from original dataset", call. = FALSE)
   }
 
@@ -68,7 +68,7 @@ FindUD <- function(
   fprintf("Input data filename: N= %s \n", N, file = ofileSout, append = TRUE)
 
   Ip0 <- N
-  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, EB, Imd, Icy, Nt)
+  oout <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, seasonal_mean, Imd, Icy, Nt)
   beta0 <- oout$trend
   betaL0 <- oout$betaL
   betaU0 <- oout$betaU
@@ -215,7 +215,7 @@ FindUD <- function(
 
   Iseg.adj <- adjustment_segment(Ips, Ns, Iadj)
 
-  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
+  otmp <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, seasonal_mean, Imd, Icy, Nt)
   Y1 <- otmp$Y0
   cor <- otmp$cor
   corl <- otmp$corl
@@ -226,7 +226,7 @@ FindUD <- function(
   W <- otmp$W
   WL <- otmp$WL
   WU <- otmp$WU
-  EB1 <- otmp$EB
+  EB1 <- otmp$seasonal_mean
 
   itmp1 <- cbind(EB1, Icy)
   itmp2 <- cbind(1:N, Imd)
@@ -391,9 +391,9 @@ FindUD <- function(
     }
   }
 
-  RW <- LSmultiple(W, Ti, Ips)$resi
-  RWL <- LSmultiple(WL, Ti, Ips)$resi
-  RWU <- LSmultiple(WU, Ti, Ips)$resi
+  RW <- LS_MultiBreaks(W, Ti, Ips)$resi
+  RWL <- LS_MultiBreaks(WL, Ti, Ips)$resi
+  RWU <- LS_MultiBreaks(WU, Ti, Ips)$resi
 
   d_TP <- list()
   if (Ns > 0) {
@@ -411,14 +411,14 @@ FindUD <- function(
       SSEf.Iseg <- sum(Rf[I1:I3]^2)
       Ips0 <- Ips[-i]
 
-      otmp <- LSmultiple(Y1, Ti, Ips0)
+      otmp <- LS_MultiBreaks(Y1, Ti, Ips0)
       SSE0.Iseg <- sum(otmp$resi[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
 
       Pk0 <- Pk.PMFT(Nseg)
       PFx <- Fx * Pk0[Ic - I1 + 1]
 
-      otmp <- LSmultiple(W, Ti, Ips0)
+      otmp <- LS_MultiBreaks(W, Ti, Ips0)
       SSE0.Iseg <- sum(otmp$resi[I1:I3]^2)
       SSEf.Iseg <- sum(RW[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
@@ -431,13 +431,13 @@ FindUD <- function(
         prob <- pf(Fx, 1, Nseg - 3)
       }
 
-      otmp <- LSmultiple(WL, Ti, Ips0)
+      otmp <- LS_MultiBreaks(WL, Ti, Ips0)
       SSE0.Iseg <- sum(otmp$resi[I1:I3]^2)
       SSEf.Iseg <- sum(RWL[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
       probL0 <- if (Fx < 0) 0 else pf(Fx, 1, Nseg - 3)
 
-      otmp <- LSmultiple(WU, Ti, Ips0)
+      otmp <- LS_MultiBreaks(WU, Ti, Ips0)
       SSE0.Iseg <- sum(otmp$resi[I1:I3]^2)
       SSEf.Iseg <- sum(RWU[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg

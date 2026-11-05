@@ -4,7 +4,7 @@ pmf_candidates <- function(indices, Y1, Ti, N, IY0flg) {
     if (I <= 0) return(list(PFx = 0, prob = 0, corL = 0))
 
     Ips <- c(I, N)
-    fit <- LSmultiple(Y1, Ti, Ips)
+    fit <- LS_MultiBreaks(Y1, Ti, Ips)
     red <- Rphi(fit$resi, Ips, 1, IY0flg)
     W <- red$W + fit$fitted
     list(

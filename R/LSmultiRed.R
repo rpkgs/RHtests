@@ -1,7 +1,7 @@
 LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   Ns <- length(Ips) - 1
   N <- length(Y0)
-  otmp <- LSmultiple(Y0, Ti, Ips)
+  otmp <- LS_MultiBreaks(Y0, Ti, Ips)
   sig <- otmp$sig
   beta <- otmp$sig[2]
   resi <- otmp$resi
@@ -14,7 +14,7 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   W2 <- c(W1[1], (resi[2:N] - cor * resi[1:(N - 1)]) / (1 - cor))
   W <- c(1, IY0flg[1:(N - 1)]) * W2 + (!c(1, IY0flg[1:(N - 1)])) * W1
 
-  otmp <- LSmatrix(W, Ti - mean(Ti), NA)
+  otmp <- LS_OneBreak(W, Ti - mean(Ti), NA)
   beta <- otmp$sig[2]
   St0 <- sum((Ti - mean(Ti))^2)
   df <- (N - 2 - Ns - Nt)
@@ -49,7 +49,8 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   }
 
   listk(W, WL, WU, sig, cor, corl, corh, resi, mu, meanhat,
-        trend = beta, betaL, betaU, p.tr)
+    trend = beta, betaL, betaU, p.tr
+  )
 }
 
 #' LSmultiRedCycle
@@ -62,7 +63,7 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
 #' @param Ips 突变点位置，末位为序列长度。
 #' @param Iseg.adj 订正目标段的序号。
 #' @param IY0flg 相邻观测是否连续（0/1）。
-#' @param EB 季节周期，长度 `Nt`。
+#' @param seasonal_mean 各月日的季节均值，长度 `Nt`。
 #' @param Imd 观测的月日（mmdd）。
 #' @param Icy 季节周期内的月日序列，长度 `Nt`。
 #' @param Nt 季节周期长度（年 1、月 12、日 365/366）。
@@ -70,16 +71,17 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
 #' @return
 #' - `resi`: residual
 #' - `meanhat`: linear trend
-LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt) {
+#' - `seasonal_mean`: 拟合后的季节周期。
+LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj, IY0flg, seasonal_mean, Imd, Icy, Nt) {
   N <- length(Y0)
   Ns <- length(Ips) - 1
   Niter <- 0
   tt <- TRUE
-  EB1 <- EB
+  current_cycle <- seasonal_mean
   while (tt) {
     tt <- FALSE
     Niter <- Niter + 1
-    EB0 <- EB1
+    previous_cycle <- current_cycle
 
     otmp <- LSmultipleRed(Y0, Ti, Ips, IY0flg, Nt)
     trend <- otmp$trend
@@ -97,142 +99,47 @@ LSmultiRedCycle <- function(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt) {
     WU <- otmp$WU
 
     if (Nt > 1) {
-      itmp1 <- cbind(EB0, Icy)
+      itmp1 <- cbind(previous_cycle, Icy)
       itmp2 <- cbind(1:N, Imd)
       colnames(itmp2) <- c("idx", "Icy")
       itmp <- merge(itmp1, itmp2, by = "Icy")
-      EBfull <- itmp[order(itmp[, "idx"]), "EB0"]
+      seasonal_values <- itmp[order(itmp[, "idx"]), "previous_cycle"]
 
       for (i in 1:(Ns + 1)) {
         I0 <- if (i == 1) 1 else Ips[i - 1] + 1
         I2 <- Ips[i]
         #       delta<-if(i==(Ns+1)) 0 else mu[i]-mu[Iseg.adj]
         delta <- mu[i] - mu[Iseg.adj]
-        Y0[I0:I2] <- Y0[I0:I2] + EBfull[I0:I2] - delta
+        Y0[I0:I2] <- Y0[I0:I2] + seasonal_values[I0:I2] - delta
       }
 
-      for (i in 1:Nt) EB1[i] <- mean(Y0[Imd == Icy[i]])
-      VEB <- sqrt(var(EB1))
-      if (is.na(VEB)) {
+      for (i in 1:Nt) current_cycle[i] <- mean(Y0[Imd == Icy[i]])
+      cycle_sd <- sqrt(var(current_cycle))
+      if (is.na(cycle_sd)) {
         tt <- FALSE
       } else {
-        itmp1 <- cbind(EB1, Icy)
+        itmp1 <- cbind(current_cycle, Icy)
         itmp2 <- cbind(1:N, Imd)
         colnames(itmp2) <- c("idx", "Icy")
         itmp <- merge(itmp1, itmp2, by = "Icy")
-        EBfull <- itmp[order(itmp[, "idx"]), "EB1"]
+        seasonal_values <- itmp[order(itmp[, "idx"]), "current_cycle"]
 
         for (i in 1:(Ns + 1)) {
           I0 <- if (i == 1) 1 else Ips[i - 1] + 1
           I2 <- Ips[i]
           #         delta<-if(i==(Ns+1)) 0 else mu[i]-mu[Iseg.adj]
           delta <- mu[i] - mu[Iseg.adj]
-          Y0[I0:I2] <- Y0[I0:I2] - EBfull[I0:I2] + delta
+          Y0[I0:I2] <- Y0[I0:I2] - seasonal_values[I0:I2] + delta
         }
 
-        DEBmx <- max(abs(EB1 - EB0))
-        if (DEBmx > VEB / 1000 & Niter < 20) tt <- TRUE
+        max_change <- max(abs(current_cycle - previous_cycle))
+        if (max_change > cycle_sd / 1000 & Niter < 20) tt <- TRUE
       }
     }
   }
-  
-  listk(trend, betaL, betaU, EB = EB1, mu, cor, corl, corh, W, WL, WU, resi,
-        Y0 = as.vector(Y0), meanhat = as.vector(meanhat), p.tr)
-}
 
-rmCycle <- function(idata) {
-  tdata <- if (is.data.table(idata)) {
-    cbind(idata[, month * 100 + day], idata$data)
-  } else {
-    cbind(idata[, 2] * 100 + idata[, 3], idata[, 4])
-  }
-
-  inds <- sort(unique(tdata[, 1]))
-  nx <- length(inds)
-  mu <- rep(0, nx)
-  for (i in 1:nx) {
-    ind <- tdata[, 1] == inds[i]
-    mu[i] <- mean(tdata[ind, 2], na.rm = TRUE)
-    tdata[ind, 2] <- tdata[ind, 2] - mu[i]
-  }
-  list(EB = mu, Base = tdata[, 2])
-}
-
-#' Multiple breakpoints piecewise Regression (same slope, different interception)
-#'
-#' @param Y The response vector
-#' @param T The predictor vector
-#' @param Ips breakpoints
-#' @param ... 传给 `lm_solve()`。
-#'
-#' @return
-#' - `sig`   : coefficients
-#' - `fitted`: fitted value
-#' - `resi`  : residual of fitted value
-LSmultiple <- function(Y, T, Ips, ...) {
-  Nx <- length(Y)
-  Ns <- length(Ips) - 1
-  X <- as.matrix(Y)
-  # D  <- rep(1,Nx)
-  D <- cbind(1, T - mean(T))
-  if (Ns >= 1) {
-    for (i in 1:Ns) {
-      tmp <- rep(0, Nx)
-      tmp[(Ips[i] + 1):Ips[i + 1]] <- 1
-      D <- cbind(D, tmp)
-    }
-  }
-  lm_solve(D, X, ...)
-}
-
-#' single-breakpoint piecewise regression (same slope, different interception)
-#'
-#' @param Y The response vector
-#' @param T_anorm The predictor vector
-#'
-#' @param Ic the position of change point, `[1, Ic]` and `[Ic + 1, end]` are
-#' corresponding to the perid
-#' @param ... 传给 `lm_solve()`。
-#'
-#' @return
-#' - `sig`   : coefficients
-#' - `fitted`: fitted value
-#' - `resi`  : residual of fitted value
-#'
-#' - `SSE`   : sum of square error
-#' @export
-LSmatrix <- function(Y, T_anorm, Ic, ...) {
-  Nx <- length(Y)
-  X <- as.matrix(Y)
-  # D  <- rep(1, Nx)
-  # T_anorm = T - mean(T)
-  D <- cbind(1, T_anorm)
-  if (!is.na(Ic)) {
-    D <- cbind(D, c(rep(0, Ic), rep(1, Nx - Ic)))
-  }
-  lm_solve(D, X, ...)
-}
-
-lm_solve <- function(D, X, only.SSE = FALSE, ...) {
-  # microbenchmark::microbenchmark(
-  #   sig  = solve(t(D) %*% D) %*% t(D) %*% X,
-  #   sig3  = as.matrix(.lm.fit(D, X)$coefficients),
-  #   sig2 = chol2inv(chol(t(D) %*% D)) %*% t(D) %*% X,
-  #   times = 100
-  # )
-  l <- .lm.fit(D, X)
-  # sig  <- as.matrix(l$coefficients)
-  fitted <- D %*% l$coefficients
-  # resi <- X-fitted
-  SSE <- sum(l$residuals^2)
-  if (!only.SSE) {
-    list(
-      sig = l$coefficients,
-      fitted = as.vector(fitted),
-      resi = l$residuals,
-      SSE = SSE
-    )
-  } else {
-    list(SSE = SSE)
-  }
+  listk(trend, betaL, betaU,
+    seasonal_mean = current_cycle, mu, cor, corl, corh, W, WL, WU, resi,
+    Y0 = as.vector(Y0), meanhat = as.vector(meanhat), p.tr
+  )
 }

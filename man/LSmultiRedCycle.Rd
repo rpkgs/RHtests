@@ -4,7 +4,7 @@
 \alias{LSmultiRedCycle}
 \title{LSmultiRedCycle}
 \usage{
-LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
+LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, seasonal_mean, Imd, Icy, Nt)
 }
 \arguments{
 \item{Y0}{去季节后的序列。}
@@ -17,7 +17,7 @@ LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 
 \item{IY0flg}{相邻观测是否连续（0/1）。}
 
-\item{EB}{季节周期，长度 \code{Nt}。}
+\item{seasonal_mean}{各月日的季节均值，长度 \code{Nt}。}
 
 \item{Imd}{观测的月日（mmdd）。}
 
@@ -29,6 +29,7 @@ LSmultiRedCycle(Y0, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
 \itemize{
 \item \code{resi}: residual
 \item \code{meanhat}: linear trend
+\item \code{seasonal_mean}: 拟合后的季节周期。
 }
 }
 \description{

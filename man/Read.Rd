@@ -23,6 +23,6 @@ An S7 \code{RHState} object containing the series, seasonal cycle and critical v
 Remove NA values and flag \code{y[t]} as 0 when it has not corresponding \code{y[t+1]} values.
 }
 \examples{
-infile = system.file("extdata/Example1.dat", package = "RHtests")
+infile <- system.file("extdata/Example1.dat", package = "RHtests")
 Read(infile, "-999.99")
 }

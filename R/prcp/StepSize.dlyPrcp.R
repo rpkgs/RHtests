@@ -411,13 +411,13 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
   par(op)
   dev.off()
 
-  otmp<-LSmultiple(Y1,Ti,Ips)
+  otmp<-LS_MultiBreaks(Y1,Ti,Ips)
   resi<-otmp$resi
-  otmpW<-LSmultiple(W,Ti,Ips)
+  otmpW<-LS_MultiBreaks(W,Ti,Ips)
   resiW<-otmpW$resi
-  otmpWL<-LSmultiple(WL,Ti,Ips)
+  otmpWL<-LS_MultiBreaks(WL,Ti,Ips)
   resiWL<-otmpWL$resi
-  otmpWU<-LSmultiple(WU,Ti,Ips)
+  otmpWU<-LS_MultiBreaks(WU,Ti,Ips)
   resiWU<-otmpWU$resi
 
   ofileIout<-paste(output,"_fCs.txt",sep="")
@@ -441,14 +441,14 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       PFx95h<-getPFx95(corU,Nseg, phi, PFmax)
       SSEf.Iseg<-sum(resi[I1:I3]^2)
       Ips1<-Ips[-i]
-      otmp1<-LSmultiple(Y1,Ti,Ips1)
+      otmp1<-LS_MultiBreaks(Y1,Ti,Ips1)
       SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
       Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
       Pk1<-Pk.PMFT(Nseg)
       PFx<-Fx*Pk1[Ic-I1+1]
 
       SSEf.Iseg<-sum(resiW[I1:I3]^2)
-      otmp1<-LSmultiple(W,Ti,Ips1)
+      otmp1<-LS_MultiBreaks(W,Ti,Ips1)
       SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
       Fx<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
       if(Fx>0) prob<-pf(Fx,1,Nseg-3)
@@ -459,14 +459,14 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       }
 
       SSEf.Iseg<-sum(resiWL[I1:I3]^2)
-      otmp1<-LSmultiple(WL,Ti,Ips1)
+      otmp1<-LS_MultiBreaks(WL,Ti,Ips1)
       SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
       FxL<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
       if(FxL>0) probL<-pf(Fx,1,Nseg-3)
       else probL<-0
 
       SSEf.Iseg<-sum(resiWU[I1:I3]^2)
-      otmp1<-LSmultiple(WU,Ti,Ips1)
+      otmp1<-LS_MultiBreaks(WU,Ti,Ips1)
       SSE0.Iseg<-sum(otmp1$resi[I1:I3]^2)
       FxU<-(SSE0.Iseg-SSEf.Iseg)*(Nseg-3)/SSEf.Iseg
       if(FxU>0) probU<-pf(Fx,1,Nseg-3)

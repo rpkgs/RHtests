@@ -166,18 +166,14 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode = "-999.99", plev = 0.9
   }
   # finish checking
   Y0 <- itable[ind.base, data] - rtable[ind.ref, data]
-  rtmp <- itable[ind.base, ]
-  otmp <- rmCycle(rtmp)
-  EBb <- otmp$EB
-  rtmp <- rtable[ind.ref, ]
-  otmp <- rmCycle(rtmp)
-  EBr <- otmp$EB
+  base_seasonal_mean <- RemoveSeasonal(itable$data[ind.base], Imd)$mu
+  ref_seasonal_mean <- RemoveSeasonal(rtable$data[ind.ref], Imd)$mu
   itmp <- itable[ind.base, month * 100 + day]
   for (i in 1:length(Y0)) {
     indd <- itmp[i] # mmdd for Y0[i]
     indf <- NULL
     for (j in 1:Nt) if (Icy[j] == indd) indf <- j
-    Y0[i] <- Y0[i] + EBr[indf] - EBb[indf]
+    Y0[i] <- Y0[i] + ref_seasonal_mean[indf] - base_seasonal_mean[indf]
   }
 
   # c("id", "date", "value", "is_continue")

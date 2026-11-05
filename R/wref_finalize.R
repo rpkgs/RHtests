@@ -40,20 +40,20 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
   N <- length(IY1)
 
   # 先用差值序列的分段均值把基准序列订正到 Iseg.adj 段，得到订正后的趋势。
-  dtmp <- rmCycle(bdata)
-  adjBase <- dtmp$Base
-  EB <- dtmp$EB[match(IYM, inds)]
+  cycle_base <- RemoveSeasonal(bdata$data, IYM)
+  adjBase <- cycle_base$anomaly
+  EB <- cycle_base$mu[match(IYM, inds)]
   for (i in seq_len(Ns + 1L)) {
     I0 <- if (i == 1) 1L else Ips[i - 1] + 1L
     I2 <- if (i > Ns) N else Ips[i]
     adjBase[I0:I2] <- adjBase[I0:I2] + EB[I0:I2] - (muDif[i] - muDif[Iseg.adj])
   }
 
-  dtmp <- rmCycle(cbind(bdata[, 1:3], adjBase))
-  EB0 <- dtmp$EB
+  dtmp <- RemoveSeasonal(adjBase, IYM)
+  EB0 <- dtmp$mu
   EEBd <- mean(EB0)
   EB <- EB0[match(IYM, inds)]
-  dtmp <- LSmultipleRed(dtmp$Base, Ti, N, IY0flg, Nt)
+  dtmp <- LSmultipleRed(dtmp$anomaly, Ti, N, IY0flg, Nt)
   muD <- dtmp$mu[1]
   betaD <- dtmp$trend
   betaDL <- dtmp$betaL
@@ -64,7 +64,7 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
   p.trD <- dtmp$p.tr
 
   # 不考虑任何突变点时基准序列的趋势。
-  tbase <- rmCycle(bdata)$Base
+  tbase <- cycle_base$anomaly
   dtmp <- LSmultipleRed(tbase, Ti, length(tbase), IY0flg, Nt)
   meanhat0 <- dtmp$meanhat
   Ehat0 <- mean(meanhat0)
@@ -81,8 +81,8 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
   )
 
   # 迭代：拟合多段趋势 → 订正 → 重估季节周期，直到季节周期稳定。
-  EB <- rmCycle(bdata)$EB[match(IYM, inds)]
-  Base <- rmCycle(bdata)$Base
+  EB <- cycle_base$mu[match(IYM, inds)]
+  Base <- cycle_base$anomaly
   Niter <- 0L
   tt <- TRUE
   while (tt) {

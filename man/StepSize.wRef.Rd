@@ -13,7 +13,7 @@ StepSize.wRef(
   plev = 0.95,
   Iadj = 10000,
   Mq = 10,
-  GUI = F,
+  GUI = FALSE,
   Ny4a = 0,
   is_plot = TRUE,
   ...,

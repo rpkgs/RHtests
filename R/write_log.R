@@ -1,6 +1,36 @@
+# 按计算流程写出无参考序列的拟合、订正与检验摘要。
+log_stepsize <- function(file, plev, N, fit_base, QMout, Ny4a, Iseg.adj, Ips,
+                         fit, cor, corl, corh, pcor, dates, stepsizes, points) {
+  Ns <- length(stepsizes)
+  log_fit_summary(
+    file, plev, N, fit_base, Ns, QMout, Ny4a,
+    Iseg.adj, Ips, fit, cor, corl, corh, pcor
+  )
+  for (i in seq_len(Ns)) {
+    fprintf("%d %d stepsize= %.4f \n", Ips[i], dates[Ips[i]], stepsizes[i],
+      file = file, append = TRUE
+    )
+  }
+  write_test_log(points, "PMF", file)
+}
+
+# 按计算流程写出有参考序列的差值检验、拟合与订正摘要。
+log_stepsize_ref <- function(file, base, reference, fit_diff, p_diff, points,
+                             fit_base, fit_adjusted, mu_diff, QMout, segments,
+                             Iseg.adj, Ny4a, fit, p_fit, stepsizes) {
+  log_ref_inputs(file, base, reference, fit_diff, p_diff)
+  write_test_log(points, "PMT", file)
+  log_ref_fits(file, fit_base, fit_adjusted, mu_diff)
+  if (length(stepsizes) > 0) {
+    # Fcat 为分位组边界，DP 为各组均值差。
+    write_qm_log(QMout, segments, Iseg.adj, Ny4a, function(i) QMout$AdjM[i], file)
+  }
+  log_ref_result(file, fit, p_fit, length(stepsizes), stepsizes)
+}
+
 # 写出有参考序列时的输入信息及差值序列自相关。
 log_ref_inputs <- function(file, base, reference, fit, probability) {
-  fprintf("Input Base Series: %s \n", base, file = file)
+  fprintf("Input Base Series: %s \n", base, file = file, append = FALSE)
   fprintf("Input Ref Series: %s \n", reference, file = file, append = TRUE)
   fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
     fit$cor, fit$corl, fit$corh, probability, file = file, append = TRUE
@@ -36,9 +66,14 @@ log_ref_result <- function(file, fit, probability, n_breaks, stepsizes) {
 }
 
 # 整理并写出突变点表，保留两种流程原有的文件格式。
-write_points_table <- function(points, file, reference = FALSE, stepsizes = NULL) {
-  if (!length(points)) return(points)
-  if (!reference) fprintf("#  %d changepoints in Series \n", length(points), file = file)
+write_points_table <- function(points, file, reference = FALSE, append = FALSE, stepsizes = NULL) {
+  if (!length(points)) {
+    if (!append) cat("", file = file, append = FALSE)
+    return(points)
+  }
+  if (!reference) {
+    fprintf("#  %d changepoints in Series \n", length(points), file = file, append = append)
+  }
   points <- do.call(rbind, points)
   if (reference) {
     points$stepsize <- stepsizes
@@ -47,7 +82,10 @@ write_points_table <- function(points, file, reference = FALSE, stepsizes = NULL
     columns <- 6:13
   }
   for (column in columns) points[[column]] <- round(points[[column]], 4)
-  fwrite(points, file, sep = if (reference) "," else "\t", append = TRUE, col.names = TRUE)
+  fwrite(points, file,
+    sep = if (reference) "," else "\t",
+    append = if (reference) append else TRUE, col.names = TRUE
+  )
   points
 }
 # 写出突变点检验结果；PMF 和 PMT 使用各自的统计量名称。
@@ -88,4 +126,34 @@ write_qm_log <- function(QMout, segments, Iseg.adj, Ny4a, adjustment, file) {
       fprintf("Seg. %d: mean of QM-adjustments =%.4f\n", i, adjustment(i), file = file, append = TRUE)
     }
   }
+}
+
+# 写出趋势拟合与订正结果摘要。
+log_fit_summary <- function(ofileSout, plev, N, fit_base, Ns, QMout, Ny4a,
+                            Iseg.adj, Ips, otmp, cor, corl, corh, pcor) {
+  fprintf("The nominal level of confidence (1-alpha)= %.4f \n", plev, file = ofileSout, append = FALSE)
+  fprintf("Input data filename: N= %d \n", N, file = ofileSout, append = TRUE)
+  fprintf(
+    " Ignore changepoints -> trend0 = %.6f ( %.6f , %.6f ) (p= %.4f ); cor= %.4f ( %.4f , %.4f )\n",
+    fit_base$trend, fit_base$betaL, fit_base$betaU, fit_base$p.tr,
+    fit_base$cor, fit_base$corl, fit_base$corh,
+    file = ofileSout, append = TRUE
+  )
+  cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
+    file = ofileSout, append = TRUE
+  )
+
+  if (Ns > 0) {
+    segments <- segment_bounds(Ips)
+    adjustment <- function(i) mean(QMout$W[segments$start[i]:segments$end[i]])
+    # Fcat 为分位组边界，DP 为各组均值差。
+    write_qm_log(QMout, segments, Iseg.adj, Ny4a, adjustment, ofileSout)
+  }
+
+  fprintf(
+    "#steps=  %d ; trend= %.6f ( %.6f , %.6f ) (p= %.4f ); cor= %.4f ( %.4f , %.4f ) %.4f \n",
+    Ns, otmp$trend, otmp$betaL, otmp$betaU, otmp$p.tr, cor, corl, corh,
+    pcor,
+    file = ofileSout, append = TRUE
+  )
 }

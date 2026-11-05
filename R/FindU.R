@@ -134,16 +134,16 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
   }
 
   Pk0 <- Pk.PMFT(N)
-  oout <- rmCycle(itable)
-  Y1 <- oout$Base
-  EB <- oout$EB
+  oout <- RemoveSeasonal(Y0, Imd)
+  Y1 <- oout$anomaly
+  seasonal_mean <- oout$mu
 
-  if (length(EB) != length(Icy)) {
+  if (length(seasonal_mean) != length(Icy)) {
     stop("Annual cycle length differs from original dataset", call. = FALSE)
   }
 
   Ip0 <- N
-  otmp <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, EB, Imd, Icy, Nt)
+  otmp <- LSmultiRedCycle(Y1, Ti, Ip0, 1, IY0flg, seasonal_mean, Imd, Icy, Nt)
   beta0 <- otmp$trend
   meanhat0 <- otmp$meanhat
   Ehat0 <- mean(meanhat0)
@@ -274,7 +274,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
   # end of detection
   Iseg.adj <- adjustment_segment(Ips, Ns, Iadj)
 
-  oout <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, EB, Imd, Icy, Nt)
+  oout <- LSmultiRedCycle(Y1, Ti, Ips, Iseg.adj, IY0flg, seasonal_mean, Imd, Icy, Nt)
 
   Y1 <- oout$Y0
   cor <- oout$cor
@@ -285,7 +285,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
   W <- oout$W
   WL <- oout$WL
   WU <- oout$WU
-  EB1 <- oout$EB
+  EB1 <- oout$seasonal_mean
   itmp1 <- cbind(EB1, Icy)
   itmp2 <- cbind(1:N, Imd)
   colnames(itmp2) <- c("idx", "Icy")
@@ -449,13 +449,13 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
     }
   }
 
-  otmp <- LSmultiple(Y1, Ti, Ips)
+  otmp <- LS_MultiBreaks(Y1, Ti, Ips)
   resi <- otmp$resi
-  otmpW <- LSmultiple(W, Ti, Ips)
+  otmpW <- LS_MultiBreaks(W, Ti, Ips)
   resiW <- otmpW$resi
-  otmpWL <- LSmultiple(WL, Ti, Ips)
+  otmpWL <- LS_MultiBreaks(WL, Ti, Ips)
   resiWL <- otmpWL$resi
-  otmpWU <- LSmultiple(WU, Ti, Ips)
+  otmpWU <- LS_MultiBreaks(WU, Ti, Ips)
   resiWU <- otmpWU$resi
 
   d_TP <- list()
@@ -471,14 +471,14 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
       PFx95h <- getPFx95(corh, Nseg, phi, PFmax)
       SSEf.Iseg <- sum(resi[I1:I3]^2)
       Ips1 <- Ips[-i]
-      otmp1 <- LSmultiple(Y1, Ti, Ips1)
+      otmp1 <- LS_MultiBreaks(Y1, Ti, Ips1)
       SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
       Pk1 <- Pk.PMFT(Nseg)
       PFx <- Fx * Pk1[Ic - I1 + 1]
 
       SSEf.Iseg <- sum(resiW[I1:I3]^2)
-      otmp1 <- LSmultiple(W, Ti, Ips1)
+      otmp1 <- LS_MultiBreaks(W, Ti, Ips1)
       SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
       Fx <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
       if (Fx > 0) {
@@ -490,7 +490,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
       }
 
       SSEf.Iseg <- sum(resiWL[I1:I3]^2)
-      otmp1 <- LSmultiple(WL, Ti, Ips1)
+      otmp1 <- LS_MultiBreaks(WL, Ti, Ips1)
       SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
       FxL <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
       if (FxL > 0) {
@@ -500,7 +500,7 @@ FindU <- function(InSeries = NULL, output = "./OUTPUT/example01", MissingValueCo
       }
 
       SSEf.Iseg <- sum(resiWU[I1:I3]^2)
-      otmp1 <- LSmultiple(WU, Ti, Ips1)
+      otmp1 <- LS_MultiBreaks(WU, Ti, Ips1)
       SSE0.Iseg <- sum(otmp1$resi[I1:I3]^2)
       FxU <- (SSE0.Iseg - SSEf.Iseg) * (Nseg - 3) / SSEf.Iseg
       if (FxU > 0) {
