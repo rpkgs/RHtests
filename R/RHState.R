@@ -60,7 +60,7 @@ RHState <- S7::new_class(
 
     if (!is.numeric(series$Y0) || !is.numeric(series$IY0) || !is.numeric(series$Ti) ||
       !(is.numeric(series$IY0flg) || is.logical(series$IY0flg)) ||
-      anyNA(series$IY0flg) || any(!series$IY0flg %in% c(0, 1))) {
+      anyNA(series$IY0flg) || !all(series$IY0flg %in% c(0, 1))) {
       return("Values, dates and time indices must be numeric; continuity flags must be 0 or 1")
     }
     n <- length(series$Y0)

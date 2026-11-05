@@ -22,13 +22,16 @@
 #' @seealso [Read.wRef()]、[FindU.wRef()]、[StepSize.wRef()]
 #' @export
 FindUD.wRef <- function(
-    Bseries = NULL, Rseries = NULL, InCs, output,
-    MissingValueCode = "-999.99",
-    plev = 0.95, Iadj = 10000, Mq = 10, GUI = F, Ny4a = 0,
-    is_plot = TRUE, .state = NULL) {
+  Bseries = NULL, Rseries = NULL, InCs, output,
+  MissingValueCode = "-999.99",
+  plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
+  is_plot = TRUE, .state = NULL
+) {
   state <- if (is.null(.state)) {
     Read.wRef(Bseries, Rseries, MissingValueCode, plev)
-  } else .state
+  } else {
+    .state
+  }
   check_rh_state(state, reference = TRUE, plev = plev)
   c(Y0, IY0, IY0flg) %<-% state@series[c("Y0", "IY0", "IY0flg")]
   Nt <- state@season$Nt
@@ -277,7 +280,8 @@ FindUD.wRef <- function(
   } else {
     fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
       cor, corl, corh, p.cor,
-      file = ofileSout, append = TRUE)
+      file = ofileSout, append = TRUE
+    )
     fprintf("%s changepoints in Series %s \n", Ns, Bseries, file = ofileIout)
   }
   d_TP <- list()
@@ -322,7 +326,8 @@ FindUD.wRef <- function(
       sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%4.0f", as.numeric(Id)),
       sprintf("%10.4f", prob), sprintf("%10.4f", probL), sprintf("%10.4f", probU),
       sprintf("%10.4f", PTx0), sprintf("%10.4f", PTx95), sprintf("%10.4f", PTx95L),
-      sprintf("%10.4f", PTx95U), sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
+      sprintf("%10.4f", PTx95U), sprintf("%4.0f", Nseg),
+      file = ofileSout, append = TRUE
     )
     d_TP[[i]] <- data.table(
       kind = Id, Idc, date = IY0[Ic],
@@ -339,8 +344,8 @@ FindUD.wRef <- function(
     output = output, Mq = Mq, Nadj = Nadj, Ny4a = Ny4a,
     is_plot = is_plot, plot_fun = plot_FindUD.ref, ofileSout = ofileSout
   )
-  # write.table(odata, paste0(output, "_UD.dat"), col.names = TRUE, row.names = F, na = MissingValueCode)
-  
+  # write.table(odata, paste0(output, "_UD.dat"), col.names = TRUE, row.names = FALSE, na = MissingValueCode)
+
   if (GUI) {
     return(0)
   } else {

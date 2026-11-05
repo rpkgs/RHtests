@@ -29,8 +29,8 @@ getMtrendFdly <- function(idata) {
   }
   t1data <- tdata
   for (i in 1:12) {
-    if (sum(is.na(tdata[tdata[, 2] == i, 3]) == F) < 5) print(paste("monthly data too few at", cmon[i]))
-    mmean[i] <- mean(tdata[tdata[, 2] == i, 3], na.rm = T)
+    if (sum(is.na(tdata[tdata[, 2] == i, 3]) == FALSE) < 5) print(paste("monthly data too few at", cmon[i]))
+    mmean[i] <- mean(tdata[tdata[, 2] == i, 3], na.rm = TRUE)
     t1data[t1data[, 2] == i, 3] <- t1data[t1data[, 2] == i, 3] - mmean[i]
   }
   y <- t1data[, 3]

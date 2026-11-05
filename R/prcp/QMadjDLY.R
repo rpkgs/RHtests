@@ -22,8 +22,8 @@ QMadjDLY <- function(P, Ips, Mq, Iseg.adj) {
     I2 <- Ips[i]
     Nseg <- I2 - I1 + 1
     Y <- P[I1:I2]
-    iindx <- sort(Y, index = T)$ix
-    irank <- sort(iindx, index = T)$ix
+    iindx <- sort(Y, index = TRUE)$ix
+    irank <- sort(iindx, index = TRUE)$ix
     F[i, 1:Nseg] <- irank / Nseg
     EP[i, ] <- 0
     for (k in 2:(Mq + 1)) {
@@ -60,7 +60,7 @@ QMadjDLY <- function(P, Ips, Mq, Iseg.adj) {
     }
 
     Rs <- F[i, 1:Nseg]
-    ors <- sort(Rs, index = T)$ix
+    ors <- sort(Rs, index = TRUE)$ix
     osp <- rbind(osp, cbind(I1:I2, Rs[ors], W[I1:I2][ors]))
   }
   oout <- list()

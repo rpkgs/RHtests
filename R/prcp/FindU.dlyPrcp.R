@@ -23,7 +23,7 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
   PFmax <- critical_values$PFmax
 
   # smallestP<-min(Y0)
-  smallestP<-min(ori.itable[ori.itable[,"data"]>0,"data"],na.rm=T)
+  smallestP<-min(ori.itable[ori.itable[,"data"]>0,"data"],na.rm=TRUE)
   smallestP<-max(c(smallestP,pthr))
   sumLogPi<-sum(log(Y0))
 
@@ -52,7 +52,7 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
         print(c(lambdas[ind],lambda,lambdas[ind]-lambda))
         stop(paste("ind=",ind,"lambda=",lambda,"error"))
       }
-      if(is.na(LHs[ind])==F){  # already done before
+      if(is.na(LHs[ind])==FALSE){  # already done before
         LH<-LHs[ind]
         Ns<-Nss[ind]
         Ips<-Ipss[ind,1:(Ns+1)]
@@ -196,7 +196,7 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
 
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])
-    Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
+    Iseg.longest<-sort(Nsegs,index=TRUE,decreasing=TRUE)$ix[1]
   }
   else Iseg.longest<-0
 
@@ -226,12 +226,12 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
   meanhatA<-rep(NA,N)
 
   # cat("Common trend TPR fit to the transformed Base series:\n",
-  #     file=ofileSout,append=T)
+  #     file=ofileSout,append=TRUE)
   # cat(paste("#steps= ",Ns,"; trend=",round(otmp$trend,6),"unit/yr (p=",
   #           round(otmp$p.tr,4),"); lambda=",round(lambda,2),"; cor=",
   #           round(cor,4),"(",round(corL,4),",",round(corU,4),") p=",
   #           round(pcor,4),"\n"),
-  #           file=ofileSout,append=T)
+  #           file=ofileSout,append=TRUE)
 
   if(Ns>0) {
     fprintf("Step-sizes of the transfromed/original series:\n", file = ofileSout, append = TRUE)
@@ -314,9 +314,9 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
 
     if(QMout$Mq>1){
       cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-          append=T)
-      write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                  row.names=F,col.names=F)
+          append=TRUE)
+      write.table(round(QMout$osmean,4),file=ofileSout,append=TRUE,
+                  row.names=FALSE,col.names=FALSE)
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
@@ -376,11 +376,11 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
   }
 
   ofilePout<-paste(output,"_U.dat",sep="")
-  # write.table(round(odataP,4),file=ofilePout,na=MissingValueCode,col.names=F,row.names=F)
-  write.table(odata,file=ofilePout,na=MissingValueCode,col.names=F,row.names=F)
+  # write.table(round(odataP,4),file=ofilePout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
+  write.table(odata,file=ofilePout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
 
   ofilePdf<-paste(output,"_U.pdf",sep="")
-  pdf(file=ofilePdf,onefile=T)
+  pdf(file=ofilePdf,onefile=TRUE)
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
   par(mfrow=c(2,1))
   par(mar=c(2,4,3,1)+.1)
@@ -403,7 +403,7 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
       labels=ori.itable[ats,1]*10000+ori.itable[ats,2]*100+ori.itable[ats,3]
       axis(side=1,at=c(I1,Ic,I2),labels=labels)
 
-      tflg<-is.na(p1data[I1:I2,3])==F
+      tflg<-is.na(p1data[I1:I2,3])==FALSE
       lines(c(I1:I2)[tflg],p1data[I1:I2,3][tflg],col="red",lwd=1.5)
     }
     for(Iseg in 1:Ns){ # plot Y1~meanhat
@@ -458,7 +458,7 @@ FindU.dlyPrcp<-function(InSeries, output, MissingValueCode="-999.99",
       Fd<-.5/QMout$Mq
       I1<-if(i==1) 1 else Ips[i-1]+1
       I2<-Ips[i]
-      ymax<-max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
+      ymax<-max(osp[,2:3],na.rm=TRUE); ymin<-min(osp[,2:3],na.rm=TRUE)
       if(i!=Iseg.adj){
         np<-np+1
         if(col==0) {

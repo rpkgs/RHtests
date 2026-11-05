@@ -1,7 +1,7 @@
 readPFtable <- function(Nx, plev = 0.95) {
   # ,ifile="PFmax31red_Nmin10_CVs"
   # 计算临界值表及其对应的自相关系数。
-  # itmp <- matrix(scan(ifile,skip=2,quiet=T),ncol=6,byrow=T)
+  # itmp <- matrix(scan(ifile,skip=2,quiet=TRUE),ncol=6,byrow=TRUE)
   # itmp <- read.table("PFtable.csv", header = FALSE) %>% as.matrix()
   if (!plev %in% c(0.75, 0.8, 0.9, 0.95, 0.99, 0.9999)) {
     stop(paste0("invalid : input plev = ", plev, " !\n"))

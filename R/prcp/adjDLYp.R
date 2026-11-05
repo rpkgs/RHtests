@@ -27,8 +27,8 @@ adjDLYp <- function(P, Ips, Mq, Iseg.adj, Ptr.mx, R, Ncat.min, Nadj) {
     if (Nadj > 0) I1 <- max(c(I1, I2 - Nadj))
     Nseg <- I2 - I1
     Y <- P[(I1 + 1):I2]
-    iindx <- sort(Y, index = T)$ix
-    irank <- sort(iindx, index = T)$ix
+    iindx <- sort(Y, index = TRUE)$ix
+    irank <- sort(iindx, index = TRUE)$ix
     F[i, 1:Nseg] <- irank / Nseg
     EPb[i, ] <- 0
     for (k in 2:(Mq + 1)) {
@@ -43,8 +43,8 @@ adjDLYp <- function(P, Ips, Mq, Iseg.adj, Ptr.mx, R, Ncat.min, Nadj) {
     if (Nadj > 0 | i == Ns) {
       Nseg <- I4 - I3
       Y <- P[(I3 + 1):I4]
-      iindx <- sort(Y, index = T)$ix
-      irank <- sort(iindx, index = T)$ix
+      iindx <- sort(Y, index = TRUE)$ix
+      irank <- sort(iindx, index = TRUE)$ix
       #     F[i,1:Nseg]<-irank/Nseg
       EPa[i, ] <- 0
       for (k in 2:(Mq + 1)) {
@@ -77,8 +77,8 @@ adjDLYp <- function(P, Ips, Mq, Iseg.adj, Ptr.mx, R, Ncat.min, Nadj) {
     I2 <- Ips[i]
     Nseg <- I2 - I1 + 1
     Y <- P[I1:I2]
-    iindx <- sort(Y, index = T)$ix
-    irank <- sort(iindx, index = T)$ix
+    iindx <- sort(Y, index = TRUE)$ix
+    irank <- sort(iindx, index = TRUE)$ix
     F[i, 1:Nseg] <- irank / Nseg
     if (i == Iseg.adj) {
       PA[I1:I2] <- P[I1:I2] - Ptr.mx + R[I1:I2]
@@ -93,7 +93,7 @@ adjDLYp <- function(P, Ips, Mq, Iseg.adj, Ptr.mx, R, Ncat.min, Nadj) {
     }
 
     Rs <- F[i, 1:Nseg]
-    ors <- sort(Rs, index = T)$ix
+    ors <- sort(Rs, index = TRUE)$ix
     osp <- rbind(osp, cbind(I1:I2, Rs[ors], W[I1:I2][ors]))
   }
 

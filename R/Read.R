@@ -50,7 +50,7 @@ Read <- function(InSeries, MissingValueCode = "-999.99", plev = 0.95) {
   Nt <- length(Icy)
 
   ind <- ori.itable[ooflg, year * 10000 + month * 100 + day]
-  if (sum(!(ind %in% Ind2)) > 0 || all.equal(ind, sort(ind)) != T) {
+  if (sum(!(ind %in% Ind2)) > 0 || all.equal(ind, sort(ind)) != TRUE) {
     stop("Input data series not continuous", call. = FALSE)
   }
   # 允许缺测，但有效观测日期须按时间顺序排列。
@@ -99,7 +99,7 @@ ReadDLY.g <- function(InSeries, MissingValueCode) {
     itmp <- try(read.table(InSeries,
       sep = ",", header = FALSE, na.strings = MissingValueCode,
       colClasses = rep("real", 4)
-    ), silent = T)
+    ), silent = TRUE)
     if (inherits(itmp, "try-error")) {
       stop(as.character(itmp), call. = FALSE)
     } else {
@@ -109,7 +109,7 @@ ReadDLY.g <- function(InSeries, MissingValueCode) {
     itmp <- try(read.table(InSeries,
       sep = "", header = FALSE, na.strings = MissingValueCode,
       colClasses = rep("real", 4)
-    ), silent = T)
+    ), silent = TRUE)
     if (inherits(itmp, "try-error")) {
       stop(as.character(itmp), call. = FALSE)
     } else {

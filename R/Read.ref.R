@@ -110,7 +110,7 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode = "-999.99", plev = 0.9
 
   itable.nmb <- merge(cbind(date = icol.base, itable),
     cbind(date = icol.ref, rtable[, .(data.ref = data)]),
-    by = "date", all.x = T, all.y = F, sort = F
+    by = "date", all.x = TRUE, all.y = FALSE, sort = FALSE
   ) %>%
     .[order(date), -1]
 
@@ -152,14 +152,14 @@ Read.wRef <- function(Bseries, Rseries, MissingValueCode = "-999.99", plev = 0.9
   itmp[ind.base, 2] <- itable[ind.base, data]
   idenind <- unique(itmp[, 1])
   for (i in 1:Nt) {
-    if (sum(is.na(itmp[itmp[, 1] == Icy[i]]) == F) < 10) {
+    if (sum(is.na(itmp[itmp[, 1] == Icy[i]]) == FALSE) < 10) {
       message <- paste("input data too few at:", Icy[i])
       stop(message, call. = FALSE)
     }
   }
   itmp1 <- 0
   for (i in 1:(dim(itmp)[1] - 1)) {
-    if (is.na(itmp[i, 2]) == F & is.na(itmp[(i + 1), 2]) == F) itmp1 <- itmp1 + 1
+    if (is.na(itmp[i, 2]) == FALSE & is.na(itmp[(i + 1), 2]) == FALSE) itmp1 <- itmp1 + 1
   }
   if (itmp1 < 10) {
     stop("input data too few for autocorrelation calculating", call. = FALSE)

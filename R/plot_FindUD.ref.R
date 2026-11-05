@@ -2,7 +2,7 @@ plot_FindUD.ref <- function(output, Base, EB, EB1, B,
     oY0, omuDif, otmp, meanhatD,
     QMout, Mq, Ns, adj, adjB, Ips, Iseg.adj, IY0, ori.bdata, owflg, ...)
 {
-     pdf(file = paste0(output, "_UD.pdf"), onefile = T, paper = "letter")
+     pdf(file = paste0(output, "_UD.pdf"), onefile = TRUE, paper = "letter")
      op <- par(no.readonly = TRUE) # the whole list of settable par's.
      on.exit({ par(op); dev.off() })
      par(mfrow = c(4, 1))

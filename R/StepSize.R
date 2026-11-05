@@ -61,7 +61,7 @@ StepSize <- function(
   EB1 <- fit$EB
 
   EBfull <- EB1[match(Imd, Icy)]
-  EEB <- mean(EB1, na.rm = T)
+  EEB <- mean(EB1, na.rm = TRUE)
 
   # 先去除趋势，再按基准段进行分位数匹配，最后加回趋势。
   Rb <- Y1 - fit$trend * Ti + EBfull
@@ -123,7 +123,7 @@ StepSize <- function(
   d_TP <- write_points_table(d_TP, ofileIout)
 
   odata <- dt_num2date(odata)
-  # write.table(file = paste0(output, "_F.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = F)
+  # write.table(file = paste0(output, "_F.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = FALSE)
 
   if (GUI) {
     return(0)
@@ -146,7 +146,7 @@ log_fit_summary <- function(ofileSout, plev, N, fit_base, Ns, QMout, Ny4a,
     file = ofileSout, append = TRUE
   )
   cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
-    file = ofileSout, append = T
+    file = ofileSout, append = TRUE
   )
 
   if (Ns > 0) {

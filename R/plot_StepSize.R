@@ -2,7 +2,7 @@
 plot_stepsize <- function(oout, ofilePdf, EBfull, EEB, B, QMout, Mq, Ns, adj,
     Ips, Iseg.adj, otmp, ori.itable, ooflg, ...)
 {
-    pdf(file=ofilePdf,onefile=T,paper='letter')
+    pdf(file=ofilePdf,onefile=TRUE,paper='letter')
     op <- par(no.readonly = TRUE) # the whole list of settable par's.
     par(mfrow=c(2,1),cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
 

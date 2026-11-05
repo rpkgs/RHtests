@@ -13,7 +13,7 @@
 StepSize.wRef <- function(
   Bseries = NULL, Rseries = NULL, InCs, output,
   MissingValueCode = "-999.99",
-  plev = 0.95, Iadj = 10000, Mq = 10, GUI = F, Ny4a = 0,
+  plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
   is_plot = TRUE, ..., debug = TRUE, .state = NULL
 ) {
   # 读取计算状态，或使用上游传入的状态。
@@ -71,7 +71,7 @@ StepSize.wRef <- function(
     omuDif[I0:I2] <- muDif[i]
   }
   # write.table(cbind(IY0,round(oY0,4),round(omuDif,4),round(Wo,4)),
-  #             file=ofileRout,col.names=F,row.names=F)
+  #             file=ofileRout,col.names=FALSE,row.names=FALSE)
 
   # 将差值序列的突变位置映射回基准序列。
   Ips0 <- Ips
@@ -214,7 +214,7 @@ StepSize.wRef <- function(
   )
 
   odata <- dt_num2date(odata)
-  # write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=F, na=MissingValueCode)
+  # write.table(file=paste0(output,"_F.dat"), odata, col.names=TRUE, row.names=FALSE, na=MissingValueCode)
 
   d_TP <- write_points_table(d_TP, ofileIout, reference = TRUE, stepsizes = stepsizes)
 

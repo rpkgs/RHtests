@@ -24,11 +24,11 @@ Read.file <- function() {
   if (csv) {
     itmp <- try(
       read.table(ifname,
-        header = F,
+        header = FALSE,
         col.names = c("year", "month", "day", "prcp", "tmax", "tmin"),
         sep = ",", na.strings = "-99.9", colClasses = rep("real", 6)
       ),
-      silent = T
+      silent = TRUE
     )
     if (inherits(itmp, "try-error")) {
       ErrorMSG <<- geterrmessage()
@@ -40,11 +40,11 @@ Read.file <- function() {
   } else {
     itmp <- try(
       read.table(ifname,
-        header = F,
+        header = FALSE,
         col.names = c("year", "month", "day", "prcp", "tmax", "tmin"),
         na.strings = "-99.9", colClasses = rep("real", 6)
       ),
-      silent = T
+      silent = TRUE
     )
     if (inherits(itmp, "try-error")) {
       ErrorMSG <<- geterrmessage()
@@ -82,11 +82,11 @@ Read.file <- function() {
     for (k in smonth:12) {
       if (sum(is.na(tmpdata[tmpdata[, "month"] == k, vars[i]])) <= 3) {
         if (vars[i] == "prcp") {
-          itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+          itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
           itmp1mm <- sum(tmpdata[tmpdata[, "month"] == k &
-            tmpdata[, vars[i]] >= 1, vars[i]], na.rm = T)
+            tmpdata[, vars[i]] >= 1, vars[i]], na.rm = TRUE)
         } else {
-          itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+          itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
         }
       } else {
         itmp <- NA
@@ -101,11 +101,11 @@ Read.file <- function() {
       for (k in 1:12) {
         if (sum(is.na(tmpdata[tmpdata[, "month"] == k, vars[i]])) <= 3) {
           if (vars[i] == "prcp") {
-            itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+            itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
             itmp1mm <- sum(tmpdata[tmpdata[, "month"] == k &
-              tmpdata[, vars[i]] >= 1, vars[i]], na.rm = T)
+              tmpdata[, vars[i]] >= 1, vars[i]], na.rm = TRUE)
           } else {
-            itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+            itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
           }
         } else {
           itmp <- NA
@@ -119,11 +119,11 @@ Read.file <- function() {
     for (k in 1:emonth) {
       if (sum(is.na(tmpdata[tmpdata[, "month"] == k, vars[i]])) <= 3) {
         if (vars[i] == "prcp") {
-          itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+          itmp <- sum(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
           itmp1mm <- sum(tmpdata[tmpdata[, "month"] == k &
-            tmpdata[, vars[i]] >= 1, vars[i]], na.rm = T)
+            tmpdata[, vars[i]] >= 1, vars[i]], na.rm = TRUE)
         } else {
-          itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = T)
+          itmp <- mean(tmpdata[tmpdata[, "month"] == k, vars[i]], na.rm = TRUE)
         }
       } else {
         itmp <- NA
@@ -142,13 +142,13 @@ Read.file <- function() {
     }
   }
   logprcp <- prcp
-  if (min(prcp[, 4], na.rm = T) > 0) {
+  if (min(prcp[, 4], na.rm = TRUE) > 0) {
     logprcp[, 4] <- log(prcp[, 4])
   } else {
     logprcp[, 4] <- log(prcp[, 4] + 1)
   }
   logprcp1mm <- prcp1mm
-  if (min(prcp1mm[, 4], na.rm = T) > 0) {
+  if (min(prcp1mm[, 4], na.rm = TRUE) > 0) {
     logprcp1mm[, 4] <- log(prcp1mm[, 4])
   } else {
     logprcp1mm[, 4] <- log(prcp1mm[, 4] + 1)
@@ -232,23 +232,23 @@ Read.file <- function() {
   rownames(tmax) <- NULL
   rownames(tmin) <- NULL
   rownames(prcp) <- NULL
-  write.table(tmax, file = ofmax, sep = " ", na = MissingStr, col.names = F, row.names = F)
-  write.table(tmin, file = ofmin, sep = " ", na = MissingStr, col.names = F, row.names = F)
-  write.table(prcp, file = ofprcp, sep = " ", na = MissingStr, col.names = F, row.names = F)
-  write.table(logprcp, file = ofprcpL, sep = " ", na = MissingStr, col.names = F, row.names = F)
-  write.table(prcp1mm, file = ofprcp1mm, sep = " ", na = MissingStr, col.names = F, row.names = F)
-  write.table(logprcp1mm, file = ofprcp1mmL, sep = " ", na = MissingStr, col.names = F, row.names = F)
+  write.table(tmax, file = ofmax, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
+  write.table(tmin, file = ofmin, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
+  write.table(prcp, file = ofprcp, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
+  write.table(logprcp, file = ofprcpL, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
+  write.table(prcp1mm, file = ofprcp1mm, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
+  write.table(logprcp1mm, file = ofprcp1mmL, sep = " ", na = MissingStr, col.names = FALSE, row.names = FALSE)
   write.table(iInSeries[, c("year", "month", "day", "prcp")],
     file = ofprcpD,
-    na = MissingStr, col.names = F, row.names = F
+    na = MissingStr, col.names = FALSE, row.names = FALSE
   )
   write.table(iInSeries[, c("year", "month", "day", "tmax")],
     file = ofmaxD,
-    na = MissingStr, col.names = F, row.names = F
+    na = MissingStr, col.names = FALSE, row.names = FALSE
   )
   write.table(iInSeries[, c("year", "month", "day", "tmin")],
     file = ofminD,
-    na = MissingStr, col.names = F, row.names = F
+    na = MissingStr, col.names = FALSE, row.names = FALSE
   )
   tkinsert(txt, "end", "Data transform finished, monthly series output:\n")
   tkinsert(txt, "end", paste(ofmax, "\n"))

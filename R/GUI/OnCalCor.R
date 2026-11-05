@@ -11,8 +11,8 @@ OnCalCor<-function(){
        return(c(ocor,ocnt,ocomm))
     }
     if(is.csv(bfname)){
-      itmp<-try(read.table(bfname,sep=",",header=F,na.strings=MissingValueCode,
-              colClasses="real"),silent=T)
+      itmp<-try(read.table(bfname,sep=",",header=FALSE,na.strings=MissingValueCode,
+              colClasses="real"),silent=TRUE)
       if(inherits(itmp,"try-error")){
         ocomm<-geterrmessage()
         return(c(ocor,ocnt,ocomm))
@@ -20,8 +20,8 @@ OnCalCor<-function(){
       else itable<-itmp
     }
     else{
-      itmp<-try(read.table(bfname,sep="",header=F,na.strings=MissingValueCode,
-            colClasses="real"),silent=T)
+      itmp<-try(read.table(bfname,sep="",header=FALSE,na.strings=MissingValueCode,
+            colClasses="real"),silent=TRUE)
       if(inherits(itmp,"try-error")){
         ocomm<-geterrmessage()
         return(c(ocor,ocnt,ocomm))
@@ -30,8 +30,8 @@ OnCalCor<-function(){
     }
 
     if(is.csv(rfname)){
-      itmp<-try(read.table(rfname,sep=",",header=F,na.strings=MissingValueCode,
-              colClasses="real"),silent=T)
+      itmp<-try(read.table(rfname,sep=",",header=FALSE,na.strings=MissingValueCode,
+              colClasses="real"),silent=TRUE)
       if(inherits(itmp,"try-error")){
         ocomm<-geterrmessage()
         return(c(ocor,ocnt,ocomm))
@@ -39,8 +39,8 @@ OnCalCor<-function(){
       else rtable<-itmp
     }
     else{
-      itmp<-try(read.table(rfname,sep="",header=F,na.strings=MissingValueCode,
-            colClasses="real"),silent=T)
+      itmp<-try(read.table(rfname,sep="",header=FALSE,na.strings=MissingValueCode,
+            colClasses="real"),silent=TRUE)
       if(inherits(itmp,"try-error")){
         ocomm<-geterrmessage()
         return(c(ocor,ocnt,ocomm))
@@ -92,7 +92,7 @@ OnCalCor<-function(){
 
       labs=if(diff(yrange)>10) unique(pyr/10) else unique(pyr)
       ats=match(labs,pyr)
-      ylow=min(odata,na.rm=T); yup=max(odata,na.rm=T); ylim=c(ylow,yup+(yup-ylow)*.2)
+      ylow=min(odata,na.rm=TRUE); yup=max(odata,na.rm=TRUE); ylim=c(ylow,yup+(yup-ylow)*.2)
       plot(1:nrow(odata),odata[,1],type='l',col='red',ylim=ylim,xaxt='n',cex=.5,xlab=paste('Cor=',round(ocor,2)),ylab='')
 #          main=basename(rfname),col.main='blue')
       lines(1:nrow(odata),odata[,2],type='l',col='blue',ylim=ylim,xaxt='n',cex=.5,xlab=paste('Cor=',round(ocor,2)),ylab='')
@@ -189,7 +189,7 @@ OnCalCor<-function(){
     ofilePdf=paste(outdir,'/',ofbody,'_Cor.pdf',sep='')
     oflog=paste(outdir,'/',ofbody,'_Cor.log',sep='')
 
-    pdf(file=ofilePdf,onefile=T,paper='letter')
+    pdf(file=ofilePdf,onefile=TRUE,paper='letter')
     op <- par(no.readonly = TRUE) # the whole list of settable par's.
     par(mfrow=c(2,1))
     par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)

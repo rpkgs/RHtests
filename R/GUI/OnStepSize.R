@@ -253,7 +253,7 @@ OnStepSize.wRef<-function(){
       ofname<-paste(paste(outdir,ofbody,sep="/"),ofrbody,sep="_")
       itmp<-StepSize.wRef(Bseries=ifname,Rseries=ifrname,InCs=iDIpsName,
             output=ofname,MissingValueCode=MissingStr,plev=as.numeric(PlevStr),
-    	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),GUI=T)
+    	    Iadj=as.numeric(AdjStr),Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),GUI=TRUE)
       if(itmp<0){ # Error happens
         tkinsert(txt,"end",ErrorMSG)
         return()

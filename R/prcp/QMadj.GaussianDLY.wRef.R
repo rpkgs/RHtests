@@ -37,7 +37,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
 
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])
-    Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
+    Iseg.longest<-sort(Nsegs,index=TRUE,decreasing=TRUE)$ix[1]
   }
   else Iseg.longest<-0
 
@@ -69,7 +69,7 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
   colnames(itmp2)<-c("idx","Icy")
   itmp<-merge(itmp1,itmp2,by="Icy")
   EBfull<-itmp[order(itmp[,"idx"]),"EB1"]
-  EEB<-mean(EB1,na.rm=T)
+  EEB<-mean(EB1,na.rm=TRUE)
 
   if(Ns>0){
     Rb<-Y1-otmp$trend*Ti+EBfull
@@ -90,16 +90,16 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
       Iseg.adj, if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1, Ips[Iseg.adj], file = ofileSout, append = TRUE
     )
 #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-#       append=T)
+#       append=TRUE)
     if(QMout$Mq>1){
       oline<-paste('#Fcat: frequency category boundaries\n',
                    '#DP: Difference in the category means\n#',sep='')
       for(i in 1:Ns) oline<-paste(oline,paste('Fcat.Seg',i,sep=''),paste('DP.Seg',i,sep=''))
       oline<-paste(oline,'\n')
-      cat(oline,file=ofileSout,append=T)
+      cat(oline,file=ofileSout,append=TRUE)
 
-      write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                  row.names=F,col.names=F)
+      write.table(round(QMout$osmean,4),file=ofileSout,append=TRUE,
+                  row.names=FALSE,col.names=FALSE)
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
@@ -146,10 +146,10 @@ QMadj.GaussianDLY<-function(InSeries,InCs,output,MissingValueCode,GUI=FALSE,
 
   ofileAout<-paste(output,"_QMadjDLY.dat",sep="")
 # ofileAout<-output # suggested by Lucie, user can choose whatever filename
-  write.table(odata,file=ofileAout,na=MissingValueCode,col.names=F,row.names=F)
+  write.table(odata,file=ofileAout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
 
   ofilePdf<-paste(output,"_QMadjDLY.pdf",sep="")
-  pdf(file=ofilePdf,onefile=T,paper='letter')
+  pdf(file=ofilePdf,onefile=TRUE,paper='letter')
   op <- par(no.readonly = TRUE) # the whole list of settable par's
   par(mfrow=c(2,1),cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
 
@@ -246,7 +246,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   }
   if(Ns>0) {
     Nsegs<-Ips-c(0,Ips[1:Ns])
-    Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
+    Iseg.longest<-sort(Nsegs,index=TRUE,decreasing=TRUE)$ix[1]
   }
   else Iseg.longest<-0
 
@@ -317,7 +317,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   for(i in 1:length(IY1))
     EB[i]<-otmp$EB[inds==IYM[i]]
   Base<-otmp$Base
-  EPB<-mean(bdata[,"data"],na.rm=T)
+  EPB<-mean(bdata[,"data"],na.rm=TRUE)
   tt<-TRUE
   Niter<-0
   while(tt){
@@ -345,7 +345,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
 # re-estimate seasonal cycle using adjusted series:
       EB1<-rep(0,length(inds))
       for(i in 1:length(inds))
-        EB1[i]<-mean(Base[IYM==inds[i]],na.rm=T)
+        EB1[i]<-mean(Base[IYM==inds[i]],na.rm=TRUE)
       for(i in 1:length(IY1))
         EB[i]<-EB1[inds==IYM[i]]
       for(i in 1:(Ns+1)){
@@ -385,16 +385,16 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
       Iseg.adj, if(Iseg.adj==1) 1 else Ips[Iseg.adj-1]+1, Ips[Iseg.adj], file = ofileSout, append = TRUE
     )
 #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-#       append=T)
+#       append=TRUE)
     if(QMout$Mq>1){
       oline<-paste('#Fcat: frequency category boundaries\n',
                    '#DP: Difference in the category means\n#',sep='')
       for(i in 1:Ns) oline<-paste(oline,paste('Fcat.Seg',i,sep=''),paste('DP.Seg',i,sep=''))
       oline<-paste(oline,'\n')
-      cat(oline,file=ofileSout,append=T)
+      cat(oline,file=ofileSout,append=TRUE)
 
-      write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                  row.names=F,col.names=F)
+      write.table(round(QMout$osmean,4),file=ofileSout,append=TRUE,
+                  row.names=FALSE,col.names=FALSE)
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
@@ -410,7 +410,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
 # B<-B+otmp$trend*Ti
 
   ofilePdf<-paste(output,"_QMadjDLYwRef.pdf",sep="")
-  pdf(file=ofilePdf,onefile=T,paper='letter')
+  pdf(file=ofilePdf,onefile=TRUE,paper='letter')
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
   par(mfrow=c(3,1))
   par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)
@@ -466,7 +466,7 @@ QMadj.GaussianDLY.wRef<-function(Bseries,Rseries,MissingValueCode,InCs,output,Ia
   }
   else odata<-cbind(ori.itable[,c(1,2,3,4,4,4)],0,0)
   ofileAout<-paste(output,"_QMadjDLYwRef.dat",sep="")
-  write.table(odata,file=ofileAout,na=MissingValueCode,col.names=F,row.names=F)
+  write.table(odata,file=ofileAout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
   return(0)
 
 }

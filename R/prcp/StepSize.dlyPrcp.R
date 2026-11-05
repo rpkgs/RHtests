@@ -62,7 +62,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
     }
   }
   # smallestP<-min(Y0)
-  smallestP<-min(ori.itable[ori.itable[,"data"]>0,"data"],na.rm=T)
+  smallestP<-min(ori.itable[ori.itable[,"data"]>0,"data"],na.rm=TRUE)
   smallestP<-max(c(smallestP,pthr))
   sumLogPi<-sum(log(Y0))
 
@@ -74,7 +74,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
   fprintf("The smallest non-zero dailyP is: %s \n", smallestP, file = ofileSout, append = TRUE)
 
   Nsegs<-Ips-c(0,Ips[1:Ns])
-  Iseg.longest<-sort(Nsegs,index=T,decreasing=T)$ix[1]
+  Iseg.longest<-sort(Nsegs,index=TRUE,decreasing=TRUE)$ix[1]
   if(Iadj>(Ns+1)|Iseg.longest==0) Iseg.adj<-Ns+1
   else if(Iadj==0)Iseg.adj<-Iseg.longest
   else Iseg.adj<-Iadj
@@ -96,7 +96,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
         print(c(lambdas[ind],lambda,lambdas[ind]-lambda))
         stop(paste("ind=",ind,"lambda=",lambda,"error"))
       }
-      if(is.na(LHs[ind])==F){  # already done before
+      if(is.na(LHs[ind])==FALSE){  # already done before
         LH<-LHs[ind]
         Y1<-BCtrans(P,lambda)
       }
@@ -144,11 +144,11 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
   Pmeanhat<-IVBCtrans(meanhat,lambda)
 
   # cat("Common trend TPR fit to the transformed Base series:\n",
-  #     file=ofileSout,append=T)
+  #     file=ofileSout,append=TRUE)
   # cat(paste("#steps= ",Ns,"; trend=",round(otmp$trend,6),"unit/yr (p=",
   #           round(otmp$p.tr,4),"); lambda=",round(lambda,2),"; cor=",
   #           round(cor,4),"(",round(corL,4),",",round(corU,4),") p=",
-  #           round(pcor,4),"\n"),file=ofileSout,append=T)
+  #           round(pcor,4),"\n"),file=ofileSout,append=TRUE)
   stepsizes = NULL
 
   if(Ns>0) {
@@ -234,9 +234,9 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
 
     if(QMout$Mq>1){
       cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-          append=T)
-      write.table(round(QMout$osmean,4),file=ofileSout,append=T,
-                  row.names=F,col.names=F)
+          append=TRUE)
+      write.table(round(QMout$osmean,4),file=ofileSout,append=TRUE,
+                  row.names=FALSE,col.names=FALSE)
       for(i in 1:(Ns+1)){
         I1<-if(i==1) 1 else Ips[i-1]+1
         I2<-Ips[i]
@@ -289,14 +289,14 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
     )
   }
   # ofileDout<-paste(output,"_adj_F.dat",sep="")
-  # write.table(odata,file=ofileDout,na=MissingValueCode,col.names=F,row.names=F)
+  # write.table(odata,file=ofileDout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
 
   ofilePout<-paste(output,"_F.dat",sep="")
-  # write.table(round(odataP,4),file=ofilePout,na=MissingValueCode,col.names=F,row.names=F)
-  write.table(odata,file=ofilePout,na=MissingValueCode,col.names=F,row.names=F)
+  # write.table(round(odataP,4),file=ofilePout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
+  write.table(odata,file=ofilePout,na=MissingValueCode,col.names=FALSE,row.names=FALSE)
 
   ofilePdf<-paste(output,"_F.pdf",sep="")
-  pdf(file=ofilePdf,onefile=T)
+  pdf(file=ofilePdf,onefile=TRUE)
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
   par(mfrow=c(2,1))
   # par(mar=c(3,4,3,2)+.1)
@@ -319,7 +319,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       labels=ori.itable[ats,1]*10000+ori.itable[ats,2]*100+ori.itable[ats,3]
       axis(side=1,at=c(I1,Ic,I2),labels=labels)
 
-      tflg<-is.na(p1data[I1:I2,3])==F
+      tflg<-is.na(p1data[I1:I2,3])==FALSE
       lines(c(I1:I2)[tflg],p1data[I1:I2,3][tflg],col="red",lwd=1.5)
     }
     for(Iseg in 1:Ns){ # plot Y1~meanhat
@@ -333,7 +333,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
            main=paste("Box-Cox transformed dailyP>pthr series\n",
                       "Changepoint ",Iseg," at:",IY0[Ips[Iseg]],sep=""))
       axis(side=1,at=c(I1,Ic,I2),labels=IY0[c(I1,Ic,I2)])
-      #     tflg<-is.na(p2data[I1:I2,3])==F
+      #     tflg<-is.na(p2data[I1:I2,3])==FALSE
       #     lines(c(I1:I2)[tflg],p2data[I1:I2,3][tflg],col="red",lwd=1.5)
       lines(c(I1:I2),odata[I1:I2,9],col="red",lwd=1.5)
     }
@@ -374,7 +374,7 @@ StepSize.dlyPrcp<-function(InSeries, InCs, output,
       Fd<-.5/QMout$Mq
       I1<-if(i==1) 1 else Ips[i-1]+1
       I2<-Ips[i]
-      ymax<-max(osp[,2:3],na.rm=T); ymin<-min(osp[,2:3],na.rm=T)
+      ymax<-max(osp[,2:3],na.rm=TRUE); ymin<-min(osp[,2:3],na.rm=TRUE)
       if(i!=Iseg.adj){
         np<-np+1
         if(col==0) {

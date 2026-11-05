@@ -8,7 +8,7 @@ plot_FindU.ref <- function(output, Base, EB, EB1, B,
   ofilePdf  <- paste(output,"_U.pdf",sep="")
   file.create(ofilePdf)
 
-  pdf(file=ofilePdf,onefile=T,paper='letter')
+  pdf(file=ofilePdf,onefile=TRUE,paper='letter')
   op <- par(no.readonly = TRUE) # the whole list of settable par's.
   par(mfrow=c(4,1))
   par(mar=c(3,4,3,2)+.1,cex.main=.8,cex.lab=.8,cex.axis=.8,cex=.8)

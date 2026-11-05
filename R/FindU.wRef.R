@@ -40,13 +40,16 @@
 #' @seealso [Read.wRef()]、[FindUD.wRef()]、[StepSize.wRef()]
 #' @export
 FindU.wRef <- function(
-    Bseries = NULL, Rseries = NULL, output, MissingValueCode = "-999.99",
-    plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
-    is_plot = TRUE, ..., .state = NULL) {
+  Bseries = NULL, Rseries = NULL, output, MissingValueCode = "-999.99",
+  plev = 0.95, Iadj = 10000, Mq = 10, GUI = FALSE, Ny4a = 0,
+  is_plot = TRUE, ..., .state = NULL
+) {
   mkdir(dirname(output))
   state <- if (is.null(.state)) {
     Read.wRef(Bseries, Rseries, MissingValueCode, plev)
-  } else .state
+  } else {
+    .state
+  }
   check_rh_state(state, reference = TRUE, plev = plev)
   c(Y0, IY0, IY0flg) %<-% state@series[c("Y0", "IY0", "IY0flg")]
   Nt <- state@season$Nt
@@ -103,7 +106,7 @@ FindU.wRef <- function(
   otmp <- PTKIc(Y0, Pk0, I02)
   ofileIout <- paste(output, "_1Cs.txt", sep = "")
   file.create(ofileIout)
-  
+
   # ofileMout <- paste(output, "_mCs.txt", sep = "")
   # ofileRout<-paste(output,"_Base_Ref.fitU",sep="")
   if (otmp$PTk < PTx95L) { # search for more changepoints
@@ -111,7 +114,8 @@ FindU.wRef <- function(
       Ns, Bseries, paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
         sprintf("%10.0f", 19000101), ")",
         sep = ""
-      ), file = ofileIout
+      ),
+      file = ofileIout
     )
     cat("PMT finds no Type-1 changepoints in the series!\n")
     Ns <- 0
@@ -227,7 +231,7 @@ FindU.wRef <- function(
       p.cor <- pt(abs(cor) * sqrt(df / (1 - cor^2)), df)
       if (Ns.initial > Ns) {
         Ns.initial <- Ns
-        tt <- T
+        tt <- TRUE
         corL <- corl
       } else {
         tt0 <- FALSE
@@ -265,13 +269,16 @@ FindU.wRef <- function(
         Idc <- "No  "
       } else if (otmp$PTk >= PTx95l & otmp$PTk < PTx95h) {
         Idc <- "?   "
-      } else if (otmp$PTk >= PTx95h) Idc <- "Yes "
-      #     }
+      } else if (otmp$PTk >= PTx95h) {
+        Idc <- "Yes "
+      }
+
       fprintf("PMT : c=%s; (Time %s); Type= 1; p=%s(%s-%s); PTmax=%s; CV95=%s(%s-%s); Nseg=%s\n",
         sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%10.4f", probW),
         sprintf("%6.4f", probL), sprintf("%6.4f", probU), sprintf("%10.4f", otmp$PTk),
         sprintf("%10.4f", PTx95), sprintf("%10.4f", PTx95l), sprintf("%10.4f", PTx95h),
-        sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
+        sprintf("%4.0f", Nseg),
+        file = ofileSout, append = TRUE
       )
       d_TP[[i]] <- data.table(
         kind = 1, Idc, date = IY0[Ic],
@@ -285,13 +292,15 @@ FindU.wRef <- function(
       Ns, Bseries, Rseries, paste("sample:(", sprintf("%1.0f", 1), " ", sprintf("%-4.4s", "YifD"),
         sprintf("%10.0f", 19000101), ")",
         sep = ""
-      ), file = ofileIout
+      ),
+      file = ofileIout
     )
     cat("PMT finds no Type-1 changepoints in the series!\n")
   } else {
     fprintf("The adj-diff. autocor is: %.4f ( %.4f , %.4f p= %.4f )\n",
       cor, corl, corh, p.cor,
-      file = ofileSout, append = TRUE)
+      file = ofileSout, append = TRUE
+    )
     fprintf("%s changepoints in Series %s , %s \n", Ns, Bseries, Rseries,
       file = ofileIout, append = TRUE
     )
@@ -306,7 +315,7 @@ FindU.wRef <- function(
     output = output, Mq = Mq, Nadj = Nadj, Ny4a = Ny4a,
     is_plot = is_plot, plot_fun = plot_FindU.ref, ofileSout = ofileSout
   )
-  # write.table(file = paste0(output, "_U.dat"), odata, col.names = TRUE, row.names = F, na = MissingValueCode)
+  # write.table(file = paste0(output, "_U.dat"), odata, col.names = TRUE, row.names = FALSE, na = MissingValueCode)
 
   if (GUI) {
     return(0)

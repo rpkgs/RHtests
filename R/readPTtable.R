@@ -7,7 +7,7 @@ readPTtable <- function(Nx, plev) {
   # 计算临界值表及其对应的自相关系数。
   # itmp <- read.table("PTtable.csv", header = FALSE) %>% as.matrix()
   itmp <- PTtable
-  # itmp <- matrix(, ncol=8,byrow=T)
+  # itmp <- matrix(, ncol=8,byrow=TRUE)
   Nmax <- max(itmp[, 1])
   Nmin <- min(itmp[, 1])
   nlevs <- unique(itmp[, 1])

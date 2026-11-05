@@ -1,27 +1,32 @@
 #' FindUD
-#' 
+#'
 #' @inheritParams FindU
-#' 
+#'
 #' @param InCs A data.frame of detected turning points returned from [FindU],
 #' with the columns of `c("kind", "Idc", "date", "probL", "probU", "plev",
 #' "PFx", "PFx95l", "PFx95h")`.
-#' 
-#' @examples 
-#' f = system.file("extdata/Example1.dat", package = "RHtests")
-#' r1 = FindU(f, output = file.path(tempdir(), "example01"))
-#' 
-#' r2 = FindUD(InSeries = f, InCs = r1$TP,
-#'   output = file.path(tempdir(), "example01"))
+#'
+#' @examples
+#' f <- system.file("extdata/Example1.dat", package = "RHtests")
+#' r1 <- FindU(f, output = file.path(tempdir(), "example01"))
+#'
+#' r2 <- FindUD(
+#'   InSeries = f, InCs = r1$TP,
+#'   output = file.path(tempdir(), "example01")
+#' )
 #' print(r2)
-#' 
+#'
 #' plot_output(r2$fit)
 #' @export
 FindUD <- function(
-    InSeries = NULL, InCs, output, MissingValueCode = "-999.99",
-    GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, is_plot = FALSE, .state = NULL) {
+  InSeries = NULL, InCs, output, MissingValueCode = "-999.99",
+  GUI = FALSE, plev = 0.95, Iadj = 10000, Mq = 10, Ny4a = 0, is_plot = FALSE, .state = NULL
+) {
   state <- if (is.null(.state)) {
     Read(InSeries, MissingValueCode, plev)
-  } else .state
+  } else {
+    .state
+  }
   check_rh_state(state, reference = FALSE, plev = plev)
   c(Y0, Ti, IY0, IY0flg, Imd, itable, ori.itable, ooflg) %<-%
     state@series[c("Y0", "Ti", "IY0", "IY0flg", "Imd", "itable", "ori.itable", "ooflg")]
@@ -236,30 +241,43 @@ FindUD <- function(
     QMout <- QMadjGaussian(Rb, Ips, Mq, Iseg.adj, Nadj, Nt)
     B <- QMout$PA
     fprintf("Nseg_shortest = %s ; Mq =  %s ; Ny4a =  %s \n",
-      QMout$Nseg.mn, QMout$Mq, Ny4a, file = ofileSout, append = TRUE)
+      QMout$Nseg.mn, QMout$Mq, Ny4a,
+      file = ofileSout, append = TRUE
+    )
     fprintf("\n Adjust to segment %s : from %s to %s \n",
       Iseg.adj, if (Iseg.adj == 1) 1 else Ips[Iseg.adj - 1] + 1,
-      Ips[Iseg.adj], file = ofileSout, append = TRUE)
+      Ips[Iseg.adj],
+      file = ofileSout, append = TRUE
+    )
     #   cat("#Fcat, DP (CDF and Differnces in category mean)\n",file=ofileSout,
-    #       append=T)
+    #       append=TRUE)
     if (QMout$Mq > 1) {
       oline <- paste("#Fcat: frequency category boundaries\n",
-        "#DP: Difference in the category means\n#", sep = "")
-      for (i in 1:Ns) oline <- paste(oline, paste("Fcat.Seg", i, sep = ""), 
-        paste("DP.Seg", i, sep = ""))
-      
+        "#DP: Difference in the category means\n#",
+        sep = ""
+      )
+      for (i in 1:Ns) {
+        oline <- paste(
+          oline, paste("Fcat.Seg", i, sep = ""),
+          paste("DP.Seg", i, sep = "")
+        )
+      }
+
       oline <- paste(oline, "\n")
       cat(oline, file = ofileSout, append = TRUE)
 
       write.table(round(QMout$osmean, 4),
-        file = ofileSout, append = TRUE, row.names = FALSE, col.names = FALSE)
-      
+        file = ofileSout, append = TRUE, row.names = FALSE, col.names = FALSE
+      )
+
       for (i in 1:(Ns + 1)) {
         I1 <- if (i == 1) 1 else Ips[i - 1] + 1
         I2 <- Ips[i]
         if (i != Iseg.adj) {
           fprintf("Seg. %s: mean of QM-adjustments =%.4f\n",
-            i, mean(QMout$W[I1:I2]), file = ofileSout, append = TRUE)
+            i, mean(QMout$W[I1:I2]),
+            file = ofileSout, append = TRUE
+          )
         }
       }
     }
@@ -273,14 +291,16 @@ FindUD <- function(
 
   fprintf(" Ignore changepoints -> trend0 = %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s )\n",
     round(beta0, 6), round(betaL0, 6), round(betaU0, 6), round(p.tr0, 4), round(corD, 4),
-    round(corDL, 4), round(corDU, 4), file = ofileSout, append = TRUE
+    round(corDL, 4), round(corDU, 4),
+    file = ofileSout, append = TRUE
   )
   cat("Common trend TPR fit to the seasonal-cycle-adjusted Base series:\n",
     file = ofileSout, append = TRUE
   )
   fprintf("#steps=  %s ; trend= %s ( %s , %s ) (p= %s ); cor= %s ( %s , %s ) %s \n",
     Ns, round(otmp$trend, 6), round(otmp$betaL, 6), round(otmp$betaU, 6), round(otmp$p.tr, 4),
-    round(cor, 4), round(corl, 4), round(corh, 4), round(pcor, 4), file = ofileSout, append = TRUE
+    round(cor, 4), round(corl, 4), round(corh, 4), round(pcor, 4),
+    file = ofileSout, append = TRUE
   )
   if (Ns > 0) {
     for (i in 1:(Ns + 1)) {
@@ -290,7 +310,9 @@ FindUD <- function(
       adj[I1:I2] <- adj[I1:I2] + Delta
       stepsize <- otmp$mu[i + 1] - otmp$mu[i]
       fprintf("%s %s stepsize= %.4f \n", Ips[i], IY0[Ips[i]],
-        stepsize, file = ofileSout, append = TRUE)
+        stepsize,
+        file = ofileSout, append = TRUE
+      )
     }
   }
 
@@ -438,7 +460,8 @@ FindUD <- function(
         sprintf("%4.0f", Ic), sprintf("%10.0f", IY0[Ic]), sprintf("%4.0f", as.numeric(Id)),
         sprintf("%10.4f", prob), sprintf("%10.4f", probL), sprintf("%10.4f", probU),
         sprintf("%10.4f", PFx), sprintf("%10.4f", PFx95), sprintf("%10.4f", PFx95l),
-        sprintf("%10.4f", PFx95h), sprintf("%4.0f", Nseg), file = ofileSout, append = TRUE
+        sprintf("%10.4f", PFx95h), sprintf("%4.0f", Nseg),
+        file = ofileSout, append = TRUE
       )
       d_TP[[i]] <- data.table(kind = Id, Idc, date = IY0[Ic], probL, probU, plev, PFx, PFx95l, PFx95h)
     }
@@ -455,7 +478,7 @@ FindUD <- function(
 
   odata %<>% as.data.table()
   odata$date %<>% num2date()
-  # write.table(file = paste0(output, "_UD.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = F)
+  # write.table(file = paste0(output, "_UD.dat"), odata, na = MissingValueCode, col.names = TRUE, row.names = FALSE)
 
   if (GUI) {
     return(0)
@@ -476,7 +499,6 @@ guess_sign_level <- function(Id, plev, probL, probU, PFx, PFx95l, PFx95h) {
       Idc <- "YifD"
     }
     if (PFx >= PFx95h) Idc <- "Yes "
-
   } else if (Id == 1) { # type-1 changepoints
     if (PFx < PFx95l) {
       Idc <- "No  "

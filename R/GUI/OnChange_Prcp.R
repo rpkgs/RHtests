@@ -543,7 +543,7 @@ OnadjDLYp<-function(){
             odata<-idata[mmdd>=Sstrts[ith]&mmdd<=Sends[ith],]
           iftmp<-paste(ofname,"_",Snames[ith],".dat",sep="")
           oftmp<-paste(ofname,"_",Snames[ith],sep="")
-          write.table(odata,file=iftmp,col.names=F,row.names=F)
+          write.table(odata,file=iftmp,col.names=FALSE,row.names=FALSE)
           itmp<-adjDLYp(InSeries=iftmp,output=oftmp,InCs=iDIpsName,
                         MissingValueCode=MissingStr,Iadj=as.numeric(AdjStr),
                         Mq=as.numeric(Mq0Str),Ny4a=as.numeric(Ny4aStr),GUI=TRUE)
@@ -562,7 +562,7 @@ OnadjDLYp<-function(){
           ifileSout<-paste(ofname,"_",Snames[ith],"_adjDLYpstat.txt",sep="")
           ifileAout<-paste(ofname,"_",Snames[ith],"_adjDLYp.dat",sep="")
           iftmp<-paste(ofname,"_",Snames[ith],".dat",sep="")
-          if(ith>1) cat("\n\n",file=ofileSout,append=T)
+          if(ith>1) cat("\n\n",file=ofileSout,append=TRUE)
           fprintf("#   %s season: %s \n", ifname, Snames[ith], file = ofileSout, append = TRUE)
           file.append(ofileSout,ifileSout)
           file.remove(ifileSout)
@@ -573,7 +573,7 @@ OnadjDLYp<-function(){
         }
         ymd<-odata[,1]*10000+odata[,2]*100+odata[,3]
         o1data<-odata[order(ymd),]
-        write.table(o1data,file=ofileAout,col.names=F,row.names=F)
+        write.table(o1data,file=ofileAout,col.names=FALSE,row.names=FALSE)
       }
 
       oact<-str40("ofbody",ofbody)
