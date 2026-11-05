@@ -49,7 +49,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">LSmultiRedCycle</span><span class="op">(</span><span class="va">Y0</span>, <span class="va">Ti</span>, <span class="va">Ips</span>, <span class="va">Iseg.adj</span>, <span class="va">IY0flg</span>, <span class="va">EB</span>, <span class="va">Imd</span>, <span class="va">Icy</span>, <span class="va">Nt</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">LSmultiRedCycle</span><span class="op">(</span><span class="va">Y0</span>, <span class="va">Ti</span>, <span class="va">Ips</span>, <span class="va">Iseg.adj</span>, <span class="va">IY0flg</span>, <span class="va">seasonal_mean</span>, <span class="va">Imd</span>, <span class="va">Icy</span>, <span class="va">Nt</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -76,8 +76,8 @@
 <dd><p>相邻观测是否连续（0/1）。</p></dd>
 
 
-<dt id="arg-eb">EB<a class="anchor" aria-label="anchor" href="#arg-eb"></a></dt>
-<dd><p>季节周期，长度 <code>Nt</code>。</p></dd>
+<dt id="arg-seasonal-mean">seasonal_mean<a class="anchor" aria-label="anchor" href="#arg-seasonal-mean"></a></dt>
+<dd><p>各月日的季节均值，长度 <code>Nt</code>。</p></dd>
 
 
 <dt id="arg-imd">Imd<a class="anchor" aria-label="anchor" href="#arg-imd"></a></dt>
@@ -97,6 +97,7 @@
 
 <ul><li><p><code>resi</code>: residual</p></li>
 <li><p><code>meanhat</code>: linear trend</p></li>
+<li><p><code>seasonal_mean</code>: 拟合后的季节周期。</p></li>
 </ul></div>
 
   </div>
