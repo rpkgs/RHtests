@@ -2,8 +2,8 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   Ns <- length(Ips) - 1
   N <- length(Y0)
   otmp <- LS_MultiBreaks(Y0, Ti, Ips)
-  sig <- otmp$sig
-  beta <- otmp$sig[2]
+  coef <- otmp$coef
+  beta <- otmp$coef[2]
   resi <- otmp$resi
   otmp <- autocorlh(resi, IY0flg)
   cor <- otmp$cor
@@ -15,7 +15,7 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
   W <- c(1, IY0flg[1:(N - 1)]) * W2 + (!c(1, IY0flg[1:(N - 1)])) * W1
 
   otmp <- LS_OneBreak(W, Ti - mean(Ti), NA)
-  beta <- otmp$sig[2]
+  beta <- otmp$coef[2]
   St0 <- sum((Ti - mean(Ti))^2)
   df <- (N - 2 - Ns - Nt)
   sigmaE2 <- otmp$SSE / df
@@ -48,7 +48,7 @@ LSmultipleRed <- function(Y0, Ti, Ips, IY0flg, Nt) {
     WU[I0:I2] <- WU[I0:I2] + mean(itmp[I0:I2]) + beta * Ti[I0:I2]
   }
 
-  listk(W, WL, WU, sig, cor, corl, corh, resi, mu, meanhat,
+  listk(W, WL, WU, coef, cor, corl, corh, resi, mu, meanhat,
     trend = beta, betaL, betaU, p.tr
   )
 }

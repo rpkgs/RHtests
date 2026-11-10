@@ -109,7 +109,7 @@ StepSize.wRef <- function(
   )
   c(Base, seasonal_values, fitted_seasonal_mean, otmp) %<-%
     fit_result[c("base", "seasonal", "cycle", "fit")]
-  sig <- otmp$sig
+  coef <- otmp$coef
   df <- N - 2 - Nt - Ns
   p.cor <- pt(abs(otmp$cor) * sqrt(df / (1 - otmp$cor^2)), df)
   Ehat <- mean(otmp$meanhat)
@@ -128,7 +128,7 @@ StepSize.wRef <- function(
   adjB <- Base + seasonal_values
   meanhatD <- rep(0, N)
   if (Ns > 0) {
-    delta <- sig[Iseg.adj + 1] - sig[-1]
+    delta <- coef[Iseg.adj + 1] - coef[-1]
     delta_diff <- muDif[Iseg.adj] - muDif
     adj <- add_segment_adjustment(adj, segments, delta)
     adjB <- add_segment_adjustment(adjB, segments, delta_diff)
@@ -140,7 +140,7 @@ StepSize.wRef <- function(
   }
 
   # 各段系数相对首段；后续突变幅度取相邻系数之差。
-  stepsizes <- if (Ns > 0) c(sig[3], diff(sig[-(1:2)])) else numeric()
+  stepsizes <- if (Ns > 0) c(coef[3], diff(coef[-(1:2)])) else numeric()
 
   # 8. 恢复日期、缺测值和闰日，组装输出序列。
   odata <- build_ref_fitted_table(

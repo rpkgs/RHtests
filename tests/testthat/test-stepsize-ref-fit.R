@@ -3,7 +3,7 @@ test_that("reference fit updates the seasonal cycle until convergence", {
   local_mocked_bindings(
     LSmultipleRed = function(...) {
       calls <<- calls + 1L
-      list(sig = c(0, 0, 2))
+      list(coef = c(0, 0, 2))
     },
     .package = "RHtests"
   )
@@ -20,7 +20,7 @@ test_that("reference fit updates the seasonal cycle until convergence", {
 })
 
 test_that("reference fit preserves the seasonal values without changepoints", {
-  local_mocked_bindings(LSmultipleRed = function(...) list(sig = c(0, 0)), .package = "RHtests")
+  local_mocked_bindings(LSmultipleRed = function(...) list(coef = c(0, 0)), .package = "RHtests")
   result <- RHtests:::fit_reference_cycle(
     base = 1:4, seasonal = c(1, 2, 1, 2), previous_cycle = c(1, 2),
     cycle_index = c(1, 2, 1, 2), cycle_values = 1:2,

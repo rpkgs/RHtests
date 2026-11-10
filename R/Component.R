@@ -20,7 +20,7 @@ RemoveSeasonal <- function(y, t_mmdd) {
 #' @param ... 传给 `lm_solve()`。
 #'
 #' @return
-#' - `sig`   : coefficients
+#' - `coef`  : coefficients
 #' - `fitted`: fitted value
 #' - `resi`  : residual of fitted value
 LS_MultiBreaks <- function(Y, X, Ips, ...) {
@@ -44,7 +44,7 @@ LS_MultiBreaks <- function(Y, X, Ips, ...) {
 #' @param ... 传给 `lm_solve()`。
 #'
 #' @return
-#' - `sig`   : coefficients
+#' - `coef`  : coefficients
 #' - `fitted`: fitted value
 #' - `resi`  : residual of fitted value
 #'
@@ -62,13 +62,13 @@ LS_OneBreak <- function(Y, X, Ic, ...) {
 
 lm_solve <- function(design, response, only.SSE = FALSE, ...) {
   l <- .lm.fit(design, as.matrix(response))
-  # sig  <- as.matrix(l$coefficients)
+  # coef <- as.matrix(l$coefficients)
   fitted <- design %*% l$coefficients
   # resi <- response-fitted
   SSE <- sum(l$residuals^2)
   if (!only.SSE) {
     list(
-      sig = l$coefficients,
+      coef = l$coefficients,
       fitted = as.vector(fitted),
       resi = l$residuals,
       SSE = SSE
@@ -79,7 +79,7 @@ lm_solve <- function(design, response, only.SSE = FALSE, ...) {
 }
 
 # microbenchmark::microbenchmark(
-#   sig  = solve(t(design) %*% design) %*% t(design) %*% response,
+#   coef = solve(t(design) %*% design) %*% t(design) %*% response,
 #   sig3 = as.matrix(.lm.fit(design, response)$coefficients),
 #   sig2 = chol2inv(chol(t(design) %*% design)) %*% t(design) %*% response,
 #   times = 100

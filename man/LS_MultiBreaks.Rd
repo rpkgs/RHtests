@@ -17,7 +17,7 @@ LS_MultiBreaks(Y, X, Ips, ...)
 }
 \value{
 \itemize{
-\item \code{sig}   : coefficients
+\item \code{coef}  : coefficients
 \item \code{fitted}: fitted value
 \item \code{resi}  : residual of fitted value
 }

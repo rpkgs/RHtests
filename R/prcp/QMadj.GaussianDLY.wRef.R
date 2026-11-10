@@ -378,7 +378,7 @@ QMadj.GaussianDLY.wRef <- function(Bseries, Rseries, MissingValueCode, InCs, out
     p.cor <- pt(abs(otmp$cor) * sqrt(df / (1 - otmp$cor^2)), df)
     otrend <- otmp$trend
     corout <- c(otmp$cor, otmp$corl, otmp$corh, p.cor)
-    sig <- otmp$sig
+    coef <- otmp$coef
     p.tro <- otmp$p.tr
     if (Ns == 0) {
       EB1 <- EB00
@@ -387,7 +387,7 @@ QMadj.GaussianDLY.wRef <- function(Bseries, Rseries, MissingValueCode, InCs, out
       for (i in 1:(Ns + 1)) {
         I0 <- if (i == 1) 1 else Ips[i - 1] + 1
         I2 <- if (i > Ns) length(Base) else Ips[i]
-        Delta <- sig[i + 1] - sig[Iseg.adj + 1]
+        Delta <- coef[i + 1] - coef[Iseg.adj + 1]
         Base[I0:I2] <- Base[I0:I2] + EB00[I0:I2] - Delta
       }
       # re-estimate seasonal cycle using adjusted series:
@@ -401,7 +401,7 @@ QMadj.GaussianDLY.wRef <- function(Bseries, Rseries, MissingValueCode, InCs, out
       for (i in 1:(Ns + 1)) {
         I0 <- if (i == 1) 1 else Ips[i - 1] + 1
         I2 <- if (i > Ns) length(Base) else Ips[i]
-        Delta <- sig[i + 1] - sig[Iseg.adj + 1]
+        Delta <- coef[i + 1] - coef[Iseg.adj + 1]
         Base[I0:I2] <- Base[I0:I2] - EB[I0:I2] + Delta
       }
       VEB <- sqrt(var(EB1))
@@ -421,7 +421,7 @@ QMadj.GaussianDLY.wRef <- function(Bseries, Rseries, MissingValueCode, InCs, out
     for (i in 1:(Ns + 1)) {
       I1 <- if (i == 1) 1 else Ips[i - 1] + 1
       I2 <- Ips[i]
-      Delta <- sig[Iseg.adj + 1] - sig[i + 1]
+      Delta <- coef[Iseg.adj + 1] - coef[i + 1]
       DeltaD <- muDif[Iseg.adj] - muDif[i]
       adj[I1:I2] <- adj[I1:I2] + Delta
       adjB[I1:I2] <- adjB[I1:I2] + DeltaD

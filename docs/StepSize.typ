@@ -2,17 +2,19 @@
 #import "@local/modern-cug-report:0.1.3": *
 #show: doc => template(doc, footer: "", header: "")
 
-= StepSize：突变幅度估计与序列订正
+= 1 StepSize：突变幅度估计与序列订正
 
 `StepSize()` 根据给定的候选突变点，估计各点的跳变幅度、复检其显著性，并将序列订正至指定基准段。它不搜索或移动突变点，也不自行删除检验不显著的点；逐步筛选由上层的 `RHtests_stepsize()` 完成。
 
-== 1 输入与分段
+== 1.1 输入与分段
 
 输入包括基准序列 `InSeries`、候选突变点表 `InCs` 和输出路径前缀 `output`。`InCs` 至少包含日期 `date` 和类型 `kind`；候选日期映射至该日或之前最近的有效观测，并须按时间排序。突变点属于前一段，下一段从其后一个有效观测开始。
 
 基准段由 `Iadj` 指定：默认 `10000` 表示最后一段，`0` 表示最长段，其他有效正整数表示对应段。已有读取状态时可传入 `.state`，避免重复读取。
 
-== 2 拟合与订正
+== 1.2 拟合与订正
+
+拟合要同时回答三件事：趋势、季节周期与各段均值。三者互相干扰：季节周期在每个循环位置只有少数样本，与趋势近似共线；残差常有一阶自相关，直接最小二乘会低估方差、夸大显著性。因此代码不把三者放进一个最小二乘，而拆成各司其职的几层：`LS_MultiBreaks()` 与 `LS_OneBreak()` 只构造设计矩阵并求解；`LSmultipleRed()` 在去季节序列上修正自相关，并产出供检验的预白化序列；`LSmultiRedCycle()` 在周期与趋势之间交替迭代。
 
 无参考序列时，处理流程如下：
 
@@ -24,31 +26,176 @@
 
 `Mq` 控制分位数组数上限，默认 10；`Mq = 1` 时为单组均值订正，无参考序列的 `QM_adjusted` 列此时不输出该结果。`Ny4a` 控制突变点两侧估计订正量的窗口年数：0 使用整段，正数不超过 5 时按 5 年处理。
 
-=== 2.1 多突变点拟合：`LSmultiple()`
+#pagebreak()
 
-设序列长度为 $n$，`Ips` 为 $(p_1, dots, p_K, p_(K+1))$，其中 $p_(K+1) = n$，$K$ 为突变点数。模型为
+=== 1.2.1 单突变点拟合：`LS_OneBreak()`
 
-$ Y_t = alpha + beta (X_t - overline(X))
-  + sum_(j=1)^K gamma_j I(p_j < t <= p_(j+1)) + epsilon_t, quad t = 1, dots, n. $
-
-其中 $Y_t$ 为观测值，$X_t$ 为自变量，$I(A)$ 在条件 $A$ 成立时为 1，否则为 0。各段共用斜率 $beta$；$gamma_j$ 是第 $j+1$ 段相对第一段的截距差，*不是*所有突变点的跳变量。第一处跳变量为 $gamma_1$，此后第 $j$ 处为 $gamma_j - gamma_(j-1)$。$K = 0$ 时求和项为零。
-
-=== 2.2 单突变点拟合：`LSmatrix()`
-
-当 `Ic` 为突变位置 $c$ 时，模型为
+要解决的问题是：判定一个候选突变点是否显著时，需要比较“不含突变”与“含一个突变”两种模型。该函数为这两种模型提供残差平方和，其差值即检验统计量的分子。当 `Ic` 为突变位置 $c$ 时，模型为
 
 $ Y_t = alpha + beta X_t + gamma I(t > c) + epsilon_t, quad t = 1, dots, n. $
 
-其中 $gamma$ 是突变前后的截距差，突变位置 $c$ 属于前一段；`Ic = NA` 时不包含突变项。`LSmatrix()` 直接使用传入的 $X$，不自行中心化；调用方可事先将其减去均值。
+其中 $gamma$ 是突变前后的截距差，突变位置 $c$ 属于前一段；`Ic = NA` 时不包含突变项。`LS_OneBreak()` 直接使用传入的 $X$，不自行中心化；调用方可事先将其减去均值。
 
-== 3 突变点复检
+=== 1.2.2 多突变点拟合：`LS_MultiBreaks()`
+
+在多个已知突变点下估出一条共同趋势和每段的截距。设序列长度为 $n$，`Ips` 为 $(p_1, dots, p_K, p_(K+1))$，其中 $p_(K+1) = n$，$K$ 为突变点数。模型为
+
+$
+  Y_t = alpha + beta (X_t - overline(X))
+  + sum_(j=1)^K gamma_j I(p_j < t <= p_(j+1)) + epsilon_t, quad t = 1, dots, n.
+$
+
+其中 $Y_t$ 为观测值，$X_t$ 为自变量，$I(A)$ 在条件 $A$ 成立时为 1，否则为 0。各段共用斜率 $beta$；$gamma_j$ 是第 $j+1$ 段相对第一段的截距差，*不是*所有突变点的跳变量。第一处跳变量为 $gamma_1$，此后第 $j$ 处为 $gamma_j - gamma_(j-1)$。$K = 0$ 时求和项为零。
+
+=== 1.2.3 考虑自相关的分段趋势：`LSmultipleRed()`
+
+要解决的问题是：#highlight[残差的正自相关可能使常规最小二乘的趋势标准误偏小]。相邻残差若经常同向变化，误差会成片出现，不能再把各时刻的误差当作独立信息。
+
+*第一步：写出趋势估计误差。*设 $z_t$ 是第 $t$ 个已去季节观测值，$T_t$ 是时间，$s(t)$ 表示它所属的段。假定观测值由分段截距、共同趋势和随机误差组成：
+
+$ z_t = mu_(s(t)) + beta T_t + epsilon_t. $
+
+其中 $beta$ 是未知的真实趋势，$epsilon_t$ 是均值为零的随机误差。记第 $s$ 段的平均时间为 $overline(T)_s$，令 $x_t = T_t - overline(T)_(s(t))$。例如一段的时间为 1、2、3，其平均值为 2，对应的 $x_t$ 为 $-1$、0、1，和为零。同理，每段内的 $x_t$ 之和均为零，因此
+
+$
+  sum_t x_t mu_(s(t)) = 0, quad
+  sum_t x_t overline(T)_(s(t)) = 0
+$ <eq-4>
+
+$ sum_t x_t T_t = sum_t x_t (x_t + overline(T)_(s(t))) = sum_t x_t^2 。 $ <eq-5>
+
+#box-blue()[
+  *如何得到趋势估计？*最小二乘法寻找使拟合误差平方和最小的截距和斜率。设第 $j$ 段的观测位置集合为 $I_j$，待估计的截距和斜率分别为 $a_j$、$b$，则目标是最小化
+
+  $ Q = sum_j sum_(t in I_j) (z_t - a_j - b T_t)^2. $
+
+  先固定 $b$，对 $a_j$ 求导并令导数为零：
+
+  $ (partial Q) / (partial a_j) = -2 sum_(t in I_j) (z_t - a_j - b T_t) = 0. $
+
+  因此，第 $j$ 段的截距估计为 $a_j = overline(z)_j - b overline(T)_j$，其中横线表示段内平均值。将它代回拟合误差，并记 $x_t = T_t - overline(T)_(s(t))$，得到
+
+  $ Q(b) = sum_t [(z_t - overline(z)_(s(t))) - b x_t]^2. $
+
+  再对 $b$ 求导并令导数为零：
+
+  $ (dif Q) / (dif b) = -2 sum_t x_t [(z_t - overline(z)_(s(t))) - b x_t] = 0. $
+
+  移项后，由于每段的 $sum x_t = 0$，含段均值的项 $sum_t x_t overline(z)_(s(t)) = 0$，故
+
+  $
+    hat(beta) = (sum_t x_t (z_t - overline(z)_(s(t)))) / (sum_t x_t^2)
+    = (sum_t x_t z_t) / (sum_t x_t^2).
+  $
+
+  只要时间在至少一段内有变化，$sum_t x_t^2 > 0$，此解就是平方和的最小值。
+
+  将上面的观测模型代入分子，并使用上述两个等式，得到
+
+  $
+    hat(beta) = (sum_t x_t [mu_(s(t)) + beta T_t + epsilon_t]) / (sum_t x_t^2)
+    = beta + (sum_t x_t epsilon_t) / (sum_t x_t^2).
+  $
+
+  上式简化用到了式#[@eq-4]与#[@eq-5]。也就是说，$hat(beta) - beta$ 是各时刻随机误差的加权和；时间和分段位置在这里视为固定值。
+]
+
+*第二步：计算估计误差的方差。*方差衡量估计值在重复观测中的波动，标准误是方差的平方根。记 $S = sum_t x_t^2$，由于 $beta$ 和 $S$ 都是固定值，有
+
+$
+  "Var"(hat(beta)) = "Var"(hat(beta) - beta)
+  = 1 / S^2 "Var"(sum_t x_t epsilon_t).
+$
+
+两个随机量之和的方差不仅包含各自的方差，还包含它们的协方差；后者衡量二者共同变化的程度。将这一规则推广到所有时刻，并注意每对不同时刻会出现两次，得
+
+$
+  "Var"(sum_t x_t epsilon_t)
+  = sum_t x_t^2 "Var"(epsilon_t)
+  + 2 sum_(t=2)^n sum_(s=1)^(t-1) x_t x_s "Cov"(epsilon_t, epsilon_s).
+$
+
+假设每个时刻的误差方差都是 $sigma^2$，相隔 $k$ 个位置的误差相关系数为 $rho_k$，则 $"Cov"(epsilon_t, epsilon_s) = sigma^2 rho_(t-s)$（$t > s$）。把它们代入，并将相隔同样步数的项归为一组，得到
+
+$ "Var"(hat(beta)) = sigma^2 / S^2 [S + 2 sum_(k=1)^(n-1) rho_k sum_(t=k+1)^n x_t x_(t-k)]. $
+
+*第三步：比较有无自相关。*若误差独立，则所有 $rho_k = 0$，方括号内只剩 $S$，方差为 $sigma^2 / S$。若误差自相关，第二项通常不为零，不能沿用独立情形的公式。正自相关且相邻 $x_t$ 多数同号时，第二项往往为正：真实方差比独立假设下更大，因此常规标准误可能偏小；具体方向仍取决于时间和相关结构。
+
+#box-red()[
+  为减弱自相关，可对残差进行*预白化*：按 $w_t = e_t - rho e_(t-1)$ 去除前一时刻的影响。若残差符合一阶自回归模型且 $rho$ 已知，变换后的序列不再自相关；实际使用估计值时只能近似达到这一效果。该函数用 $rho$ 及其上下界构造三套预白化序列，供后续检验使用。
+]
+
+设已去季节的序列为 $z_t$，在给定突变点下估计共同趋势和分段截距：
+
+$ z_t = beta T_t + mu_(s(t)) + epsilon_t. $
+
+其中 $T_t$ 是时间序号，$s(t)$ 是观测所属段；各段的 $mu_s$ 不同，但趋势 $beta$ 相同。具体计算如下：
+
+1. *初次拟合：*用 `LS_MultiBreaks()` 拟合 $z_t$，得到初始斜率 $beta_0$ 和残差 $e_t^0$，再由残差估计一阶自相关 $rho$ 及其上下界。初次拟合的回归系数保存在 `coef`。
+2. *修正趋势：*先令 $r_t = e_t^0 + beta_0 T_t$，对连续观测执行标准化预白化；首个观测或存在时间缺口时不使用前一观测：
+
+  $
+    w_t = cases(
+      (r_t - rho r_(t-1)) / (1 - rho) & "连续观测",
+      r_t / (1 - rho) & "首个观测或时间缺口".
+    )
+  $
+
+  对 $w_t$ 与中心化时间 $T_t - overline(T)$ 作无突变线性回归，得到修正后的趋势 $beta$、其置信区间及统计量。
+3. *重估截距和残差：*对第 $s$ 段的观测位置集合 $S_s$，计算
+
+  $
+    mu_s = 1 / |S_s| sum_(t in S_s) (z_t - beta T_t),
+    quad e_t = z_t - (mu_(s(t)) + beta T_t).
+  $
+
+4. *构造检验序列：*对残差分别用 $rho$ 及其上下界 $rho_l$、$rho_u$ 预白化，再加回拟合值。例如使用 $rho$ 时：
+
+  $
+    W_t = mu_(s(t)) + beta T_t + cases(
+      e_t - rho e_(t-1) & "连续观测",
+      e_t & "首个观测或时间缺口".
+    )
+  $
+
+  `W`、`WL` 和 `WU` 分别对应 $rho$、$rho_l$ 和 $rho_u$；与第 2 步不同，此处不除以 $1-rho$。
+
+返回的 `trend`、`mu`、`meanhat` 和 `resi` 使用修正后的趋势；`coef` 保留初次拟合的系数，不能与修正后的 `mu` 混同。`p.tr` 是 $t$ 分布的累积分布函数值，并非通常的双侧 $p$ 值。该函数不更新季节周期。
+
+=== 1.2.4 季节周期与分段趋势联合拟合：`LSmultiRedCycle()`
+
+要解决的问题是：趋势与季节周期互相干扰，周期估偏会让趋势吸收季节信号，趋势估偏又会让周期残留趋势。该函数用交替迭代解决：固定周期先估趋势，再把各段对齐后重估周期，循环至收敛。
+
+设 $y_t$ 为原始观测，$T_t$ 为时间序号，$q(t)$ 为月日，$s(t)$ 为所属段，则模型为
+
+$ y_t = c_(q(t)) + beta T_t + mu_(s(t)) + epsilon_t, $
+
+其中 $c_q$ 为季节周期，$beta$ 是所有段共同的趋势，$mu_s$ 是第 $s$ 段的截距。函数输入 `Y0` 已去季节；输入周期 `seasonal_mean` 用于恢复 $y_t$。
+
+每轮先用当前周期 $c_q^(k)$ 得到去季节序列 $z_t^(k) = y_t - c_(q(t))^(k)$，再按 2.3 节调用 `LSmultipleRed()`，估计共同趋势 $beta^(k)$ 和各段截距 $mu_s^(k)$。随后：
+
+1. 暂时将各段平移到基准段 $r$，按月日重算季节周期：
+
+  $
+    c_q^(k+1) = 1 / |Q_q| sum_(t in Q_q)
+    (y_t - mu_(s(t))^(k) + mu_r^(k)).
+  $
+
+  其中 $Q_q$ 为月日等于 $q$ 的观测位置。新周期的标准差不是 `NA` 时，重新去除新周期并恢复段间差异。
+2. 当 $max_q abs(c_q^(k+1) - c_q^(k)) <= sigma_c / 1000$、达到 20 轮，或新周期的标准差为 `NA` 时停止；$sigma_c$ 为新周期的标准差。年尺度（`Nt = 1`）不更新季节周期。
+
+输出包括 `seasonal_mean`、共同趋势 `trend`、各段截距 `mu`、拟合值与残差，以及自相关和预白化序列。每轮是先拟合、后更新周期：停止时返回的拟合量来自该轮更新前的去季节序列，不会再对更新后的序列额外拟合一次。若新周期的标准差为 `NA`，代码直接停止，不执行上述去季节复原。
+
+== 1.3 突变点复检
 
 无参考序列使用 PMF 检验。对每个候选点，在其相邻两段的范围内，比较保留与移除该点时的残差平方和。原序列上的 $F$ 统计量乘以位置惩罚因子，得到 `PFx`；对预白化序列分别计算 `prob` 及其上下界 `probL`、`probU`。若预白化计算的 $F$ 为负，代码将 `PFx` 和 `prob` 置为 0。
 
 `prob` 是 $F$ 分布的累积分布函数值，不是常规的上尾 $p$ 值；数值越大对应的统计量越大。`PFx95` 及其上下界来自临界值表，表由指定的置信水平 `plev` 生成，默认 0.95。
 
 #table(
-  columns: (auto, 1fr, auto), align: (left, left, left), inset: 5pt,
+  columns: (auto, 1fr, auto),
+  align: (left, left, left),
+  inset: 5pt,
   [*类型*], [*判定条件，按顺序*], [*Idc*],
   [`kind = 0`], [`PFx >= PFx95h`], [`Yes`],
   [], [`probU < plev`], [`No`],
@@ -61,13 +208,13 @@ $ Y_t = alpha + beta X_t + gamma I(t > c) + epsilon_t, quad t = 1, dots, n. $
 
 `YifD` 表示须有可靠元数据支持才能认定显著。`RHtests_stepsize()` 在候选点不少于两个时，每轮仅检查幅度绝对值最小的点：`kind = 0` 时比较 `prob >= probU`，`kind = 1` 时比较 `PFx >= PFx95h`；不满足则删除该点并重新运行，满足则停止。此规则不等同于逐个删除所有 `Idc = No` 的点；只剩一个点时不再筛选。
 
-== 4 有参考序列时
+== 1.4 有参考序列时
 
 `StepSize.wRef()` 在基准与参考序列的差值上采用 PMT 检验，并将差值分段均值用于相对参考序列的均值订正；同时也根据基准序列自身的分段趋势拟合计算另一套均值订正。
 
 返回的 `stepsize` 来自基准序列自身的分段回归系数，不是差值序列的分段均值之差。分位数订正调用 `QMadjGaussian.wRef()`：按基准值分组，以基准与参考序列的差值估计订正量，并对均值施加约束。
 
-== 5 输出
+== 1.5 输出
 
 非 GUI 模式返回 `list(data, TP)`，分别为逐时次序列与突变点表；GUI 模式返回状态码 0。
 
@@ -75,4 +222,6 @@ $ Y_t = alpha + beta X_t + gamma I(t > c) + epsilon_t, quad t = 1, dots, n. $
 - `TP`：包括突变日期 `date`、类型 `kind`、判定 `Idc`、幅度 `stepsize`、概率和临界值。有参考序列时，`PFx` 等列名沿用无参考版本，但其值对应 PMT 检验。
 - `output_fCs.txt`：突变点结果表；`output_Fstat.txt`：拟合和检验摘要，`debug = FALSE` 时为空；`output_F.pdf`：`is_plot = TRUE` 时绘制的诊断图。
 
-#text(size: 9pt)[实现：`R/StepSize.R`、`R/StepSize.wRef.R`；拟合表、检验和日志分别见 `R/stepsize_output.R`、`R/stepsize_test.R` 和 `R/write_log.R`。]
+#text(
+  size: 9pt,
+)[实现：`R/StepSize.R`、`R/StepSize.wRef.R`；回归见 `R/Component.R`、`R/LSmultiRed.R`；拟合表、检验和日志分别见 `R/stepsize_output.R`、`R/stepsize_test.R` 和 `R/write_log.R`。]

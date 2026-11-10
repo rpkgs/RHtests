@@ -18,7 +18,7 @@ corresponding to the perid}
 }
 \value{
 \itemize{
-\item \code{sig}   : coefficients
+\item \code{coef}  : coefficients
 \item \code{fitted}: fitted value
 \item \code{resi}  : residual of fitted value
 \item \code{SSE}   : sum of square error

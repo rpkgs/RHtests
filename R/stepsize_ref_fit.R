@@ -13,7 +13,7 @@ fit_reference_cycle <- function(base, seasonal, previous_cycle, cycle_index, cyc
     }
 
     # 暂时将各段调整至基准段，以估计共同的季节周期。
-    delta <- fit$sig[-1] - fit$sig[reference_segment + 1]
+    delta <- fit$coef[-1] - fit$coef[reference_segment + 1]
     base <- add_segment_adjustment(base + seasonal, segments, -delta)
     cycle <- map_dbl(cycle_values, \(value) mean(base[cycle_index == value], na.rm = TRUE))
     seasonal <- cycle[match(cycle_index, cycle_values)]

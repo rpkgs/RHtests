@@ -93,12 +93,12 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
     df <- N - 2 - Ns
     p.cor <- pt(abs(otmp$cor) * sqrt(df / (1 - otmp$cor^2)), df)
     corout <- c(otmp$cor, otmp$corl, otmp$corh, p.cor)
-    sig <- otmp$sig
+    coef <- otmp$coef
     p.tro <- otmp$p.tr
     for (i in seq_len(Ns + 1L)) {
       I0 <- if (i == 1) 1L else Ips[i - 1] + 1L
       I2 <- if (i > Ns) N else Ips[i]
-      Base[I0:I2] <- Base[I0:I2] + EB00[I0:I2] - (sig[i + 1] - sig[Iseg.adj + 1])
+      Base[I0:I2] <- Base[I0:I2] + EB00[I0:I2] - (coef[i + 1] - coef[Iseg.adj + 1])
     }
     # 用订正后的序列重估季节周期，再把季节周期加回。
     EB1 <- map_dbl(inds, \(md) mean(Base[IYM == md], na.rm = TRUE))
@@ -106,7 +106,7 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
     for (i in seq_len(Ns + 1L)) {
       I0 <- if (i == 1) 1L else Ips[i - 1] + 1L
       I2 <- if (i > Ns) N else Ips[i]
-      Base[I0:I2] <- Base[I0:I2] - EB[I0:I2] + (sig[i + 1] - sig[Iseg.adj + 1])
+      Base[I0:I2] <- Base[I0:I2] - EB[I0:I2] + (coef[i + 1] - coef[Iseg.adj + 1])
     }
     VEB <- sqrt(var(EB1))
     tt <- !(is.na(VEB) || max(abs(EB0 - EB1)) < VEB / 1000 || Niter > 50)
@@ -156,7 +156,7 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
     for (i in seq_len(Ns + 1L)) {
       ind <- if (i == 1) seq_len(Ips[1]) else seq(Ips[i - 1] + 1L, Ips[i])
       DeltaD <- muDif[Iseg.adj] - muDif[i]
-      adj[ind] <- adj[ind] + (sig[Iseg.adj + 1] - sig[i + 1])
+      adj[ind] <- adj[ind] + (coef[Iseg.adj + 1] - coef[i + 1])
       adjB[ind] <- adjB[ind] + DeltaD
       meanhatD[ind] <- EEBd + muD + betaD * Ti[ind] - DeltaD
     }
@@ -177,12 +177,12 @@ finalize_wref <- function(series, Ips, Iseg.adj, Nt, output, Mq, Nadj, Ny4a,
     file = ofileSout, append = TRUE
   )
   fprintf("#steps=  %s ; trend= %s (p= %s ); cor= %s ( %s , %s )  p= %s \n",
-    Ns, round(sig[2], 6), round(p.tro, 4), round(corout[1], 4), round(corout[2], 4),
+    Ns, round(coef[2], 6), round(p.tro, 4), round(corout[1], 4), round(corout[2], 4),
     round(corout[3], 4), round(corout[4], 4), file = ofileSout, append = TRUE
   )
-  # 段间位移：首段取 sig[3]，其后取相邻 sig 之差。
+  # 段间位移：首段取 coef[3]，其后取相邻系数之差。
   if (Ns > 0) {
-    cat(round(c(sig[3], diff(sig[3:(Ns + 2)])), 4),
+    cat(round(c(coef[3], diff(coef[3:(Ns + 2)])), 4),
       file = ofileSout, append = TRUE, fill = 80
     )
   }
